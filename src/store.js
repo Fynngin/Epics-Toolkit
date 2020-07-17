@@ -12,7 +12,8 @@ export default new Vuex.Store({
             username: null,
             id: null,
             avatar: null
-        }
+        },
+        category: 1
     },
     getters: {
         isAuthenticated: (state) => {
@@ -57,6 +58,9 @@ export default new Vuex.Store({
             } else {
                 this.state.authenticated = false
             }
+        },
+        changeCategory(state, category) {
+            this.state.category = category;
         }
     }
 })
