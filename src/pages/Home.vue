@@ -10,6 +10,9 @@
             <b-card border-variant="dark" header="Spinner Odds" header-bg-variant="light">
                 <SpinnerOddsChart :category="$store.state.category"></SpinnerOddsChart>
             </b-card>
+            <b-card border-variant="dark" header="Pack Stock" header-bg-variant="light">
+                <PackStock :category="$store.state.category"></PackStock>
+            </b-card>
         </b-card-group>
 
     </div>
@@ -18,10 +21,11 @@
 <script>
     import Sidebar from "../components/Sidebar";
     import SpinnerOddsChart from "../components/SpinnerOddsChart";
+    import PackStock from "../components/PackStock";
 
     export default {
         name: "Home",
-        components: {SpinnerOddsChart, Sidebar},
+        components: {PackStock, SpinnerOddsChart, Sidebar},
         created() {
 
         }

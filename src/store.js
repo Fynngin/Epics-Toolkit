@@ -13,7 +13,11 @@ export default new Vuex.Store({
             id: null,
             avatar: null
         },
-        category: 1
+        category: 1,
+        currentSeasons: {
+            1: '2020',
+            2: 'First Edition'
+        }
     },
     getters: {
         isAuthenticated: (state) => {

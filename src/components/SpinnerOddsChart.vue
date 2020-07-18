@@ -19,7 +19,6 @@
                         colorschemes: {
                             scheme: 'brewer.SetThree12'
                         }
-
                     }
                 }
             }
@@ -74,7 +73,3 @@
         }
     }
 </script>
-
-<style scoped>
-
-</style>
