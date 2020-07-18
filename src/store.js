@@ -17,7 +17,8 @@ export default new Vuex.Store({
         currentSeasons: {
             1: '2020',
             2: 'First Edition'
-        }
+        },
+        seasons: []
     },
     getters: {
         isAuthenticated: (state) => {

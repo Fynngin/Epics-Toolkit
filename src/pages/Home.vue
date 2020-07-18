@@ -31,6 +31,7 @@
     import Sidebar from "../components/Sidebar";
     import SpinnerOddsChart from "../components/SpinnerOddsChart";
     import PackStock from "../components/PackStock";
+    import axios from "axios";
 
     export default {
         name: "Home",
@@ -41,6 +42,28 @@
                     spinnerOdds: true,
                     packStock: true
                 }
+            }
+        },
+        created() {
+            this.getSeasons()
+        },
+        methods: {
+            getSeasons() {
+                axios("https://api.epics.gg/api/v1/settings/web", {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-user-jwt': this.$store.state.userdata.jwt
+                    },
+                    params: {
+                        'categoryId': this.category
+                    }
+                }).then(res => {
+                    if (res.data.success) {
+                        console.log(res.data)
+                        this.$store.state.seasons = res.data.data.seasons
+                    }
+                })
             }
         }
     }
