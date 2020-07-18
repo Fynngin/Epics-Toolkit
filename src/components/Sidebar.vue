@@ -12,6 +12,14 @@
                     @click="changeCategory(2)"
             >Streamers</b-button>
         </div>
+        <b-row class="mt-2" align-h="center">
+            <b-button class="w-100" :variant="pageVariant('/')" @click="$router.push('/')">
+                Dashboard
+            </b-button>
+            <b-button class="w-100" :variant="pageVariant('/masslist')" @click="$router.push('/masslist')">
+                Mass-List
+            </b-button>
+        </b-row>
     </b-sidebar>
 </template>
 
@@ -27,6 +35,9 @@
             ...mapMutations(['changeCategory']),
             categoryVariant(category) {
                 return this.$store.state.category === category ? 'primary' : 'secondary'
+            },
+            pageVariant(page) {
+                return this.$router.currentRoute.fullPath === page ? 'primary' : 'secondary'
             }
         }
     }
