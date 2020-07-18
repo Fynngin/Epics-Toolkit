@@ -9,6 +9,7 @@
         data() {
             return {
                 data: {
+                    labels: [''],
                     datasets: []
                 },
                 options: {
@@ -32,7 +33,9 @@
         },
         methods: {
             getData() {
+                this.$emit('loading', true);
                 this.data.datasets = [];
+                this.packs = [];
                 this.sendRequest(1);
             },
             sendRequest(page) {
@@ -99,6 +102,7 @@
                     })
                 })
 
+                this.$emit('loading', false);
                 this.renderChart(this.data, this.options)
             }
         }

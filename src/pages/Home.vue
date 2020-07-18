@@ -8,13 +8,22 @@
 
         <b-card-group columns class="ml-2 mr-2">
             <b-card border-variant="dark" header="Spinner Odds" header-bg-variant="light">
-                <SpinnerOddsChart :category="$store.state.category"></SpinnerOddsChart>
+                <b-spinner v-if="spinner.spinnerOdds"/>
+                <SpinnerOddsChart
+                        :hidden="spinner.packStock"
+                        :category="$store.state.category"
+                        @loading="value => {value ? this.spinner.spinnerOdds = true : this.spinner.spinnerOdds = false}"
+                ></SpinnerOddsChart>
             </b-card>
             <b-card border-variant="dark" header="Pack Stock" header-bg-variant="light">
-                <PackStock :category="$store.state.category"></PackStock>
+                <b-spinner v-if="spinner.packStock"/>
+                <PackStock
+                        :hidden="spinner.packStock"
+                        :category="$store.state.category"
+                        @loading="value => {value ? this.spinner.packStock = true : this.spinner.packStock = false}"
+                ></PackStock>
             </b-card>
         </b-card-group>
-
     </div>
 </template>
 
@@ -26,8 +35,13 @@
     export default {
         name: "Home",
         components: {PackStock, SpinnerOddsChart, Sidebar},
-        created() {
-
+        data() {
+            return {
+                spinner: {
+                    spinnerOdds: true,
+                    packStock: true
+                }
+            }
         }
     }
 </script>

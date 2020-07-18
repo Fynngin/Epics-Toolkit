@@ -20,7 +20,7 @@
                             scheme: 'brewer.SetThree12'
                         }
                     }
-                }
+                },
             }
         },
         extends: Pie,
@@ -34,6 +34,7 @@
         },
         methods: {
             getData() {
+                this.$emit('loading', true);
                 this.data.labels = []
                 this.data.datasets[0].data = []
                 axios("https://api.epics.gg/api/v1/spinner", {
@@ -68,6 +69,7 @@
                     this.data.datasets[0].data.push(item.data)
                 })
 
+                this.$emit('loading', false);
                 this.renderChart(this.data, this.options)
             }
         }
