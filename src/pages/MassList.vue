@@ -24,28 +24,27 @@
             </b-col>
             <b-col cols="8">
                 <b-card border-variant="dark">
-                    <b-spinner v-if="spinner.cardImages"/>
-                    <b-card-group deck v-else>
-                        <b-card v-for="card in cards"
-                                :key="card.templateId"
-                                style="max-height: 400px"
-                        >
-                            <b-row>
-                                <b-col>
-                                    <b-card-img :src="card.templateImage" @click="showMints(card)"/>
-                                </b-col>
-                                <b-col  v-show="card.showMints">
-                                    <b-list-group>
-                                        <b-list-group-item v-for="c in card.cards" :key="c.id">
-                                            {{c.mintBatch}}{{c.mintNumber}}
-                                        </b-list-group-item>
-                                    </b-list-group>
-                                </b-col>
-                            </b-row>
-                        </b-card>
-                    </b-card-group>
+                    <b-row>
+                        <b-col :cols="card.showMints ? 6 : 3" v-for="card in cards" :key="card.templateId" class="mb-3">
+                            <b-spinner v-if="spinner.cardImages"/>
+                            <b-card style="max-height: 300px" >
+                                <b-row>
+                                    <b-col>
+                                        <b-card-img :src="card.templateImage" @click="showMints(card)"/>
+                                    </b-col>
 
+                                    <b-col  v-show="card.showMints">
+                                        <b-list-group>
+                                            <b-list-group-item v-for="c in card.cards" :key="c.id">
+                                                {{c.mintBatch}}{{c.mintNumber}}
+                                            </b-list-group-item>
+                                        </b-list-group>
+                                    </b-col>
+                                </b-row>
 
+                            </b-card>
+                        </b-col>
+                    </b-row>
                 </b-card>
             </b-col>
             <b-col cols="2" class="mr-2">
