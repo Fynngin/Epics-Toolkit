@@ -7,7 +7,7 @@
         <h1>Welcome {{this.$store.state.userdata.username}}!</h1>
 
         <b-row align-h="center">
-            <b-col cols="5">
+            <b-col lg="5" sm="10" class="mb-2">
                 <b-card border-variant="dark" header="Spinner Odds" header-bg-variant="light">
                     <b-spinner v-if="spinner.spinnerOdds"/>
                     <SpinnerOddsChart
@@ -18,7 +18,7 @@
                 </b-card>
             </b-col>
 
-            <b-col cols="5">
+            <b-col lg="5" sm="10" class="mb-2">
                 <b-card border-variant="dark" header="Pack Stock" header-bg-variant="light">
                     <b-spinner v-if="spinner.packStock"/>
                     <PackStock
