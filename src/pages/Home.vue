@@ -6,24 +6,30 @@
         </b-button>
         <h1>Welcome {{this.$store.state.userdata.username}}!</h1>
 
-        <b-card-group columns class="ml-2 mr-2">
-            <b-card border-variant="dark" header="Spinner Odds" header-bg-variant="light">
-                <b-spinner v-if="spinner.spinnerOdds"/>
-                <SpinnerOddsChart
-                        :hidden="spinner.packStock"
-                        :category="$store.state.category"
-                        @loading="value => {value ? this.spinner.spinnerOdds = true : this.spinner.spinnerOdds = false}"
-                ></SpinnerOddsChart>
-            </b-card>
-            <b-card border-variant="dark" header="Pack Stock" header-bg-variant="light">
-                <b-spinner v-if="spinner.packStock"/>
-                <PackStock
-                        :hidden="spinner.packStock"
-                        :category="$store.state.category"
-                        @loading="value => {value ? this.spinner.packStock = true : this.spinner.packStock = false}"
-                ></PackStock>
-            </b-card>
-        </b-card-group>
+        <b-row align-h="center">
+            <b-col cols="5">
+                <b-card border-variant="dark" header="Spinner Odds" header-bg-variant="light">
+                    <b-spinner v-if="spinner.spinnerOdds"/>
+                    <SpinnerOddsChart
+                            :hidden="spinner.spinnerOdds"
+                            :category="$store.state.category"
+                            @loading="value => {value ? this.spinner.spinnerOdds = true : this.spinner.spinnerOdds = false}"
+                    ></SpinnerOddsChart>
+                </b-card>
+            </b-col>
+
+            <b-col cols="5">
+                <b-card border-variant="dark" header="Pack Stock" header-bg-variant="light">
+                    <b-spinner v-if="spinner.packStock"/>
+                    <PackStock
+                            :hidden="spinner.packStock"
+                            :category="$store.state.category"
+                            @loading="value => {value ? this.spinner.packStock = true : this.spinner.packStock = false}"
+                    ></PackStock>
+                </b-card>
+            </b-col>
+
+        </b-row>
     </div>
 </template>
 

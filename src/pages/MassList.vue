@@ -27,18 +27,18 @@
                     <b-row>
                         <b-col :cols="card.showMints ? 6 : 3" v-for="card in cards" :key="card.templateId" class="mb-3">
                             <b-spinner v-if="spinner.cardImages"/>
-                            <b-card style="max-height: 300px" >
+                            <b-card>
                                 <b-row>
                                     <b-col>
                                         <b-card-img :src="card.templateImage" @click="showMints(card)"/>
                                     </b-col>
 
-                                    <b-col  v-show="card.showMints">
-                                        <b-list-group>
-                                            <b-list-group-item v-for="c in card.cards" :key="c.id">
+                                    <b-col v-show="card.showMints">
+                                        <select v-model="selected" style="overflow:scroll;" multiple class="w-100 h-100">
+                                            <option :id="`list_card_${c.id}`" v-for="c in card.cards" :key="c.id" :value="c">
                                                 {{c.mintBatch}}{{c.mintNumber}}
-                                            </b-list-group-item>
-                                        </b-list-group>
+                                            </option>
+                                        </select>
                                     </b-col>
                                 </b-row>
 
@@ -67,6 +67,7 @@
                 collection: [],
                 collectionOptions: [],
                 cards: [],
+                selected: [],
                 spinner: {
                     cardImages: false,
                     collections: false
@@ -123,6 +124,7 @@
                     let template = sorted.find(s => {return s.templateId === card.cardTemplate.id})
                     if (template) {
                         template.cards.push({
+                            name: card.cardTemplate.title,
                             id: card.id,
                             image: card.images.size402,
                             mintBatch: card.mintBatch,
@@ -133,6 +135,7 @@
                             templateId: card.cardTemplate.id,
                             templateImage: card.cardTemplate.images.size402,
                             cards: [{
+                                name: card.cardTemplate.title,
                                 id: card.id,
                                 image: card.images.size402,
                                 mintBatch: card.mintBatch,
