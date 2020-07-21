@@ -24,9 +24,9 @@
             </b-col>
             <b-col cols="8">
                 <b-card border-variant="dark">
-                    <b-row>
+                    <b-row :align-h="spinner.cardImages ? 'center' : 'start'">
+                        <b-spinner v-if="spinner.cardImages"/>
                         <b-col :cols="card.showMints ? 6 : 3" v-for="card in cards" :key="card.templateId" class="mb-3">
-                            <b-spinner v-if="spinner.cardImages"/>
                             <b-card>
                                 <b-row>
                                     <b-col>
@@ -41,14 +41,20 @@
                                         </select>
                                     </b-col>
                                 </b-row>
-
                             </b-card>
                         </b-col>
                     </b-row>
                 </b-card>
             </b-col>
             <b-col cols="2" class="mr-2">
-                <b-card border-variant="dark"></b-card>
+                <b-card border-variant="dark">
+                    <b-card v-for="card in selected" :key="card.id">
+                        <p class="font-weight-bold">{{`${card.mintBatch}${card.mintNumber}`}}</p>
+                        <span>
+                            {{card.name}}
+                        </span>
+                    </b-card>
+                </b-card>
             </b-col>
         </b-row>
     </div>
