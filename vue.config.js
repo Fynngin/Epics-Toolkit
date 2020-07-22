@@ -1,4 +1,6 @@
 module.exports = {
-    publicPath: "/Epics-Toolkit/",
+    publicPath: process.env.NODE_ENV === 'production'
+        ? '/Epics-Toolkit/'
+        : '/',
     outputDir: "dist"
 };
