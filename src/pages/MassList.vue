@@ -83,7 +83,7 @@
                 <b-card v-if="selected.length > 0">
                     <b-form-radio-group v-model="packSellType" :options="packSellOptions"/>
                     <b-button variant="primary" @click="sellPacks">
-                        <b-spinner v-if="spinner.selling"/>
+                        <b-spinner v-if="spinner.selling === true"/>
                         <span v-else>Sell</span>
                     </b-button>
                 </b-card>
@@ -276,10 +276,10 @@
             sellPacks() {
                 this.spinner.selling = true
                 if (this.packSellType === 'newest') {
-                    this.selected.forEach(template => {
+                    this.selected.forEach(async template => {
                         for (let i = 0; i <= template.sellCount; i++) {
                             let pack = template.packs[i]
-                            this.sellItem(pack.id, 'pack', template.price, null)
+                            await this.sellItem(pack.id, 'pack', template.price, null)
                         }
                     })
                 } else {
@@ -292,8 +292,8 @@
                 }
                 this.spinner.selling = false
             },
-            sellItem(id, type, price, minOffer) {
-                axios("https://api.epics.gg/api/v1/market/list", {
+            async sellItem(id, type, price, minOffer) {
+                await axios("https://api.epics.gg/api/v1/market/list", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -307,10 +307,6 @@
                         'minOffer': minOffer,
                         'price': price,
                         'type': type
-                    }
-                }).then(res => {
-                    if (res.data.success) {
-                        console.log(res)
                     }
                 })
             }
