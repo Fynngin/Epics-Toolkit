@@ -21,6 +21,7 @@
                             stacked
                             class="mt-2"
                             v-model="collection"
+                            v-if="type === 'Cards'"
                             :options="collectionOptions"
                             text-field="collection.name"
                             value-field="collection.id"
@@ -32,7 +33,7 @@
                 <b-card border-variant="dark">
                     <b-row :align-h="spinner.cardImages ? 'center' : 'start'">
                         <b-spinner v-if="spinner.cardImages"/>
-                        <b-col cols="3" v-else v-for="pack in packs" :key="pack.templateId" class="mb-3" @click="selectPack(pack)">
+                        <b-col lg="2" md="4" sm="6" v-else v-for="pack in packs" :key="pack.templateId" class="mb-3" @click="selectPack(pack)">
                             <b-card>
                                 <b-badge>x{{pack.count}}</b-badge>
                                 <b-card-img :src="pack.templateImage"/>
@@ -45,7 +46,7 @@
                 <b-card border-variant="dark">
                     <b-row :align-h="spinner.cardImages ? 'center' : 'start'">
                         <b-spinner v-if="spinner.cardImages"/>
-                        <b-col :cols="card.showMints ? 6 : 3" v-for="card in cards" :key="card.templateId" class="mb-3">
+                        <b-col :lg="card.showMints ? 4 : 2" :md="card.showMints ? 8 : 4" :sm="card.showMints ? 12 : 6" v-for="card in cards" :key="card.templateId" class="mb-3">
                             <b-card>
                                 <b-row>
                                     <b-col>
@@ -77,7 +78,6 @@
                         <b-form-group label="Price: ">
                             <b-form-input v-model="pack.price" number></b-form-input>
                         </b-form-group>
-
                     </b-card>
                 </b-card>
                 <b-card v-if="selected.length > 0">
@@ -99,6 +99,10 @@
                 </b-card>
             </b-col>
         </b-row>
+
+        <b-modal id="progressModal" :title="spinner.selling ? 'Selling in progress...' : 'Done!'" hide-footer>
+            <b-progress :value="itemsSold" :max="totalItems" show-progress/>
+        </b-modal>
     </div>
 </template>
 
@@ -128,12 +132,25 @@
                     selling: false
                 },
                 packSellOptions: ['newest', 'oldest'],
-                packSellType: ['newest']
+                packSellType: ['newest'],
+                itemsSold: 0
+            }
+        },
+        computed: {
+            totalItems() {
+                let total = 0
+                this.selected.forEach(template => {
+                    total += template.sellCount
+                })
+                return total;
             }
         },
         methods: {
             getPacks(page) {
                 this.spinner.cardImages = true
+                if (page === 1) {
+                    this.packs = []
+                }
                 if (this.type === 'Packs') {
                     axios("https://api.epics.gg/api/v1/packs/user", {
                         method: 'GET',
@@ -171,7 +188,7 @@
                         sorted.push({
                             disabled: false,
                             templateId: pack.packTemplate.id,
-                            templateImage: `http://cdn.epics.gg${pack.packTemplate.images[0].url}`,
+                            templateImage: `https://cdn.epics.gg${pack.packTemplate.images[0].url}`,
                             name: pack.packTemplate.name,
                             count: 1,
                             sellCount: 0,
@@ -274,19 +291,23 @@
                 }
             },
             sellPacks() {
+                this.itemsSold = 0
                 this.spinner.selling = true
+                this.$bvModal.show('progressModal')
                 if (this.packSellType === 'newest') {
                     this.selected.forEach(async template => {
-                        for (let i = 0; i <= template.sellCount; i++) {
+                        for (let i = 0; i < template.sellCount; i++) {
                             let pack = template.packs[i]
                             await this.sellItem(pack.id, 'pack', template.price, null)
+                            this.itemsSold += 1
                         }
                     })
                 } else {
-                    this.selected.forEach(template => {
-                        for (let i = template.count - 1; i >= (template.count - template.sellCount); i--) {
+                    this.selected.forEach(async template => {
+                        for (let i = template.count - 1; i > (template.count - template.sellCount); i--) {
                             let pack = template.packs[i]
-                            this.sellItem(pack.id, 'pack', template.price, null)
+                            await this.sellItem(pack.id, 'pack', template.price, null)
+                            this.itemsSold++
                         }
                     })
                 }
