@@ -8,7 +8,7 @@ import MassList from "./pages/MassList";
 Vue.use(VueRouter)
 
 const router = new VueRouter({
-    mode: 'history',
+    // mode: 'history',
     routes: [
         {
             path: '/login',
