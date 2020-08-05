@@ -19,6 +19,12 @@
             <b-button class="w-100" :variant="pageVariant('/masslist')" @click="$router.push('/masslist')">
                 Mass-List
             </b-button>
+            <b-button class="w-100" variant="secondary">
+                Mint-Search
+            </b-button>
+            <b-button class="w-100" variant="secondary">
+                Rush Team-Builder
+            </b-button>
         </b-row>
     </b-sidebar>
 </template>
