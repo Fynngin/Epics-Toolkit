@@ -4,6 +4,7 @@ import VueRouter from "vue-router";
 import Vue from "vue";
 import store from "./store";
 import MassList from "./pages/MassList";
+import MintSearch from "./pages/MintSearch";
 
 Vue.use(VueRouter)
 
@@ -24,6 +25,13 @@ const router = new VueRouter({
         {
             path: '/masslist',
             component: MassList,
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/mintsearch',
+            component: MintSearch,
             meta: {
                 requiresAuth: true
             }
