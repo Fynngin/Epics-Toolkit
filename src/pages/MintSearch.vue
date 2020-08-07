@@ -104,11 +104,13 @@
                 })
             },
             loadCards() {
+                this.selected = []
                 getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection).then(res => {
                     res.data.success ? this.cards = res.data.data : this.cards = []
                 })
             },
             async startSearch() {
+                this.found = []
                 this.searchDone = false
                 this.$bvModal.show('resultsModal')
                 let page = 1
