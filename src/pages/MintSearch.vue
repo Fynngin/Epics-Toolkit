@@ -90,6 +90,9 @@
             }
         },
         methods: {
+            timeout(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms))
+            },
             loadCollections() {
                 getCollections(this.$store.state.userdata.jwt, this.$store.state.category,
                     this.season, this.$store.state.userdata.id).then(res => {
@@ -110,13 +113,25 @@
                         if (res.data.success && res.data.data.length > 0) {
                             users = res.data.data
                             page++
-                            users.forEach(user => {
+                            for (const user of users) {
                                 this.checkUser(user.user)
-                            })
+                            }
                         } else {
-                            console.log(res.data)
                             continueSearch = false
                         }
+                    }).catch(async () => {
+                        await this.timeout(60000);
+                        getLeaderboard(this.$store.state.userdata.jwt, this.$store.state.category, this.collection, page).then(res => {
+                            if (res.data.success && res.data.data.length > 0) {
+                                users = res.data.data
+                                page++
+                                for (const user of users) {
+                                    this.checkUser(user.user)
+                                }
+                            } else {
+                                continueSearch = false
+                            }
+                        })
                     })
                 }
             },
@@ -124,7 +139,7 @@
                 getItems(this.$store.state.userdata.jwt, this.$store.state.category, this.collection, user.id).then(res => {
                     if (res.data.success) {
                         let cards = res.data.data.cards
-                        cards.forEach(card => {
+                        for (const card of cards) {
                             if (this.selected.includes(card.cardTemplate.id)
                                 && card.mintBatch === this.mintBatch
                                 && card.mintNumber >= this.minMint
@@ -132,8 +147,24 @@
                                 this.cardsFound++
                                 console.log(`${card.mintBatch}${card.mintNumber} ${card.cardTemplate.title}: ${user.username}`)
                             }
-                        })
+                        }
                     }
+                }).catch(async () => {
+                    await this.timeout(60000);
+                    getItems(this.$store.state.userdata.jwt, this.$store.state.category, this.collection, user.id).then(res => {
+                        if (res.data.success) {
+                            let cards = res.data.data.cards
+                            for (const card of cards) {
+                                if (this.selected.includes(card.cardTemplate.id)
+                                    && card.mintBatch === this.mintBatch
+                                    && card.mintNumber >= this.minMint
+                                    && card.mintNumber <= this.maxMint) {
+                                    this.cardsFound++
+                                    console.log(`${card.mintBatch}${card.mintNumber} ${card.cardTemplate.title}: ${user.username}`)
+                                }
+                            }
+                        }
+                    })
                 })
             },
             selectAll() {
