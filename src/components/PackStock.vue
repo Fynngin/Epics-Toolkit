@@ -1,7 +1,7 @@
 <script>
     import { Bar } from "vue-chartjs";
     import 'chartjs-plugin-colorschemes';
-    import axios from "axios";
+    import {getStorePacks} from "@/api";
 
     export default {
         name: "PackStock",
@@ -39,17 +39,7 @@
                 this.sendRequest(1);
             },
             sendRequest(page) {
-                axios("https://api.epics.gg/api/v1/packs", {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-user-jwt': this.$store.state.userdata.jwt
-                    },
-                    params: {
-                        'categoryId': this.category,
-                        page: page
-                    }
-                }).then(response => {
+                getStorePacks(this.$store.state.userdata.jwt, this.category, page).then(response => {
                     if (response.data.success) {
                         if (response.data.data.length > 0) {
                             this.packs = this.packs.concat(response.data.data)

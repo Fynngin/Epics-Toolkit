@@ -81,3 +81,17 @@ export function getSeasons(jwt, category) {
         }
     })
 }
+
+export function getStorePacks(jwt, category, page) {
+    return axios("https://api.epics.gg/api/v1/packs", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            page: page
+        }
+    })
+}
