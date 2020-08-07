@@ -9,24 +9,7 @@
         <b-row>
             <b-col class="ml-2">
                 <b-card border-variant="dark" align="left">
-                    <b-form-select
-                            class="mt-2"
-                            v-model="season"
-                            :options="$store.state.seasons"
-                            @change="loadCollections">
-                        <template v-slot:first>
-                            <b-form-select-option :value="null" disabled>-- Season --</b-form-select-option>
-                        </template>
-                    </b-form-select>
-                    <b-form-radio-group
-                            stacked
-                            class="mt-2"
-                            v-model="collection"
-                            :options="collectionOptions"
-                            text-field="collection.name"
-                            value-field="collection.id"
-                            @input="loadCards"
-                    />
+                    <CollectionSelect @collectionChange="value => loadCards(value)"/>
                 </b-card>
             </b-col>
             <b-col cols="8">
@@ -70,10 +53,11 @@
     import Sidebar from "../components/Sidebar";
     import Checkmark from "../components/Checkmark";
     import SearchResults from "../components/SearchResults";
+    import CollectionSelect from "@/components/CollectionSelect";
 
     export default {
         name: "MintSearch",
-        components: {SearchResults, Checkmark, Sidebar},
+        components: {CollectionSelect, SearchResults, Checkmark, Sidebar},
         data() {
             return {
                 season: null,
@@ -107,7 +91,8 @@
                     res.data.success ? this.collectionOptions = res.data.data : this.collectionOptions = []
                 })
             },
-            loadCards() {
+            loadCards(collection) {
+                this.collection = collection
                 this.selected = []
                 getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection).then(res => {
                     res.data.success ? this.cards = res.data.data : this.cards = []
