@@ -9,13 +9,24 @@
         <b-row>
             <b-col class="ml-2">
                 <b-card border-variant="dark" align="left">
-                    <b-form-select v-model="type" :options="typeOptions" @change="getPacks(1)"/>
+                    <b-form-select
+                            v-model="type"
+                            :options="typeOptions"
+                            @change="getPacks(1)">
+                        <template v-slot:first>
+                            <b-form-select-option :value="null" disabled>-- Type --</b-form-select-option>
+                        </template>
+                    </b-form-select>
                     <b-form-select
                             class="mt-2"
                             v-if="type === 'Cards'"
                             v-model="season"
                             :options="$store.state.seasons"
-                            @change="getCollections"/>
+                            @change="getCollections">
+                        <template v-slot:first>
+                            <b-form-select-option :value="null" disabled>-- Season --</b-form-select-option>
+                        </template>
+                    </b-form-select>
                     <b-spinner class="mt-2" v-if="spinner.collections"/>
                     <b-form-radio-group
                             stacked

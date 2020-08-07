@@ -13,7 +13,11 @@
                             class="mt-2"
                             v-model="season"
                             :options="$store.state.seasons"
-                            @change="loadCollections"/>
+                            @change="loadCollections">
+                        <template v-slot:first>
+                            <b-form-select-option :value="null" disabled>-- Season --</b-form-select-option>
+                        </template>
+                    </b-form-select>
                     <b-form-radio-group
                             stacked
                             class="mt-2"
