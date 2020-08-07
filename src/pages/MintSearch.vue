@@ -20,9 +20,9 @@
                     </b-row>
                     <b-row align-h="start">
                         <b-col lg="2" md="4" sm="6" v-for="card in cards" :key="card.id" class="mb-3">
-                            <b-card>
-                                <Checkmark v-if="card.selected" style="position: absolute;" class="overlay"/>
-                                <b-card-img :src="card.images.size402" @click="selectCard(card)"/>
+                            <b-card @click="selectCard(card)">
+                                <Checkmark v-if="card.selected" style="position: absolute;"/>
+                                <b-card-img :src="card.images.size402"/>
                             </b-card>
                         </b-col>
                     </b-row>
@@ -100,6 +100,7 @@
             },
             async startSearch() {
                 this.found = []
+                this.cardsFound = 0
                 this.searchDone = false
                 this.$bvModal.show('resultsModal')
                 let page = 1
@@ -201,10 +202,5 @@
 </script>
 
 <style scoped>
-    .overlay {
-        height:0;
-        overflow:visible;
-        pointer-events:none;
-        background:none !important;
-    }
+
 </style>

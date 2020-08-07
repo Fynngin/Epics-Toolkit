@@ -10,7 +10,8 @@
             </template>
         </b-form-select>
         <b-list-group v-if="season">
-            <b-list-group-item v-for="(colls, name, index) in collectionOptions" :key="index" button v-b-toggle="`collapse-${index}`">
+            <b-list-group-item v-for="(colls, name, index) in collectionOptions" :key="index"
+                               action v-b-toggle="`collapse-${index}`" variant="secondary">
                 {{name}}
                 <b-collapse :id="`collapse-${index}`">
                     <b-list-group>

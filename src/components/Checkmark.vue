@@ -1,4 +1,4 @@
-<template>
+<template class="overlay">
     <div title="" role="button" aria-label="animation" tabindex="0" style="width: 100%; height: 100%; overflow: hidden; margin: 0px auto; outline: none;">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" width="150" height="150" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px);">
             <defs>
@@ -54,5 +54,10 @@
 </script>
 
 <style scoped>
-
+    .overlay {
+        height: 0;
+        overflow: visible;
+        pointer-events: none;
+        background: none !important;
+    }
 </style>
