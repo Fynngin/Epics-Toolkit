@@ -30,7 +30,7 @@
 </template>
 
 <script>
-    import {mapMutations} from "vuex";
+    import {mapActions} from "vuex";
 
     export default {
         name: "Sidebar",
@@ -38,7 +38,7 @@
 
         },
         methods: {
-            ...mapMutations(['changeCategory']),
+            ...mapActions(['changeCategory']),
             categoryVariant(category) {
                 return this.$store.state.category === category ? 'primary' : 'secondary'
             },

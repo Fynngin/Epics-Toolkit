@@ -62,7 +62,7 @@
 </template>
 
 <script>
-    import {getCardTemplates, getCollections, getItems, getLeaderboard} from '../api';
+    import {getCardTemplates, getCollections, getItems, getLeaderboard} from '@/api';
     import Sidebar from "../components/Sidebar";
     import Checkmark from "../components/Checkmark";
     import SearchResults from "../components/SearchResults";

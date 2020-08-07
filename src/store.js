@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import axios from "axios";
+import {getSeasons, login} from "@/api";
 
 Vue.use(Vuex)
 
@@ -28,13 +28,7 @@ export default new Vuex.Store({
     actions: {
         requestToken({commit}, auth) {
             return new Promise((resolve, reject) => {
-                axios("https://api.epics.gg/api/v1/auth/login", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    data: JSON.stringify(auth)
-                }).then(response => {
+                login(auth).then(response => {
                     if (response.status === 200 && response.data.success === true) {
                         let data = {
                             jwt: response.data.data.jwt,
@@ -53,6 +47,13 @@ export default new Vuex.Store({
                     reject()
                 })
             })
+        },
+        changeCategory({commit}, category) {
+            getSeasons(this.state.userdata.jwt, category).then(res => {
+                if (res.data.success) {
+                    commit('changeCategory', {category: category, seasons: res.data.data.seasons})
+                }
+            })
         }
     },
     mutations: {
@@ -64,8 +65,9 @@ export default new Vuex.Store({
                 this.state.authenticated = false
             }
         },
-        changeCategory(state, category) {
-            this.state.category = category;
+        changeCategory(category, data) {
+            this.state.category = data.category;
+            this.state.seasons = data.seasons;
         }
     }
 })

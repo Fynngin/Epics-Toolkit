@@ -1,5 +1,20 @@
 import axios from "axios";
 
+/**
+ * Sends login request.
+ * @param auth object of form: {email: xxx, password: yyy}
+ * @returns Promise, which can be awaited elsewhere
+ */
+export function login(auth) {
+    return axios("https://api.epics.gg/api/v1/auth/login", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(auth)
+    })
+}
+
 export function getCollections(jwt, category, season, userId) {
     return axios(`https://api.epics.gg/api/v1/collections/users/${userId}/user-summary`, {
         method: 'GET',
@@ -43,6 +58,19 @@ export function getLeaderboard(jwt, category, collectionId, page) {
 
 export function getItems(jwt, category, collectionId, userId) {
     return axios(`https://api.epics.gg/api/v1/collections/${collectionId}/users/${userId}/owned2`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
+
+export function getSeasons(jwt, category) {
+    return axios("https://api.epics.gg/api/v1/settings/web", {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
