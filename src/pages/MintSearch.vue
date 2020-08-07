@@ -56,6 +56,8 @@
                 </b-card>
             </b-col>
         </b-row>
+
+        <SearchResults id="resultsModal" :found="found" :progress="cardsFound" :max="totalCards" :done="searchDone"/>
     </div>
 </template>
 
@@ -63,22 +65,24 @@
     import {getCardTemplates, getCollections, getItems, getLeaderboard} from '../api';
     import Sidebar from "../components/Sidebar";
     import Checkmark from "../components/Checkmark";
+    import SearchResults from "../components/SearchResults";
 
     export default {
         name: "MintSearch",
-        components: {Checkmark, Sidebar},
+        components: {SearchResults, Checkmark, Sidebar},
         data() {
             return {
                 season: null,
                 cards: [],
-                cardIds: [], //templateIds
                 collection: null,
                 collectionOptions: [],
                 selected: [],
                 minMint: 1,
                 maxMint: 10,
                 mintBatch: 'A',
-                cardsFound: 0
+                cardsFound: 0,
+                searchDone: false,
+                found: []
             }
         },
         computed: {
@@ -105,10 +109,11 @@
                 })
             },
             async startSearch() {
+                this.searchDone = false
+                this.$bvModal.show('resultsModal')
                 let page = 1
                 let users = []
-                let continueSearch = true
-                while (this.cardsFound < this.totalCards && continueSearch === true) {
+                while (this.cardsFound < this.totalCards && !this.searchDone) {
                     await getLeaderboard(this.$store.state.userdata.jwt, this.$store.state.category, this.collection, page).then(res => {
                         if (res.data.success && res.data.data.length > 0) {
                             users = res.data.data
@@ -117,7 +122,7 @@
                                 this.checkUser(user.user)
                             }
                         } else {
-                            continueSearch = false
+                            this.searchDone = true
                         }
                     }).catch(async () => {
                         await this.timeout(60000);
@@ -129,7 +134,7 @@
                                     this.checkUser(user.user)
                                 }
                             } else {
-                                continueSearch = false
+                                this.searchDone = true
                             }
                         })
                     })
@@ -145,7 +150,11 @@
                                 && card.mintNumber >= this.minMint
                                 && card.mintNumber <= this.maxMint) {
                                 this.cardsFound++
-                                console.log(`${card.mintBatch}${card.mintNumber} ${card.cardTemplate.title}: ${user.username}`)
+                                this.found.push({
+                                    mint: `${card.mintBatch}${card.mintNumber}`,
+                                    name: card.cardTemplate.title,
+                                    user: user.username
+                                })
                             }
                         }
                     }
@@ -160,7 +169,11 @@
                                     && card.mintNumber >= this.minMint
                                     && card.mintNumber <= this.maxMint) {
                                     this.cardsFound++
-                                    console.log(`${card.mintBatch}${card.mintNumber} ${card.cardTemplate.title}: ${user.username}`)
+                                    this.found.push({
+                                        mint: `${card.mintBatch}${card.mintNumber}`,
+                                        name: card.cardTemplate.title,
+                                        user: user.username
+                                    })
                                 }
                             }
                         }
