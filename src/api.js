@@ -95,3 +95,16 @@ export function getStorePacks(jwt, category, page) {
         }
     })
 }
+
+export function getPlayers(jwt, category) {
+    return axios("https://api.epics.gg/api/v1/players", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
