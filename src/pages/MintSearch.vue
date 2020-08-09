@@ -118,6 +118,8 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                     cards: [],
                     stickers: []
                 }
+                this.cards = []
+                this.stickers = []
                 if (entities.includes('card')) {
                     getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection).then(res => {
                         res.data.success ? this.cards = res.data.data : this.cards = []
