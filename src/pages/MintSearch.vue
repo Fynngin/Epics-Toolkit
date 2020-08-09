@@ -38,13 +38,13 @@
                     </b-row>
                     <b-row align-h="start">
                         <b-col lg="2" md="4" sm="6" v-for="card in cards" :key="card.id" class="mb-3">
-                            <b-card @click="selectCard(card)">
+                            <b-card @click="selectCard(card)" no-body>
                                 <Checkmark v-if="card.selected" style="position: absolute;"/>
                                 <b-card-img :src="card.images.size402"/>
                             </b-card>
                         </b-col>
                         <b-col lg="2" md="4" sm="6" v-for="sticker in stickers" :key="sticker.id" class="mb-3">
-                            <b-card @click="selectSticker(sticker)">
+                            <b-card @click="selectSticker(sticker)" no-body>
                                 <Checkmark v-if="sticker.selected" style="position: absolute;"/>
                                 <b-card-img :src="`${$store.state.cdnUrl}${sticker.images[1].url}`"/>
                             </b-card>
@@ -123,11 +123,17 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                 if (entities.includes('card')) {
                     getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection).then(res => {
                         res.data.success ? this.cards = res.data.data : this.cards = []
+                        this.cards.sort((a,b) => {
+                            return a.id - b.id
+                        })
                     })
                 }
                 if (entities.includes('sticker')) {
                     getStickerTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection).then(res => {
                         res.data.success ? this.stickers = res.data.data : this.stickers = []
+                        this.stickers.sort((a,b) => {
+                            return a.id - b.id
+                        })
                     })
                 }
             },
