@@ -1,12 +1,13 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import {getSeasons, login} from "@/api";
+import {getAppInfo, login} from "@/api";
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
         authenticated: false,
+        cdnUrl: 'http://cdn.epics.gg',
         userdata: {
             jwt: null,
             username: null,
@@ -49,7 +50,7 @@ export default new Vuex.Store({
             })
         },
         changeCategory({commit}, category) {
-            getSeasons(this.state.userdata.jwt, category).then(res => {
+            getAppInfo(this.state.userdata.jwt, category).then(res => {
                 if (res.data.success) {
                     commit('changeCategory', {category: category, seasons: res.data.data.seasons})
                 }

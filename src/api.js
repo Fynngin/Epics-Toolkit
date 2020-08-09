@@ -42,6 +42,19 @@ export function getCardTemplates(jwt, category, collectionId) {
     })
 }
 
+export function getStickerTemplates(jwt, category, collectionId) {
+    return axios(`https://api.epics.gg/api/v1/collections/${collectionId}/sticker-templates`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
+
 export function getLeaderboard(jwt, category, collectionId, page) {
     return axios(`https://api.epics.gg/api/v1/leaderboards/collections/${collectionId}`, {
         method: 'GET',
@@ -69,7 +82,7 @@ export function getItems(jwt, category, collectionId, userId) {
     })
 }
 
-export function getSeasons(jwt, category) {
+export function getAppInfo(jwt, category) {
     return axios("https://api.epics.gg/api/v1/settings/web", {
         method: 'GET',
         headers: {

@@ -6,17 +6,35 @@
         </b-button>
         <h1>Welcome {{this.$store.state.userdata.username}}!</h1>
 
-        <b-row>
-            <b-col class="ml-2">
+        <b-row class="ml-2">
+            <b-col class="mb-2">
+                <b-card border-variant="dark">
+                    <b-form inline>
+                        <b-input-group prepend="MintBatch" class="mr-2">
+                            <b-form-input v-model="mintBatch"></b-form-input>
+                        </b-input-group>
+                        <b-input-group prepend="Min" class="mr-2">
+                            <b-form-input type="number" v-model="minMint"></b-form-input>
+                        </b-input-group>
+                        <b-input-group prepend="Max" class="mr-2">
+                            <b-form-input type="number" v-model="maxMint"></b-form-input>
+                        </b-input-group>
+                        <b-button variant="primary" @click="startSearch">Search</b-button>
+                    </b-form>
+                </b-card>
+            </b-col>
+        </b-row>
+        <b-row class="ml-2">
+            <b-col>
                 <b-card border-variant="dark" align="left">
                     <CollectionSelect @collectionChange="value => loadCards(value)"/>
                 </b-card>
             </b-col>
-            <b-col cols="8">
+            <b-col cols="9">
                 <b-card border-variant="dark">
                     <b-row class="mb-2 ml-0">
-                        <b-button v-if="!allSelected" @click="selectAll">Select All</b-button>
-                        <b-button @click="deselectAll">Deselect All</b-button>
+                        <b-button v-if="!allSelected" @click="selectAll" class="mr-2" variant="outline-dark">Select All</b-button>
+                        <b-button @click="deselectAll" variant="outline-dark">Deselect All</b-button>
                     </b-row>
                     <b-row align-h="start">
                         <b-col lg="2" md="4" sm="6" v-for="card in cards" :key="card.id" class="mb-3">
@@ -25,31 +43,29 @@
                                 <b-card-img :src="card.images.size402"/>
                             </b-card>
                         </b-col>
+                        <b-col lg="2" md="4" sm="6" v-for="sticker in stickers" :key="sticker.id" class="mb-3">
+                            <b-card @click="selectSticker(sticker)">
+                                <Checkmark v-if="sticker.selected" style="position: absolute;"/>
+                                <b-card-img :src="`${$store.state.cdnUrl}${sticker.images[1].url}`"/>
+                            </b-card>
+                        </b-col>
                     </b-row>
-                </b-card>
-            </b-col>
-            <b-col cols="2" class="mr-2">
-                <b-card border-variant="dark">
-                    <b-input-group prepend="MintBatch">
-                        <b-form-input v-model="mintBatch"></b-form-input>
-                    </b-input-group>
-                    <b-input-group prepend="Min">
-                        <b-form-input type="number" v-model="minMint"></b-form-input>
-                    </b-input-group>
-                    <b-input-group prepend="Max">
-                        <b-form-input type="number" v-model="maxMint"></b-form-input>
-                    </b-input-group>
-                    <b-button variant="primary" @click="startSearch">Search</b-button>
                 </b-card>
             </b-col>
         </b-row>
 
-        <SearchResults id="resultsModal" :found="found" :progress="cardsFound" :max="totalCards" :done="searchDone"/>
+        <SearchResults
+            id="resultsModal"
+            @hidden="resetSearch"
+            :found="found"
+            :progress="cardsFound"
+            :max="totalCards"
+            :done="searchDone"/>
     </div>
 </template>
 
 <script>
-    import {getCardTemplates, getCollections, getItems, getLeaderboard} from '@/api';
+import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTemplates} from '@/api';
     import Sidebar from "../components/Sidebar";
     import Checkmark from "../components/Checkmark";
     import SearchResults from "../components/SearchResults";
@@ -62,9 +78,13 @@
             return {
                 season: null,
                 cards: [],
+                stickers: [],
                 collection: null,
                 collectionOptions: [],
-                selected: [],
+                selected: {
+                    cards: [],
+                    stickers: []
+                },
                 minMint: 1,
                 maxMint: 10,
                 mintBatch: 'A',
@@ -75,10 +95,10 @@
         },
         computed: {
             allSelected() {
-                return this.cards.length === this.selected.length
+                return this.cards.length === this.selected.length && this.stickers.length === this.selected.length
             },
             totalCards() {
-                return this.selected.length * (this.maxMint - this.minMint + 1)
+                return (this.selected.cards.length + this.selected.stickers.length) * (this.maxMint - this.minMint + 1)
             }
         },
         methods: {
@@ -92,11 +112,22 @@
                 })
             },
             loadCards(collection) {
-                this.collection = collection
-                this.selected = []
-                getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection).then(res => {
-                    res.data.success ? this.cards = res.data.data : this.cards = []
-                })
+                this.collection = collection.id
+                let entities = collection.entities
+                this.selected = {
+                    cards: [],
+                    stickers: []
+                }
+                if (entities.includes('card')) {
+                    getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection).then(res => {
+                        res.data.success ? this.cards = res.data.data : this.cards = []
+                    })
+                }
+                if (entities.includes('sticker')) {
+                    getStickerTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection).then(res => {
+                        res.data.success ? this.stickers = res.data.data : this.stickers = []
+                    })
+                }
             },
             async startSearch() {
                 this.found = []
@@ -136,8 +167,9 @@
                 getItems(this.$store.state.userdata.jwt, this.$store.state.category, this.collection, user.id).then(res => {
                     if (res.data.success) {
                         let cards = res.data.data.cards
+                        let stickers = res.data.data.stickers
                         for (const card of cards) {
-                            if (this.selected.includes(card.cardTemplate.id)
+                            if (this.selected.cards.includes(card.cardTemplate.id)
                                 && card.mintBatch === this.mintBatch
                                 && card.mintNumber >= this.minMint
                                 && card.mintNumber <= this.maxMint) {
@@ -149,14 +181,31 @@
                                 })
                             }
                         }
+                        for (const sticker of stickers) {
+                            if (this.selected.stickers.includes(sticker.stickerTemplate.id)
+                                && sticker.mintBatch === this.mintBatch
+                                && sticker.mintNumber >= this.minMint
+                                && sticker.mintNumber <= this.maxMint) {
+                                this.cardsFound++
+                                this.found.push({
+                                    mint: `${sticker.mintBatch}${sticker.mintNumber}`,
+                                    name: sticker.stickerTemplate.title,
+                                    user: user.username
+                                })
+                            }
+                        }
+                        if (this.cardsFound === this.totalCards) {
+                            this.searchDone = true
+                        }
                     }
                 }).catch(async () => {
                     await this.timeout(60000);
                     getItems(this.$store.state.userdata.jwt, this.$store.state.category, this.collection, user.id).then(res => {
                         if (res.data.success) {
                             let cards = res.data.data.cards
+                            let stickers = res.data.data.stickers
                             for (const card of cards) {
-                                if (this.selected.includes(card.cardTemplate.id)
+                                if (this.selected.cards.includes(card.cardTemplate.id)
                                     && card.mintBatch === this.mintBatch
                                     && card.mintNumber >= this.minMint
                                     && card.mintNumber <= this.maxMint) {
@@ -168,34 +217,75 @@
                                     })
                                 }
                             }
+                            for (const sticker of stickers) {
+                                if (this.selected.stickers.includes(sticker.stickerTemplate.id)
+                                    && sticker.mintBatch === this.mintBatch
+                                    && sticker.mintNumber >= this.minMint
+                                    && sticker.mintNumber <= this.maxMint) {
+                                    this.cardsFound++
+                                    this.found.push({
+                                        mint: `${sticker.mintBatch}${sticker.mintNumber}`,
+                                        name: sticker.stickerTemplate.title,
+                                        user: user.username
+                                    })
+                                }
+                            }
                         }
                     })
                 })
             },
             selectAll() {
-                this.selected = []
+                this.selected = {
+                    cards: [],
+                    stickers: []
+                }
                 this.cards.forEach(card => {
                     card.selected = true
-                    this.selected.push(card.id)
+                    this.selected.cards.push(card.id)
+                })
+                this.stickers.forEach(sticker => {
+                    sticker.selected = true
+                    this.selected.stickers.push(sticker.id)
                 })
                 this.$forceUpdate()
             },
             deselectAll() {
-                this.selected = []
+                this.selected = {
+                    cards: [],
+                    stickers: []
+                }
                 this.cards.forEach(card => {
                     card.selected = false
+                })
+                this.stickers.forEach(sticker => {
+                    sticker.selected = false
                 })
                 this.$forceUpdate()
             },
             selectCard(card) {
                 if (card.selected) {
                     card.selected = false
-                    this.selected.splice(this.selected.indexOf(card.id), 1)
+                    this.selected.cards.splice(this.selected.cards.indexOf(card.id), 1)
                 } else {
-                    this.selected.push(card.id)
+                    this.selected.cards.push(card.id)
                     card.selected = true
                 }
                 this.$forceUpdate()
+            },
+            selectSticker(sticker) {
+                if (sticker.selected) {
+                    sticker.selected = false
+                    this.selected.stickers.splice(this.selected.stickers.indexOf(sticker.id), 1)
+                } else {
+                    this.selected.stickers.push(sticker.id)
+                    sticker.selected = true
+                }
+                this.$forceUpdate()
+            },
+            resetSearch() {
+                this.searchDone = true
+                this.found = []
+                this.cardsFound = 0
             }
         }
     }
