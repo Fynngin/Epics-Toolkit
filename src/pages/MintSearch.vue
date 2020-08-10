@@ -57,6 +57,7 @@
         <SearchResults
             id="resultsModal"
             @hidden="resetSearch"
+            :accsChecked="accountsChecked"
             :found="found"
             :progress="cardsFound"
             :max="totalCards"
@@ -90,7 +91,8 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                 mintBatch: 'A',
                 cardsFound: 0,
                 searchDone: false,
-                found: []
+                found: [],
+                accountsChecked: 0
             }
         },
         computed: {
@@ -141,6 +143,7 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                 this.found = []
                 this.cardsFound = 0
                 this.searchDone = false
+                this.accountsChecked = 0
                 this.$bvModal.show('resultsModal')
                 let page = 1
                 let users = []
@@ -205,6 +208,7 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                         if (this.cardsFound === this.totalCards) {
                             this.searchDone = true
                         }
+                        this.accountsChecked++
                     }
                 }).catch(async () => {
                     await this.timeout(60000);
@@ -238,6 +242,10 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                                     })
                                 }
                             }
+                            if (this.cardsFound === this.totalCards) {
+                                this.searchDone = true
+                            }
+                            this.accountsChecked++
                         }
                     })
                 })
