@@ -121,3 +121,42 @@ export function getPlayers(jwt, category) {
         }
     })
 }
+
+export function getRoles(jwt, category) {
+    return axios("https://api.epics.gg/api/v1/players/roles", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
+
+export function getPlayerMaps(jwt, category) {
+    return axios("https://api.epics.gg/api/v1/ultimate-team/players", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
+
+export function getMaps(jwt, category) {
+    return axios("https://api.epics.gg/api/v1/ultimate-team/maps", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}

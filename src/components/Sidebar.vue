@@ -22,7 +22,7 @@
             <b-button class="w-100" :variant="pageVariant('/mintsearch')" @click="$router.push('/mintsearch')">
                 Mint-Search
             </b-button>
-            <b-button class="w-100" variant="secondary">
+            <b-button class="w-100" :variant="pageVariant('/teambuilder')" @click="$router.push('/teambuilder')">
                 Rush Team-Builder
             </b-button>
         </b-row>

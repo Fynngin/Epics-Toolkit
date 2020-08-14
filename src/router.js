@@ -5,6 +5,7 @@ import Vue from "vue";
 import store from "./store";
 import MassList from "./pages/MassList";
 import MintSearch from "./pages/MintSearch";
+import TeamBuilder from "@/pages/TeamBuilder";
 
 Vue.use(VueRouter)
 
@@ -32,6 +33,13 @@ const router = new VueRouter({
         {
             path: '/mintsearch',
             component: MintSearch,
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/teambuilder',
+            component: TeamBuilder,
             meta: {
                 requiresAuth: true
             }
