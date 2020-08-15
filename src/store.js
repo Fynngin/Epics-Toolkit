@@ -15,11 +15,13 @@ export default new Vuex.Store({
             id: null,
             avatar: null
         },
+        whaleId: 26108,
         category: 1,
         currentSeasons: {
             1: '2020',
             2: 'First Edition'
         },
+        rushSeason: '2020',
         seasons: []
     },
     getters: {

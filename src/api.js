@@ -160,3 +160,19 @@ export function getMaps(jwt, category) {
         }
     })
 }
+
+export function getCardsByPlayer(jwt, category, userId, playerId, season, page) {
+    return axios(`https://api.epics.gg/api/v1/cards/owned/users/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            'playerIds': playerId,
+            'season': season,
+            'page': page
+        }
+    })
+}

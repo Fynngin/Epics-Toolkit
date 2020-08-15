@@ -14,13 +14,13 @@
                         <b-col xl="2" md="4" class="mb-3">
                             <b-card border-variant="dark" class="roleCard" @click="selectedRole = roles[0].id">
                                 {{roles[0].name}}
-                                <b-img class="role-img mw-100" :src="`${$store.state.cdnUrl}${roles[0].images[0].url}`"/>
+                                <b-img class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${roles[0].images[0].url}`"/>
                             </b-card>
                         </b-col>
                         <b-col xl="2" md="4" class="mb-3">
                             <b-card border-variant="dark" class="roleCard" @click="selectedRole = roles[2].id">
                                 {{roles[2].name}}
-                                <b-img class="role-img mw-100" :src="`${$store.state.cdnUrl}${roles[2].images[0].url}`"/>
+                                <b-img class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${roles[2].images[0].url}`"/>
                             </b-card>
                         </b-col>
                         <b-col xl="2" md="4" class="mb-3">
@@ -32,13 +32,13 @@
                         <b-col xl="2" md="4" class="mb-3">
                             <b-card border-variant="dark" class="roleCard" @click="selectedRole = roles[1].id">
                                 {{roles[1].name}}
-                                <b-img class="role-img mw-100" :src="`${$store.state.cdnUrl}${roles[1].images[0].url}`"/>
+                                <b-img class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${roles[1].images[0].url}`"/>
                             </b-card>
                         </b-col>
                         <b-col xl="2" md="4" class="mb-3">
                             <b-card border-variant="dark" class="roleCard" @click="selectedRole = roles[3].id">
                                 {{roles[3].name}}
-                                <b-img class="role-img mw-100" :src="`${$store.state.cdnUrl}${roles[3].images[0].url}`"/>
+                                <b-img class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${roles[3].images[0].url}`"/>
                             </b-card>
                         </b-col>
                     </b-row>
@@ -50,15 +50,30 @@
             <b-col>
                 <b-card border-variant="dark">
                     <b-spinner v-if="spinner.players"/>
-                    <b-row v-else>
+                    <b-row v-else-if="selectedPlayer === 0">
                         <b-col class="mb-3" cols="4" v-for="player in playerOptions" :key="player.id">
                             <b-card no-body>
-                                <b-img class="playerFrame w-50" :src="`${$store.state.cdnUrl}${player.images[0].url}`"/>
+                                <b-img class="playerFrame w-50"
+                                       :src="`${$store.state.cdnUrl}${player.images[0].url}`"
+                                       @click="loadPlayerCards(player.id)"
+                                />
                                 <p style="float: right">{{player.minSalary}}$ - {{player.maxSalary}}$</p>
                                 <country-flag :country="player.country" size="big"/>
                             </b-card>
                         </b-col>
                     </b-row>
+                    <b-container v-else>
+                        <b-spinner v-if="spinner.cards"/>
+                        <b-button class="mb-3" @click="selectedPlayer = 0" v-else>Back</b-button>
+                        <b-row>
+                            <b-col class="mb-3" cols="4" v-for="card in cards[selectedPlayer]" :key="card.id">
+                                <b-card no-body>
+                                    <b-card-img :src="`${card.images.size402}`"/>
+                                </b-card>
+                            </b-col>
+                        </b-row>
+                    </b-container>
+
                 </b-card>
             </b-col>
         </b-row>
@@ -67,7 +82,7 @@
 
 <script>
 import Sidebar from "../components/Sidebar";
-import {getPlayerMaps, getPlayers, getRoles, getMaps} from "@/api";
+import {getPlayerMaps, getPlayers, getRoles, getMaps, getCardsByPlayer} from "@/api";
 import CountryFlag from 'vue-country-flag';
 
 export default {
@@ -76,13 +91,16 @@ export default {
     data() {
         return {
             selectedRole: 0,
+            selectedPlayer: 0,
             roles: [],
             players: [],
             playerMaps: [],
+            cards: {},
             maps: [],
             spinner: {
                 'roles': true,
-                'players': true
+                'players': true,
+                'cards': false
             }
         }
     },
@@ -149,6 +167,47 @@ export default {
                     this.maps = []
                 }
             })
+        },
+        async loadPlayerCards(playerId) {
+            this.selectedPlayer = playerId;
+            if (!this.cards[playerId]) {
+                this.spinner.cards = true;
+                this.cards[playerId] = []
+                let page = 1
+                let neededRequests = 0
+                await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, playerId, this.$store.state.rushSeason, page).then(res => {
+                    if (res.data.success) {
+                        let cards = res.data.data.cards
+                        neededRequests = Math.ceil(res.data.data.total / cards.length) - 1
+                        cards.forEach(card => {
+                            if (!this.cards[playerId].find(elem => {
+                                return elem.id === card.cardTemplate.id
+                            })) {
+                                this.cards[playerId].push(card.cardTemplate)
+                            }
+                        })
+                        page++
+                    }
+                })
+                while (neededRequests > 0) {
+                    await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, playerId, this.$store.state.rushSeason, page).then(res => {
+                        if (res.data.success) {
+                            let cards = res.data.data.cards
+                            cards.forEach(card => {
+                                if (!this.cards[playerId].find(elem => {
+                                    return elem.id === card.cardTemplate.id
+                                })) {
+                                    this.cards[playerId].push(card.cardTemplate)
+                                }
+                            })
+                            page++
+                            neededRequests--
+                        }
+                    })
+                }
+                this.spinner.cards = false;
+                this.$forceUpdate();
+            }
         }
     }
 }
