@@ -67,9 +67,17 @@
                         <b-button class="mb-3" @click="selectedPlayer = 0" v-else>Back</b-button>
                         <b-row>
                             <b-col class="mb-3" cols="4" v-for="card in cards[selectedPlayer]" :key="card.id">
-                                <b-card no-body>
-                                    <b-card-img :src="`${card.images.size402}`"/>
-                                </b-card>
+                                <b-overlay :show="overlay === card.id" style="pointer-events: none">
+                                    <b-card style="pointer-events: all" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0">
+                                        <b-card-img :src="`${card.images.size402}`"/>
+                                    </b-card>
+                                    <template v-slot:overlay>
+                                        <div>
+                                            <h2>{{card.properties.salary}} $</h2>
+                                            <h3>{{card.properties.player_rating}} OVR</h3>
+                                        </div>
+                                    </template>
+                                </b-overlay>
                             </b-col>
                         </b-row>
                     </b-container>
@@ -90,6 +98,9 @@ export default {
     components: {Sidebar, CountryFlag},
     data() {
         return {
+            roster: {
+                'flex': null
+            },
             selectedRole: 0,
             selectedPlayer: 0,
             roles: [],
@@ -97,6 +108,7 @@ export default {
             playerMaps: [],
             cards: {},
             maps: [],
+            overlay: 0,
             spinner: {
                 'roles': true,
                 'players': true,
@@ -146,6 +158,9 @@ export default {
             getRoles(this.$store.state.userdata.jwt, this.$store.state.category).then(res => {
                 if (res.data.success) {
                     this.roles = res.data.data
+                    this.roles.forEach(role => {
+                        this.roster[role.id] = null
+                    })
                     this.spinner.roles = false
                 }
             })
