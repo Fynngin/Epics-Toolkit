@@ -51,14 +51,28 @@
                 <b-card border-variant="dark">
                     <b-spinner v-if="spinner.players"/>
                     <b-row v-else-if="selectedPlayer === 0">
-                        <b-col class="mb-3" cols="4" v-for="player in playerOptions" :key="player.id">
-                            <b-card no-body>
-                                <b-img class="playerFrame w-50"
-                                       :src="`${$store.state.cdnUrl}${player.images[0].url}`"
-                                       @click="loadPlayerCards(player.id)"
-                                />
-                                <p style="float: right">{{player.minSalary}}$ - {{player.maxSalary}}$</p>
-                                <country-flag :country="player.country" size="big"/>
+                        <b-col class="mb-3" xl="4" lg="6" sm="12" v-for="player in playerOptions" :key="player.id">
+                            <b-card no-body @click="loadPlayerCards(player.id)">
+                                <b-row>
+                                    <b-col cols="4">
+                                        <b-img class="playerFrame"
+                                               :src="`${$store.state.cdnUrl}${player.images[0].url}`"
+                                        />
+                                    </b-col>
+                                    <b-col cols="8">
+                                        <b-row class="mb-2">
+                                            <strong>{{player.minSalary}}$ - {{player.maxSalary}}$</strong>
+                                            <country-flag style="float: right" :country="player.country" size="big"/>
+                                        </b-row>
+
+                                        <b-row>
+                                            <b-col cols="6" v-for="map in maps" :key="map.id" class="mb-2 p-1">
+                                                <b-img class="w-75" :src="`${$store.state.cdnUrl}${map.images[0].url}`"/>
+                                                <b-badge>{{player.maps.find(m => {return m.mapId === map.id}).weight}}</b-badge>
+                                            </b-col>
+                                        </b-row>
+                                    </b-col>
+                                </b-row>
                             </b-card>
                         </b-col>
                     </b-row>
@@ -252,6 +266,7 @@ export default {
     }
 
     .playerFrame {
-        float: left;
+        width: auto;
+        max-height: 400px;
     }
 </style>
