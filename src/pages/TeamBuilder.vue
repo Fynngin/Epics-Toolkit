@@ -53,24 +53,24 @@
                     <b-row v-else-if="selectedPlayer === 0">
                         <b-col class="mb-3" xl="4" lg="6" sm="12" v-for="player in playerOptions" :key="player.id">
                             <b-card no-body @click="loadPlayerCards(player.id)">
-                                <b-row>
-                                    <b-col cols="4">
-                                        <b-img class="playerFrame"
-                                               :src="`${$store.state.cdnUrl}${player.images[0].url}`"
-                                        />
-                                    </b-col>
-                                    <b-col cols="8">
-                                        <b-row class="mb-2">
-                                            <strong>{{player.minSalary}}$ - {{player.maxSalary}}$</strong>
-                                            <country-flag style="float: right" :country="player.country" size="big"/>
-                                        </b-row>
+                                <template v-slot:header>
+                                    <h3 style="float: left">{{player.handle}}</h3>
+                                    <country-flag class="ml-2" style="float: right" :country="player.country" size="normal"/>
+                                    <p style="float: right">{{player.minSalary}}$ - {{player.maxSalary}}$</p>
+                                </template>
 
-                                        <b-row>
-                                            <b-col cols="6" v-for="map in maps" :key="map.id" class="mb-2 p-1">
-                                                <b-img class="w-75" :src="`${$store.state.cdnUrl}${map.images[0].url}`"/>
-                                                <b-badge>{{player.maps.find(m => {return m.mapId === map.id}).weight}}</b-badge>
-                                            </b-col>
-                                        </b-row>
+                                <b-img class="playerFrame"
+                                       :src="`${$store.state.cdnUrl}${player.images[0].url}`"
+                                />
+
+                                <b-row>
+                                    <b-col cols="6" v-for="map in maps" :key="map.id" class="mb-2 p-1">
+                                        <b-img class="w-75 map_img" :src="`${$store.state.cdnUrl}${map.images[0].url}`"/>
+                                        <b-badge pill
+                                                 style="position: absolute; left: 10%"
+                                                 :variant="player.maps.find(m => {return m.mapId === map.id}).weight >= 1 ? 'success' : 'danger'">
+                                            {{ round((player.maps.find(m => {return m.mapId === map.id}).weight - 1) * 100, 3)}} %
+                                        </b-badge>
                                     </b-col>
                                 </b-row>
                             </b-card>
@@ -146,6 +146,9 @@ export default {
         }
     },
     methods: {
+        round(value, decimals) {
+            return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+        },
         async loadPlayers() {
             this.spinner.players = true
             await this.loadPlayerMaps()
@@ -266,7 +269,14 @@ export default {
     }
 
     .playerFrame {
-        width: auto;
-        max-height: 400px;
+        position: absolute;
+        width: inherit;
+        height: inherit;
+        max-width: 100%;
+        filter: grayscale(1);
+    }
+
+    .map_img {
+        filter: drop-shadow(4px 4px 5px rgba(0,0,0,0.9));
     }
 </style>
