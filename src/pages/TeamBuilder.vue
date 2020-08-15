@@ -47,6 +47,29 @@
         </b-row>
 
         <b-row class="ml-2 mr-2">
+            <b-col class="mb-2">
+                <b-card border-variant="dark">
+                    <b-form inline>
+                        <b-form-select :options="sortOptions" v-model="sorting"/>
+                        <font-awesome-icon
+                            class="ml-2"
+                            :icon="sortDirection === 'asc' ? 'arrow-up' : 'arrow-down'"
+                            size="lg"
+                            @click="changeSortingOrder"/>
+                        <b-form-select
+                            v-if="sorting === 'map'"
+                            v-model="mapSort"
+                            :options="maps"
+                            text-field="name"
+                            value-field="id"
+                            class="ml-2"
+                        />
+                    </b-form>
+                </b-card>
+            </b-col>
+        </b-row>
+
+        <b-row class="ml-2 mr-2">
             <b-col>
                 <b-card border-variant="dark">
                     <b-spinner v-if="spinner.players"/>
@@ -127,7 +150,15 @@ export default {
                 'roles': true,
                 'players': true,
                 'cards': false
-            }
+            },
+            sortOptions: [
+                {text: '--- Sort By ---', value: null},
+                {text: 'Name', value: 'name'},
+                {text: 'Map Bonus', value: 'map'}
+            ],
+            sorting: null,
+            sortDirection: 'asc',
+            mapSort: 1
         }
     },
     created() {
@@ -138,9 +169,18 @@ export default {
     computed: {
         playerOptions() {
             if (this.selectedRole !== 0) {
-                return this.players.filter(player => {
+                let temp = this.players.filter(player => {
                     return player.playerFrames[0].playerRoleId === this.selectedRole
                 })
+                if (this.sorting) {
+                    temp.sort((a,b) => {
+                        return a.handle.localeCompare(b.handle)
+                    })
+                    if (this.sortDirection === 'desc') {
+                        temp.reverse()
+                    }
+                }
+                return temp
             }
             return this.players
         }
@@ -148,6 +188,9 @@ export default {
     methods: {
         round(value, decimals) {
             return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+        },
+        changeSortingOrder() {
+            this.sortDirection === 'asc' ? this.sortDirection = 'desc' : this.sortDirection = 'asc'
         },
         async loadPlayers() {
             this.spinner.players = true
