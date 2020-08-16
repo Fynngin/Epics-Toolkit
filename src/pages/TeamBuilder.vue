@@ -49,27 +49,57 @@
         <b-row class="ml-2 mr-2">
             <b-col class="mb-2">
                 <b-card border-variant="dark">
-                    <b-form inline>
-                        <b-form-select
-                            :options="sortOptions"
-                            v-model="sorting"
-                            @change="sortPlayers(sorting, sortDirection)"
-                        />
-                        <b-form-select
-                            v-if="sorting === 'map'"
-                            v-model="mapSort"
-                            :options="maps"
-                            @change="sortPlayers(sorting, sortDirection)"
-                            text-field="name"
-                            value-field="id"
-                            class="ml-2"
-                        />
-                        <font-awesome-icon
-                            class="ml-2"
-                            :icon="sortDirection === 'asc' ? 'arrow-up' : 'arrow-down'"
-                            size="lg"
-                            @click="changeSortDirection"/>
-                    </b-form>
+                    <b-row>
+                        <b-col cols="4">
+                            <b-form inline>
+                                <b-form-select
+                                    :options="sortOptions"
+                                    v-model="sorting"
+                                    @change="sortPlayers(sorting, sortDirection)"
+                                />
+                                <b-form-select
+                                    v-if="sorting === 'map'"
+                                    v-model="mapSort"
+                                    :options="maps"
+                                    @change="sortPlayers(sorting, sortDirection)"
+                                    text-field="name"
+                                    value-field="id"
+                                    class="ml-2"
+                                />
+                                <font-awesome-icon
+                                    v-if="sorting"
+                                    class="ml-2"
+                                    :icon="sortDirection === 'asc' ? 'arrow-up' : 'arrow-down'"
+                                    size="lg"
+                                    @click="changeSortDirection"/>
+                            </b-form>
+                        </b-col>
+                        <b-col cols="8">
+                            <b-button style="float: right" @click="addFilter">Add filter</b-button>
+                            <b-form v-for="(filter, index) in filters" :key="index" inline class="mb-2">
+                                <b-button @click="filters.splice(filters.indexOf(filter), 1)" variant="danger">X</b-button>
+                                <b-form-select class="ml-2" :options="filterOptions" v-model="filter.type"/>
+                                <b-form-select
+                                    v-if="filter.type === 'map'"
+                                    v-model="filter.map"
+                                    :options="maps"
+                                    text-field="name"
+                                    value-field="id"
+                                    class="ml-2"
+                                />
+                                <b-col>
+                                    <b-input-group append="%" v-if="filter.type === 'map'">
+                                        <b-form-input type="number" class="ml-2" v-model="filter.min"/>
+                                    </b-input-group>
+                                </b-col>
+                                <b-col>
+                                    <b-input-group append="%" v-if="filter.type === 'map'">
+                                        <b-form-input type="number" class="ml-2" v-model="filter.max"/>
+                                    </b-input-group>
+                                </b-col>
+                            </b-form>
+                        </b-col>
+                    </b-row>
                 </b-card>
             </b-col>
         </b-row>
@@ -161,9 +191,16 @@ export default {
                 {text: 'Name', value: 'name'},
                 {text: 'Map Bonus', value: 'map'}
             ],
+            filterOptions: [
+                {text: '--- Filter ---', value: null},
+                {text: 'Team', value: 'team'},
+                {text: 'Country', value: 'country'},
+                {text: 'Map Bonus', value: 'map'}
+            ],
             sorting: null,
             sortDirection: 'asc',
-            mapSort: 1
+            mapSort: 1,
+            filters: []
         }
     },
     created() {
@@ -173,15 +210,32 @@ export default {
     },
     computed: {
         playerOptions() {
+            let temp = this.players
             if (this.selectedRole !== 0) {
-                return this.players.filter(player => {
+                temp = temp.filter(player => {
                     return player.playerFrames[0].playerRoleId === this.selectedRole
                 })
             }
-            return this.players
+            this.filters.forEach(filter => {
+                if (filter.type === 'map') {
+                    temp = temp.filter(player => {
+                        let weight = player.maps.find(map => {return map.mapId === filter.map}).weight
+                        return weight <= ((filter.max / 100) + 1) && weight >= ((filter.min / 100) + 1)
+                    })
+                }
+            })
+            return temp
         }
     },
     methods: {
+        addFilter() {
+            this.filters.push({
+                type: 'null',
+                map: 1,
+                min: 0,
+                max: 100
+            })
+        },
         sortPlayers(sortby, direction) {
             if (sortby === 'name') {
                 this.players.sort((a,b) => {
