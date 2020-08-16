@@ -88,14 +88,18 @@
                                     class="ml-2"
                                 />
                                 <b-col>
-                                    <b-input-group append="%" v-if="filter.type === 'map'">
-                                        <b-form-input type="number" class="ml-2" v-model="filter.min"/>
-                                    </b-input-group>
+                                    <strong v-if="filter.type === 'map'">{{filter.min}} %</strong>
+                                    <b-form-input type="range" min="-100" max="100" v-model="filter.min" v-if="filter.type === 'map'"/>
+<!--                                    <b-input-group append="%" v-if="filter.type === 'map'">-->
+<!--                                        <b-form-input type="number" class="ml-2" v-model="filter.min"/>-->
+<!--                                    </b-input-group>-->
                                 </b-col>
                                 <b-col>
-                                    <b-input-group append="%" v-if="filter.type === 'map'">
-                                        <b-form-input type="number" class="ml-2" v-model="filter.max"/>
-                                    </b-input-group>
+                                    <strong v-if="filter.type === 'map'">{{filter.max}} %</strong>
+                                    <b-form-input type="range" min="-100" max="100" v-model="filter.max" v-if="filter.type === 'map'"/>
+<!--                                    <b-input-group append="%" v-if="filter.type === 'map'">-->
+<!--                                        <b-form-input type="number" class="ml-2" v-model="filter.max"/>-->
+<!--                                    </b-input-group>-->
                                 </b-col>
                             </b-form>
                         </b-col>
