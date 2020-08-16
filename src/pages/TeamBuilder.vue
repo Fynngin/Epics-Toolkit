@@ -50,20 +50,25 @@
             <b-col class="mb-2">
                 <b-card border-variant="dark">
                     <b-form inline>
-                        <b-form-select :options="sortOptions" v-model="sorting"/>
-                        <font-awesome-icon
-                            class="ml-2"
-                            :icon="sortDirection === 'asc' ? 'arrow-up' : 'arrow-down'"
-                            size="lg"
-                            @click="changeSortingOrder"/>
+                        <b-form-select
+                            :options="sortOptions"
+                            v-model="sorting"
+                            @change="sortPlayers(sorting, sortDirection)"
+                        />
                         <b-form-select
                             v-if="sorting === 'map'"
                             v-model="mapSort"
                             :options="maps"
+                            @change="sortPlayers(sorting, sortDirection)"
                             text-field="name"
                             value-field="id"
                             class="ml-2"
                         />
+                        <font-awesome-icon
+                            class="ml-2"
+                            :icon="sortDirection === 'asc' ? 'arrow-up' : 'arrow-down'"
+                            size="lg"
+                            @click="changeSortDirection"/>
                     </b-form>
                 </b-card>
             </b-col>
@@ -169,28 +174,34 @@ export default {
     computed: {
         playerOptions() {
             if (this.selectedRole !== 0) {
-                let temp = this.players.filter(player => {
+                return this.players.filter(player => {
                     return player.playerFrames[0].playerRoleId === this.selectedRole
                 })
-                if (this.sorting) {
-                    temp.sort((a,b) => {
-                        return a.handle.localeCompare(b.handle)
-                    })
-                    if (this.sortDirection === 'desc') {
-                        temp.reverse()
-                    }
-                }
-                return temp
             }
             return this.players
         }
     },
     methods: {
+        sortPlayers(sortby, direction) {
+            if (sortby === 'name') {
+                this.players.sort((a,b) => {
+                    return a.handle.localeCompare(b.handle)
+                })
+            } else if (sortby === 'map') {
+                this.players.sort((a,b) => {
+                    return a.maps.find(map => {return map.mapId === this.mapSort}).weight - b.maps.find(map => {return map.mapId === this.mapSort}).weight
+                })
+            }
+            if (direction === 'desc') {
+                this.players.reverse()
+            }
+        },
+        changeSortDirection() {
+            this.sortDirection === 'asc' ? this.sortDirection = 'desc' : this.sortDirection = 'asc'
+            this.sortPlayers(this.sorting, this.sortDirection)
+        },
         round(value, decimals) {
             return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
-        },
-        changeSortingOrder() {
-            this.sortDirection === 'asc' ? this.sortDirection = 'desc' : this.sortDirection = 'asc'
         },
         async loadPlayers() {
             this.spinner.players = true
