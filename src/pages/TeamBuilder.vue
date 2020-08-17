@@ -91,15 +91,31 @@
                                 <CountrySearch
                                     v-if="filter.type === 'country'"
                                     class="ml-2"
-                                    @country="value => filter.countries = value"
+                                    @country="value => updateCountryFilter(filter, value)"
                                 />
                                 <b-col>
                                     <strong v-if="filter.type === 'map'">Min: {{filter.min}} %</strong>
-                                    <b-form-input type="range" min="-100" max="100" v-model="filter.min" v-if="filter.type === 'map'"/>
+                                    <b-form-input
+                                        lazy
+                                        type="range"
+                                        min="-100"
+                                        max="100"
+                                        v-model="filter.min"
+                                        v-if="filter.type === 'map'"
+                                        @change="applyFilter"
+                                    />
                                 </b-col>
                                 <b-col>
                                     <strong v-if="filter.type === 'map'">Max: {{filter.max}} %</strong>
-                                    <b-form-input type="range" min="-100" max="100" v-model="filter.max" v-if="filter.type === 'map'"/>
+                                    <b-form-input
+                                        lazy
+                                        type="range"
+                                        min="-100"
+                                        max="100"
+                                        v-model="filter.max"
+                                        v-if="filter.type === 'map'"
+                                        @change="applyFilter"
+                                    />
                                 </b-col>
                             </b-form>
                         </b-col>
@@ -113,7 +129,7 @@
                 <b-card border-variant="dark">
                     <b-spinner v-if="spinner.players"/>
                     <b-row v-else-if="selectedPlayer === 0">
-                        <b-col class="mb-3" xl="4" lg="6" sm="12" v-for="player in playerOptions" :key="player.id">
+                        <b-col class="mb-3" xl="4" lg="6" sm="12" v-for="player in filteredPlayers" :key="player.id">
                             <b-card no-body @click="loadPlayerCards(player.id)">
                                 <template v-slot:header>
                                     <h3 style="float: left">{{player.handle}}</h3>
@@ -182,6 +198,7 @@ export default {
             selectedPlayer: 0,
             roles: [],
             players: [],
+            filteredPlayers: [],
             playerMaps: [],
             cards: {},
             maps: [],
@@ -213,8 +230,12 @@ export default {
         this.loadRoleImages()
         this.loadMaps()
     },
-    computed: {
-        playerOptions() {
+    methods: {
+        updateCountryFilter(filter, value) {
+            filter.countries = value
+            this.applyFilter()
+        },
+        applyFilter() {
             let temp = this.players
             if (this.selectedRole !== 0) {
                 temp = temp.filter(player => {
@@ -236,10 +257,8 @@ export default {
                     }
                 }
             })
-            return temp
-        }
-    },
-    methods: {
+            this.filteredPlayers = temp
+        },
         addFilter() {
             this.filters.push({
                 type: 'null',
@@ -287,6 +306,7 @@ export default {
                             }
                         }
                     })
+                    this.filteredPlayers = this.players
                     this.spinner.players = false
                 }
             })
