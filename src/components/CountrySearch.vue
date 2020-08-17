@@ -1,38 +1,32 @@
 <template>
-    <b-row class="container-fluid">
-        <b-col>
-            <b-form-group
-                label-for="tag-search-input"
-                label="Search:"
-                label-cols-md="auto"
-                class="mb-0"
-                label-size="sm"
-            >
+    <div>
+        <b-dropdown variant="outline-dark">
+            <template v-slot:button-content>
+                Select country ({{tags.length}} selected)
+            </template>
+            <b-dropdown-form>
                 <b-form-input
+                    placeholder="Search..."
                     v-model="countrySearch"
-                    id="tag-search-input"
-                    type="search"
-                    size="sm"
-                    autocomplete="off"
                     autofocus
                 />
-            </b-form-group>
-        </b-col>
-        <b-col style="overflow: scroll">
-            <b-row class="flex-nowrap" style="max-width: inherit;">
-                <b-col v-for="(country, index) in countryOptions" :key="index">
-                    <b-badge
-                        pill
-                        href="#"
-                        @click="switchCountry(country.short)"
-                        :variant="tags.includes(country.short) ? 'success' : 'secondary'"
-                    >
-                        {{country.full}}
-                    </b-badge>
-                </b-col>
-            </b-row>
-        </b-col>
-    </b-row>
+            </b-dropdown-form>
+            <div style="max-height: 200px; overflow: auto">
+                <b-dropdown-item v-for="country in countryOptions" :key="country.full" @click="addCountry(country)">
+                    {{country.full}}
+                </b-dropdown-item>
+            </div>
+            <div class="ml-2">
+                <b-form-tag
+                    variant="primary"
+                    v-for="(country, index) in tags"
+                    :key="country.full"
+                    @remove="removeCountry(index)">
+                    {{country.full}}
+                </b-form-tag>
+            </div>
+        </b-dropdown>
+    </div>
 </template>
 
 <script>
@@ -44,24 +38,27 @@ export default {
     data() {
         return {
             countrySearch: '',
-            tags: []
+            tags: [],
+            shortTags: []
         }
     },
     computed: {
         countryOptions() {
             return this.$options.countries.filter(country => {
-                return country.full.toLowerCase().includes(this.countrySearch.toLowerCase())
+                return !this.tags.includes(country) && country.full.toLowerCase().includes(this.countrySearch.toLowerCase())
             })
         }
     },
     methods: {
-        switchCountry(country) {
-            if (this.tags.includes(country)) {
-                this.tags.splice(this.tags.indexOf(country))
-            } else {
-                this.tags.push(country)
-            }
-            this.$emit('country', this.tags);
+        addCountry(country) {
+            this.tags.push(country)
+            this.shortTags.push(country.short)
+            this.$emit('country', this.shortTags);
+        },
+        removeCountry(index) {
+            this.tags.splice(index, 1)
+            this.shortTags.splice(index, 1)
+            this.$emit('country', this.shortTags);
         }
     }
 }

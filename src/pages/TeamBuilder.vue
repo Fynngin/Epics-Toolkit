@@ -74,8 +74,9 @@
                                     @click="changeSortDirection"/>
                             </b-form>
                         </b-col>
+
                         <b-col cols="8">
-                            <b-button style="float: right" @click="addFilter">Add filter</b-button>
+                            <b-button style="float: right;" @click="addFilter" variant="primary">Add filter</b-button>
                             <b-form v-for="(filter, index) in filters" :key="index" inline class="mb-2">
                                 <b-button @click="filters.splice(filters.indexOf(filter), 1)" variant="danger">X</b-button>
                                 <b-form-select class="ml-2" :options="filterOptions" v-model="filter.type"/>
@@ -87,7 +88,11 @@
                                     value-field="id"
                                     class="ml-2"
                                 />
-                                <CountrySearch v-if="filter.type === 'country'"/>
+                                <CountrySearch
+                                    v-if="filter.type === 'country'"
+                                    class="ml-2"
+                                    @country="value => filter.countries = value"
+                                />
                                 <b-col>
                                     <strong v-if="filter.type === 'map'">Min: {{filter.min}} %</strong>
                                     <b-form-input type="range" min="-100" max="100" v-model="filter.min" v-if="filter.type === 'map'"/>
@@ -223,6 +228,13 @@ export default {
                         return weight <= ((filter.max / 100) + 1) && weight >= ((filter.min / 100) + 1)
                     })
                 }
+                if (filter.type === 'country') {
+                    if (filter.countries.length > 0) {
+                        temp = temp.filter(player => {
+                            return filter.countries.includes(player.country.toUpperCase())
+                        })
+                    }
+                }
             })
             return temp
         }
@@ -233,7 +245,8 @@ export default {
                 type: 'null',
                 map: 1,
                 min: 0,
-                max: 100
+                max: 100,
+                countries: []
             })
         },
         sortPlayers(sortby, direction) {
