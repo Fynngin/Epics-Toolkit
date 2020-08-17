@@ -87,19 +87,14 @@
                                     value-field="id"
                                     class="ml-2"
                                 />
+                                <CountrySearch v-if="filter.type === 'country'"/>
                                 <b-col>
-                                    <strong v-if="filter.type === 'map'">{{filter.min}} %</strong>
+                                    <strong v-if="filter.type === 'map'">Min: {{filter.min}} %</strong>
                                     <b-form-input type="range" min="-100" max="100" v-model="filter.min" v-if="filter.type === 'map'"/>
-<!--                                    <b-input-group append="%" v-if="filter.type === 'map'">-->
-<!--                                        <b-form-input type="number" class="ml-2" v-model="filter.min"/>-->
-<!--                                    </b-input-group>-->
                                 </b-col>
                                 <b-col>
-                                    <strong v-if="filter.type === 'map'">{{filter.max}} %</strong>
+                                    <strong v-if="filter.type === 'map'">Max: {{filter.max}} %</strong>
                                     <b-form-input type="range" min="-100" max="100" v-model="filter.max" v-if="filter.type === 'map'"/>
-<!--                                    <b-input-group append="%" v-if="filter.type === 'map'">-->
-<!--                                        <b-form-input type="number" class="ml-2" v-model="filter.max"/>-->
-<!--                                    </b-input-group>-->
                                 </b-col>
                             </b-form>
                         </b-col>
@@ -168,10 +163,11 @@
 import Sidebar from "../components/Sidebar";
 import {getPlayerMaps, getPlayers, getRoles, getMaps, getCardsByPlayer} from "@/api";
 import CountryFlag from 'vue-country-flag';
+import CountrySearch from "@/components/CountrySearch";
 
 export default {
     name: "TeamBuilder",
-    components: {Sidebar, CountryFlag},
+    components: {CountrySearch, Sidebar, CountryFlag},
     data() {
         return {
             roster: {
