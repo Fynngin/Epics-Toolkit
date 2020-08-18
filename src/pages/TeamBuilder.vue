@@ -13,14 +13,32 @@
                     <b-row v-else align-h="center">
                         <b-col xl="2" md="4" class="mb-3" v-for="role in roles" :key="role.id">
                             <b-card
-                                :header="role.name"
+                                :style="roster[role.id] ? 'width: min-content; height: min-content' : ''"
                                 :border-variant="selectedRole === role.id ? 'primary' : 'dark'"
                                 :header-bg-variant="selectedRole === role.id ? 'primary' : 'light'"
                                 class="roleCard"
+                                :no-body="roster[role.id] !== null"
                                 @click="selectRole(role.id)"
+                                @mouseover="roster[role.id] !== null ? rosterOverlay = role.id : ''"
+                                @mouseleave="roster[role.id] !== null ? rosterOverlay = null : ''"
                             >
-                                <b-img v-if="roster[role.id]" class="mh-100" :src="roster[role.id].images.size402"/>
-                                <b-img v-else class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${role.images[0].url}`"/>
+                                <template v-slot:header>
+                                    <span style="white-space: nowrap">{{role.name}}</span>
+                                </template>
+                                <b-overlay :show="rosterOverlay === role.id" style="pointer-events: none">
+                                    <b-img
+                                        v-if="roster[role.id]"
+                                        style="max-height: 200px"
+                                        :src="roster[role.id].images.size402"
+                                    />
+                                    <template v-slot:overlay>
+                                        <div>
+                                            <h2 style="white-space: nowrap">{{roster[role.id].properties.salary}} $</h2>
+                                            <h3>{{roster[role.id].properties.player_rating}} OVR</h3>
+                                        </div>
+                                    </template>
+                                </b-overlay>
+                                <b-img v-if="!roster[role.id]" class="role-img w-100 h-100" :src="`${$store.state.cdnUrl}${role.images[0].url}`"/>
                             </b-card>
                         </b-col>
                         <b-col xl="2" md="4" class="mb-3">
@@ -205,6 +223,7 @@ export default {
             cards: {},
             maps: [],
             overlay: 0,
+            rosterOverlay: null,
             spinner: {
                 'roles': true,
                 'players': true,

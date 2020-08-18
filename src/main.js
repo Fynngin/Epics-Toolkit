@@ -8,9 +8,9 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import {faEdit, faUserPlus, faSave, faMagic, faAlignJustify, faEllipsisV, faCogs, faExchangeAlt, faLink, faTrashAlt, faPlusCircle, faCaretRight, faCaretDown, faRandom, faArrowUp, faArrowDown} from '@fortawesome/free-solid-svg-icons'
+import {faEdit, faUserPlus, faSave, faMagic, faAlignJustify, faEllipsisV, faCogs, faExchangeAlt, faLink, faTrashAlt, faPlusCircle, faCaretRight, faCaretDown, faRandom, faArrowUp, faArrowDown, faWindowClose} from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUserPlus, faEdit, faSave, faMagic, faAlignJustify, faEllipsisV, faCogs, faExchangeAlt, faLink, faTrashAlt, faPlusCircle, faCaretRight, faCaretDown, faRandom,faArrowUp, faArrowDown)
+library.add(faUserPlus, faEdit, faSave, faMagic, faAlignJustify, faEllipsisV, faCogs, faExchangeAlt, faLink, faTrashAlt, faPlusCircle, faCaretRight, faCaretDown, faRandom,faArrowUp, faArrowDown, faWindowClose)
 
 Vue.config.productionTip = false
 Vue.use(VueRouter)
