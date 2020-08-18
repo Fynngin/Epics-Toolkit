@@ -11,34 +11,26 @@
                 <b-card border-variant="dark">
                     <b-spinner v-if="spinner.roles"/>
                     <b-row v-else align-h="center">
-                        <b-col xl="2" md="4" class="mb-3">
-                            <b-card border-variant="dark" class="roleCard" @click="selectedRole = roles[0].id">
-                                {{roles[0].name}}
-                                <b-img class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${roles[0].images[0].url}`"/>
+                        <b-col xl="2" md="4" class="mb-3" v-for="role in roles" :key="role.id">
+                            <b-card
+                                :header="role.name"
+                                :border-variant="selectedRole === role.id ? 'primary' : 'dark'"
+                                :header-bg-variant="selectedRole === role.id ? 'primary' : 'light'"
+                                class="roleCard"
+                                @click="selectRole(role.id)"
+                            >
+                                <b-img class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${role.images[0].url}`"/>
                             </b-card>
                         </b-col>
                         <b-col xl="2" md="4" class="mb-3">
-                            <b-card border-variant="dark" class="roleCard" @click="selectedRole = roles[2].id">
-                                {{roles[2].name}}
-                                <b-img class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${roles[2].images[0].url}`"/>
-                            </b-card>
-                        </b-col>
-                        <b-col xl="2" md="4" class="mb-3">
-                            <b-card border-variant="dark" class="roleCard" @click="selectedRole = 0">
-                                Flex
+                            <b-card
+                                class="roleCard"
+                                @click="selectRole(0)"
+                                header="Flex"
+                                :border-variant="selectedRole === 0 ? 'primary' : 'dark'"
+                                :header-bg-variant="selectedRole === 0 ? 'primary' : 'light'"
+                            >
                                 <font-awesome-icon size="5x" class="w-100" icon="random"/>
-                            </b-card>
-                        </b-col>
-                        <b-col xl="2" md="4" class="mb-3">
-                            <b-card border-variant="dark" class="roleCard" @click="selectedRole = roles[1].id">
-                                {{roles[1].name}}
-                                <b-img class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${roles[1].images[0].url}`"/>
-                            </b-card>
-                        </b-col>
-                        <b-col xl="2" md="4" class="mb-3">
-                            <b-card border-variant="dark" class="roleCard" @click="selectedRole = roles[3].id">
-                                {{roles[3].name}}
-                                <b-img class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${roles[3].images[0].url}`"/>
                             </b-card>
                         </b-col>
                     </b-row>
@@ -235,6 +227,10 @@ export default {
             filter.countries = value
             this.applyFilter()
         },
+        selectRole(roleId) {
+            this.selectedRole = roleId;
+            this.applyFilter();
+        },
         applyFilter() {
             let temp = this.players
             if (this.selectedRole !== 0) {
@@ -270,16 +266,16 @@ export default {
         },
         sortPlayers(sortby, direction) {
             if (sortby === 'name') {
-                this.players.sort((a,b) => {
+                this.filteredPlayers.sort((a,b) => {
                     return a.handle.localeCompare(b.handle)
                 })
             } else if (sortby === 'map') {
-                this.players.sort((a,b) => {
+                this.filteredPlayers.sort((a,b) => {
                     return a.maps.find(map => {return map.mapId === this.mapSort}).weight - b.maps.find(map => {return map.mapId === this.mapSort}).weight
                 })
             }
             if (direction === 'desc') {
-                this.players.reverse()
+                this.filteredPlayers.reverse()
             }
         },
         changeSortDirection() {
