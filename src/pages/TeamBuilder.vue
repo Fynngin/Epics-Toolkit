@@ -19,7 +19,8 @@
                                 class="roleCard"
                                 @click="selectRole(role.id)"
                             >
-                                <b-img class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${role.images[0].url}`"/>
+                                <b-img v-if="roster[role.id]" class="mh-100" :src="roster[role.id].images.size402"/>
+                                <b-img v-else class="role-img mw-100 mh-100" :src="`${$store.state.cdnUrl}${role.images[0].url}`"/>
                             </b-card>
                         </b-col>
                         <b-col xl="2" md="4" class="mb-3">
@@ -30,8 +31,15 @@
                                 :border-variant="selectedRole === 0 ? 'primary' : 'dark'"
                                 :header-bg-variant="selectedRole === 0 ? 'primary' : 'light'"
                             >
-                                <font-awesome-icon size="5x" class="w-100" icon="random"/>
+                                <b-img v-if="roster['flex']" class="mh-100" :src="roster['flex'].images.size402"/>
+                                <font-awesome-icon v-else size="5x" class="w-100" icon="random"/>
                             </b-card>
+                        </b-col>
+                        <b-col>
+                            <strong>Team summary:</strong>
+                            <p v-for="map in maps" :key="map.id" class="m-0" style="text-align: left">
+                                {{map.name}}: {{mapBonus(map.id)}}%
+                            </p>
                         </b-col>
                     </b-row>
                 </b-card>
@@ -120,9 +128,9 @@
             <b-col>
                 <b-card border-variant="dark">
                     <b-spinner v-if="spinner.players"/>
-                    <b-row v-else-if="selectedPlayer === 0">
+                    <b-row v-else-if="selectedPlayer.id === 0">
                         <b-col class="mb-3" xl="4" lg="6" sm="12" v-for="player in filteredPlayers" :key="player.id">
-                            <b-card no-body @click="loadPlayerCards(player.id)">
+                            <b-card no-body @click="loadPlayerCards(player)">
                                 <template v-slot:header>
                                     <h3 style="float: left">{{player.handle}}</h3>
                                     <country-flag class="ml-2" style="float: right" :country="player.country" size="normal"/>
@@ -148,11 +156,11 @@
                     </b-row>
                     <b-container v-else>
                         <b-spinner v-if="spinner.cards"/>
-                        <b-button class="mb-3" @click="selectedPlayer = 0" v-else>Back</b-button>
+                        <b-button class="mb-3" @click="selectedPlayer.id = 0" v-else>Back</b-button>
                         <b-row>
-                            <b-col class="mb-3" cols="4" v-for="card in cards[selectedPlayer]" :key="card.id">
+                            <b-col class="mb-3" cols="4" v-for="card in cards[selectedPlayer.id]" :key="card.id">
                                 <b-overlay :show="overlay === card.id" style="pointer-events: none">
-                                    <b-card style="pointer-events: all" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0">
+                                    <b-card style="pointer-events: all" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0" @click="addCardToRoster(card)">
                                         <b-card-img :src="`${card.images.size402}`"/>
                                     </b-card>
                                     <template v-slot:overlay>
@@ -187,7 +195,9 @@ export default {
                 'flex': null
             },
             selectedRole: 0,
-            selectedPlayer: 0,
+            selectedPlayer: {
+                id: 0
+            },
             roles: [],
             players: [],
             filteredPlayers: [],
@@ -223,6 +233,26 @@ export default {
         this.loadMaps()
     },
     methods: {
+        mapBonus(mapId) {
+            let bonus = 1;
+            for (const id in this.roster) {
+                if (this.roster[id]) {
+                    let map = this.roster[id].maps.find(m => {return m.mapId === mapId})
+                    bonus *= map.weight
+                }
+            }
+            return this.round((bonus - 1) * 100, 3)
+        },
+        addCardToRoster(card) {
+            if (this.selectedRole === 0) {
+                card.maps = this.selectedPlayer.maps
+                this.roster['flex'] = card
+            } else {
+                card.maps = this.selectedPlayer.maps
+                this.roster[this.selectedRole] = card
+            }
+            this.$forceUpdate();
+        },
         updateCountryFilter(filter, value) {
             filter.countries = value
             this.applyFilter()
@@ -337,36 +367,36 @@ export default {
                 }
             })
         },
-        async loadPlayerCards(playerId) {
-            this.selectedPlayer = playerId;
-            if (!this.cards[playerId]) {
+        async loadPlayerCards(player) {
+            this.selectedPlayer = player;
+            if (!this.cards[player.id]) {
                 this.spinner.cards = true;
-                this.cards[playerId] = []
+                this.cards[player.id] = []
                 let page = 1
                 let neededRequests = 0
-                await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, playerId, this.$store.state.rushSeason, page).then(res => {
+                await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, player.id, this.$store.state.rushSeason, page).then(res => {
                     if (res.data.success) {
                         let cards = res.data.data.cards
                         neededRequests = Math.ceil(res.data.data.total / cards.length) - 1
                         cards.forEach(card => {
-                            if (!this.cards[playerId].find(elem => {
+                            if (!this.cards[player.id].find(elem => {
                                 return elem.id === card.cardTemplate.id
                             })) {
-                                this.cards[playerId].push(card.cardTemplate)
+                                this.cards[player.id].push(card.cardTemplate)
                             }
                         })
                         page++
                     }
                 })
                 while (neededRequests > 0) {
-                    await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, playerId, this.$store.state.rushSeason, page).then(res => {
+                    await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, player.id, this.$store.state.rushSeason, page).then(res => {
                         if (res.data.success) {
                             let cards = res.data.data.cards
                             cards.forEach(card => {
-                                if (!this.cards[playerId].find(elem => {
+                                if (!this.cards[player.id].find(elem => {
                                     return elem.id === card.cardTemplate.id
                                 })) {
-                                    this.cards[playerId].push(card.cardTemplate)
+                                    this.cards[player.id].push(card.cardTemplate)
                                 }
                             })
                             page++
