@@ -11,7 +11,7 @@
                 <b-card border-variant="dark">
                     <b-spinner v-if="spinner.roles"/>
                     <b-row v-else align-h="center">
-                        <b-col xl="2" md="4" class="mb-3" v-for="role in roles" :key="role.id">
+                        <b-col xl="2" md="4" class="mb-3" v-for="(role, index) in roles" :key="index">
                             <b-card
                                 :style="roster[role.id] ? 'width: min-content; height: min-content' : ''"
                                 :border-variant="selectedRole === role.id ? 'primary' : 'dark'"
@@ -28,7 +28,7 @@
                                 <b-overlay :show="rosterOverlay === role.id" style="pointer-events: none">
                                     <b-img
                                         v-if="roster[role.id]"
-                                        style="max-height: 200px"
+                                        style="height: auto; width: 100%"
                                         :src="roster[role.id].images.size402"
                                     />
                                     <template v-slot:overlay>
@@ -38,26 +38,51 @@
                                         </div>
                                     </template>
                                 </b-overlay>
-                                <b-img v-if="!roster[role.id]" class="role-img w-100 h-100" :src="`${$store.state.cdnUrl}${role.images[0].url}`"/>
+                                <b-img
+                                    v-if="!roster[role.id]"
+                                    style="object-fit: contain; margin: auto; display: block"
+                                    class="role-img w-100 h-100"
+                                    :src="`${$store.state.cdnUrl}${role.images[0].url}`"
+                                />
                             </b-card>
                         </b-col>
                         <b-col xl="2" md="4" class="mb-3">
                             <b-card
                                 class="roleCard"
+                                :style="roster['flex'] ? 'width: min-content; height: min-content' : ''"
                                 @click="selectRole(0)"
                                 header="Flex"
+                                :no-body="roster['flex'] !== null"
                                 :border-variant="selectedRole === 0 ? 'primary' : 'dark'"
                                 :header-bg-variant="selectedRole === 0 ? 'primary' : 'light'"
+                                @mouseover="roster['flex'] !== null ? rosterOverlay = 0 : ''"
+                                @mouseleave="roster['flex'] !== null ? rosterOverlay = null : ''"
                             >
-                                <b-img v-if="roster['flex']" class="mh-100" :src="roster['flex'].images.size402"/>
-                                <font-awesome-icon v-else size="5x" class="w-100" icon="random"/>
+                                <b-overlay :show="rosterOverlay === 0" style="pointer-events: none">
+                                    <b-img
+                                        v-if="roster['flex']"
+                                        style="max-height: 200px"
+                                        :src="roster['flex'].images.size402"
+                                    />
+                                    <template v-slot:overlay>
+                                        <div>
+                                            <h2 style="white-space: nowrap">{{roster['flex'].properties.salary}} $</h2>
+                                            <h3>{{roster['flex'].properties.player_rating}} OVR</h3>
+                                        </div>
+                                    </template>
+                                </b-overlay>
+                                <font-awesome-icon v-if="!roster['flex']" size="5x" class="w-100" icon="random"/>
                             </b-card>
                         </b-col>
                         <b-col>
                             <strong>Team summary:</strong>
-                            <p v-for="map in maps" :key="map.id" class="m-0" style="text-align: left">
-                                {{map.name}}: {{mapBonus(map.id)}}%
-                            </p>
+                                <p v-for="(map, index) in maps" :key="index" class="m-0" style="text-align: left">
+                                    {{map.name}}:
+                                    <b-badge pill
+                                             :variant="mapBonus(map.id) >= 0 ? 'success' : 'danger'">
+                                        {{mapBonus(map.id)}}%
+                                    </b-badge>
+                                </p>
                         </b-col>
                     </b-row>
                 </b-card>
@@ -147,11 +172,11 @@
                 <b-card border-variant="dark">
                     <b-spinner v-if="spinner.players"/>
                     <b-row v-else-if="selectedPlayer.id === 0">
-                        <b-col class="mb-3" xl="4" lg="6" sm="12" v-for="player in filteredPlayers" :key="player.id">
+                        <b-col class="mb-3" xl="3" lg="4" md="6" sm="12" v-for="(player, index) in filteredPlayers" :key="index">
                             <b-card no-body @click="loadPlayerCards(player)">
                                 <template v-slot:header>
                                     <h3 style="float: left">{{player.handle}}</h3>
-                                    <country-flag class="ml-2" style="float: right" :country="player.country" size="normal"/>
+                                    <country-flag class="ml-2" style="float: right;" :country="player.country" size="normal"/>
                                     <p style="float: right">{{player.minSalary}}$ - {{player.maxSalary}}$</p>
                                 </template>
 
@@ -176,7 +201,7 @@
                         <b-spinner v-if="spinner.cards"/>
                         <b-button class="mb-3" @click="selectedPlayer.id = 0" v-else>Back</b-button>
                         <b-row>
-                            <b-col class="mb-3" cols="4" v-for="card in cards[selectedPlayer.id]" :key="card.id">
+                            <b-col class="mb-3" md="2" sm="4" v-for="(card, index) in cards[selectedPlayer.id]" :key="index">
                                 <b-overlay :show="overlay === card.id" style="pointer-events: none">
                                     <b-card style="pointer-events: all" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0" @click="addCardToRoster(card)">
                                         <b-card-img :src="`${card.images.size402}`"/>
@@ -236,7 +261,7 @@ export default {
             ],
             filterOptions: [
                 {text: '--- Filter ---', value: null},
-                {text: 'Team', value: 'team'},
+                {text: 'Team', value: 'team', disabled: true},
                 {text: 'Country', value: 'country'},
                 {text: 'Map Bonus', value: 'map'}
             ],
@@ -387,7 +412,7 @@ export default {
             })
         },
         async loadPlayerCards(player) {
-            this.selectedPlayer = player;
+            this.selectedPlayer = JSON.parse(JSON.stringify(player));   //deep copy
             if (!this.cards[player.id]) {
                 this.spinner.cards = true;
                 this.cards[player.id] = []
@@ -423,6 +448,9 @@ export default {
                         }
                     })
                 }
+                this.cards[player.id].sort((a,b) => {
+                    return a.properties.player_rating - b.properties.player_rating
+                })
                 this.spinner.cards = false;
                 this.$forceUpdate();
             }
