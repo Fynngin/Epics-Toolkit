@@ -75,7 +75,7 @@
                             </b-card>
                         </b-col>
                         <b-col>
-                            <strong>Team summary: {{teamOvr()}}</strong>
+                            <strong>Team summary: {{teamOvr()}} OVR</strong>
                                 <p v-for="(map, index) in maps" :key="index" class="m-0" style="text-align: left">
                                     {{map.name}}:
                                     <b-badge pill
