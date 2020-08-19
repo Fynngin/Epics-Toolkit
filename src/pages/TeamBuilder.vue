@@ -75,7 +75,7 @@
                             </b-card>
                         </b-col>
                         <b-col>
-                            <strong>Team summary:</strong>
+                            <strong>Team summary: {{teamOvr()}}</strong>
                                 <p v-for="(map, index) in maps" :key="index" class="m-0" style="text-align: left">
                                     {{map.name}}:
                                     <b-badge pill
@@ -286,6 +286,15 @@ export default {
                 }
             }
             return this.round((bonus - 1) * 100, 3)
+        },
+        teamOvr() {
+            let ovr = 0
+            Object.values(this.roster).forEach(player => {
+                if (player) {
+                    ovr += player.properties.player_rating
+                }
+            })
+            return (ovr / 5)
         },
         addCardToRoster(card) {
             if (this.selectedRole === 0) {
