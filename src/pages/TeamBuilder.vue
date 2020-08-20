@@ -28,7 +28,7 @@
                                 <b-overlay :show="rosterOverlay === role.id" style="pointer-events: none">
                                     <b-img
                                         v-if="roster[role.id]"
-                                        style="height: auto; width: 100%"
+                                        style="width: auto; height: 200px"
                                         :src="roster[role.id].images.size402"
                                     />
                                     <template v-slot:overlay>
@@ -75,7 +75,8 @@
                             </b-card>
                         </b-col>
                         <b-col>
-                            <strong>Team summary: {{teamOvr()}} OVR</strong>
+                            <strong>Team summary: {{teamOvr()}} OVR</strong><br>
+                            <strong>{{rosterSalary}}$</strong>
                                 <p v-for="(map, index) in maps" :key="index" class="m-0" style="text-align: left">
                                     {{map.name}}:
                                     <b-badge pill
@@ -249,6 +250,7 @@ export default {
             maps: [],
             overlay: 0,
             rosterOverlay: null,
+            rosterSalary: 0,
             spinner: {
                 'roles': true,
                 'players': true,
@@ -299,10 +301,18 @@ export default {
         addCardToRoster(card) {
             if (this.selectedRole === 0) {
                 card.maps = this.selectedPlayer.maps
+                if (this.roster['flex']) {
+                    this.rosterSalary -= this.roster['flex'].properties.salary
+                }
                 this.roster['flex'] = card
+                this.rosterSalary += card.properties.salary
             } else {
                 card.maps = this.selectedPlayer.maps
+                if (this.roster[this.selectedRole]) {
+                    this.rosterSalary -= this.roster[this.selectedRole].properties.salary
+                }
                 this.roster[this.selectedRole] = card
+                this.rosterSalary += card.properties.salary
             }
             this.$forceUpdate();
         },
