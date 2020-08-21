@@ -96,7 +96,9 @@
                     <b-row>
                         <b-col cols="4">
                             <b-form inline>
+                                <b-form-input placeholder="Search..." v-model="search"/>
                                 <b-form-select
+                                    class="ml-2"
                                     :options="sortOptions"
                                     v-model="sorting"
                                     @change="sortPlayers(sorting, sortDirection)"
@@ -173,7 +175,7 @@
                 <b-card border-variant="dark">
                     <b-spinner v-if="spinner.players"/>
                     <b-row v-else-if="selectedPlayer.id === 0">
-                        <b-col class="mb-3" xl="3" lg="4" md="6" sm="12" v-for="(player, index) in filteredPlayers" :key="index">
+                        <b-col class="mb-3" xl="3" lg="4" md="6" sm="12" v-for="(player, index) in playersToShow" :key="index">
                             <b-card no-body @click="loadPlayerCards(player)">
                                 <template v-slot:header>
                                     <h3 style="float: left">{{player.handle}}</h3>
@@ -270,13 +272,21 @@ export default {
             sorting: null,
             sortDirection: 'asc',
             mapSort: 1,
-            filters: []
+            filters: [],
+            search: ''
         }
     },
     created() {
         this.loadPlayers()
         this.loadRoleImages()
         this.loadMaps()
+    },
+    computed: {
+        playersToShow() {
+            return this.filteredPlayers.filter(player => {
+                return player.handle.toLowerCase().includes(this.search.toLowerCase())
+            })
+        }
     },
     methods: {
         mapBonus(mapId) {
