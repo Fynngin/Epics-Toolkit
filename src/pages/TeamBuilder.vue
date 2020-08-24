@@ -176,10 +176,10 @@
                     <b-spinner v-if="spinner.players"/>
                     <b-row v-else-if="selectedPlayer.id === 0">
                         <b-col class="mb-3" xl="3" lg="4" md="6" sm="12" v-for="(player, index) in playersToShow" :key="index">
-                            <b-card no-body @click="loadPlayerCards(player)">
+                            <b-card no-body @click="loadPlayerCards(player)" class="h-100">
                                 <template v-slot:header>
                                     <h3 style="float: left">{{player.handle}}</h3>
-                                    <country-flag class="ml-2" style="float: right;" :country="player.country" size="normal"/>
+                                    <gb-flag :code="player.country" class="playerFlag"/>
                                     <p style="float: right">{{player.minSalary}}$ - {{player.maxSalary}}$</p>
                                 </template>
 
@@ -219,22 +219,24 @@
                             </b-col>
                         </b-row>
                     </b-container>
-
                 </b-card>
             </b-col>
         </b-row>
     </div>
 </template>
 
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5/dist/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@growthbunker/vueflags@latest/dist/vueflags.min.js"></script>
 <script>
 import Sidebar from "../components/Sidebar";
 import {getPlayerMaps, getPlayers, getRoles, getMaps, getCardsByPlayer} from "@/api";
-import CountryFlag from 'vue-country-flag';
+// import CountryFlag from 'vue-country-flag';
+// import VueFlags from "@growthbunker/vueflags";
 import CountrySearch from "@/components/CountrySearch";
 
 export default {
     name: "TeamBuilder",
-    components: {CountrySearch, Sidebar, CountryFlag},
+    components: {CountrySearch, Sidebar},
     data() {
         return {
             roster: {
@@ -512,11 +514,28 @@ export default {
     }
 
     .playerFrame {
+        bottom: 0;
         position: absolute;
         width: inherit;
-        height: inherit;
         max-width: 100%;
         filter: grayscale(1);
+    }
+
+    .playerFlag {
+        height: 66px;
+        position: absolute;
+        float: right;
+        right: 0;
+        top: 0;
+        filter: opacity(0.5);
+        -webkit-mask-position: 0 0;
+        -webkit-mask-size: 118px 66px;
+        -webkit-mask-image: -webkit-gradient(linear, left bottom, right bottom,
+                                color-stop(0.00,  rgba(0,0,0,0)),
+                                color-stop(0.45,  rgba(0,0,0,0)),
+                                color-stop(0.60,  rgba(0,0,0,0)),
+                                color-stop(0.75,  rgba(0,0,0,1)),
+                                color-stop(1.00,  rgba(0,0,0,1)));
     }
 
     .map_img {
