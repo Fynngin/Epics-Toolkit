@@ -177,6 +177,22 @@ export function getCardsByPlayer(jwt, category, userId, playerId, season, page) 
     })
 }
 
+export function getMarketListings(jwt, category, templateId, type, page) {
+    return axios(`https://api.epics.gg/api/v1/market/buy`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            'templateId': templateId,
+            'type': type,
+            'page': page
+        }
+    })
+}
+
 export function getTeams(jwt) {
     return axios(`https://api.epics.gg/api/v1/teams`, {
         method: 'GET',

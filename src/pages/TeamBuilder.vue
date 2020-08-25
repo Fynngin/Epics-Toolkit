@@ -34,7 +34,9 @@
                                     <template v-slot:overlay>
                                         <div>
                                             <h2 style="white-space: nowrap">{{roster[role.id].properties.salary}} $</h2>
-                                            <h3>{{roster[role.id].properties.player_rating}} OVR</h3>
+                                            <h3 style="white-space: nowrap">{{roster[role.id].properties.player_rating}} OVR</h3>
+                                            <strong v-if="roster[role.id].price">{{roster[role.id].price}} <Epicoin/></strong>
+                                            <strong v-else style="color: red">No market price</strong>
                                         </div>
                                     </template>
                                 </b-overlay>
@@ -68,6 +70,8 @@
                                         <div>
                                             <h2 style="white-space: nowrap">{{roster['flex'].properties.salary}} $</h2>
                                             <h3>{{roster['flex'].properties.player_rating}} OVR</h3>
+                                            <strong v-if="roster['flex'].price">{{roster['flex'].price}} <Epicoin/></strong>
+                                            <strong v-else style="color: red">No market price</strong>
                                         </div>
                                     </template>
                                 </b-overlay>
@@ -76,14 +80,21 @@
                         </b-col>
                         <b-col>
                             <strong>Team summary: {{teamOvr()}} OVR</strong><br>
-                            <strong>{{rosterSalary}}$</strong>
-                                <p v-for="(map, index) in maps" :key="index" class="m-0" style="text-align: left">
-                                    {{map.name}}:
-                                    <b-badge pill
-                                             :variant="mapBonus(map.id) >= 0 ? 'success' : 'danger'">
-                                        {{mapBonus(map.id)}}%
-                                    </b-badge>
-                                </p>
+                            Salary: <strong>{{rosterSalary}}$</strong><br>
+                            <b-badge
+                                v-if="marketPriceWarning"
+                                variant="danger"
+                                v-b-tooltip:hover
+                                title="Some items are not available on the market"
+                            >!</b-badge>
+                            Market Price <strong>{{rosterMarketPrice}} </strong><Epicoin/>
+                            <p v-for="(map, index) in maps" :key="index" class="m-0" style="text-align: left">
+                                {{map.name}}:
+                                <b-badge pill
+                                         :variant="mapBonus(map.id) >= 0 ? 'success' : 'danger'">
+                                    {{mapBonus(map.id)}}%
+                                </b-badge>
+                            </p>
                         </b-col>
                     </b-row>
                 </b-card>
@@ -232,13 +243,14 @@
 
 <script>
 import Sidebar from "../components/Sidebar";
-import {getPlayerMaps, getPlayers, getRoles, getMaps, getCardsByPlayer} from "@/api";
+import {getPlayerMaps, getPlayers, getRoles, getMaps, getCardsByPlayer, getMarketListings} from "@/api";
 import CountrySearch from "@/components/CountrySearch";
 import TeamSearch from "@/components/TeamSearch";
+import Epicoin from "@/components/Epicoin";
 
 export default {
     name: "TeamBuilder",
-    components: {TeamSearch, CountrySearch, Sidebar},
+    components: {Epicoin, TeamSearch, CountrySearch, Sidebar},
     data() {
         return {
             roster: {
@@ -257,6 +269,8 @@ export default {
             overlay: 0,
             rosterOverlay: null,
             rosterSalary: 0,
+            rosterMarketPrice: 0,
+            marketPriceWarning: false,
             spinner: {
                 'roles': true,
                 'players': true,
@@ -315,22 +329,32 @@ export default {
             return (ovr / 5)
         },
         addCardToRoster(card) {
-            if (this.selectedRole === 0) {
-                card.maps = this.selectedPlayer.maps
-                if (this.roster['flex']) {
-                    this.rosterSalary -= this.roster['flex'].properties.salary
+            getMarketListings(this.$store.state.userdata.jwt, this.$store.state.category, card.id, 'card', 1).then(res => {
+                if (res.data.success) {
+                    card.price = res.data.data.market.length > 0 ? res.data.data.market[0][0].price : null;
                 }
-                this.roster['flex'] = card
-                this.rosterSalary += card.properties.salary
-            } else {
-                card.maps = this.selectedPlayer.maps
-                if (this.roster[this.selectedRole]) {
-                    this.rosterSalary -= this.roster[this.selectedRole].properties.salary
+                if (this.selectedRole === 0) {
+                    card.maps = this.selectedPlayer.maps
+                    if (this.roster['flex']) {
+                        this.rosterSalary -= this.roster['flex'].properties.salary
+                        this.rosterMarketPrice -= this.roster['flex'].price
+                    }
+                    this.roster['flex'] = card
+                } else {
+                    card.maps = this.selectedPlayer.maps
+                    if (this.roster[this.selectedRole]) {
+                        this.rosterSalary -= this.roster[this.selectedRole].properties.salary
+                        this.rosterMarketPrice -= this.roster[this.selectedRole].price
+                    }
+                    this.roster[this.selectedRole] = card
                 }
-                this.roster[this.selectedRole] = card
                 this.rosterSalary += card.properties.salary
-            }
-            this.$forceUpdate();
+                this.rosterMarketPrice += card.price
+                this.marketPriceWarning = Object.values(this.roster).find(player => {
+                    return player ? !player['price'] : false
+                }) !== undefined
+                this.$forceUpdate();
+            })
         },
         updateCountryFilter(filter, value) {
             filter.countries = value
