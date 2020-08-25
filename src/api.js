@@ -176,3 +176,13 @@ export function getCardsByPlayer(jwt, category, userId, playerId, season, page) 
         }
     })
 }
+
+export function getTeams(jwt) {
+    return axios(`https://api.epics.gg/api/v1/teams`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        }
+    })
+}

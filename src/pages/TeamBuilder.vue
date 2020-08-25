@@ -139,6 +139,11 @@
                                     class="ml-2"
                                     @country="value => updateCountryFilter(filter, value)"
                                 />
+                                <TeamSearch
+                                    v-if="filter.type === 'team'"
+                                    class="ml-2"
+                                    @team="value => updateTeamFilter(filter, value)"
+                                />
                                 <b-col>
                                     <strong v-if="filter.type === 'map'">Min: {{filter.min}} %</strong>
                                     <b-form-input
@@ -229,10 +234,11 @@
 import Sidebar from "../components/Sidebar";
 import {getPlayerMaps, getPlayers, getRoles, getMaps, getCardsByPlayer} from "@/api";
 import CountrySearch from "@/components/CountrySearch";
+import TeamSearch from "@/components/TeamSearch";
 
 export default {
     name: "TeamBuilder",
-    components: {CountrySearch, Sidebar},
+    components: {TeamSearch, CountrySearch, Sidebar},
     data() {
         return {
             roster: {
@@ -265,7 +271,7 @@ export default {
             ],
             filterOptions: [
                 {text: '--- Filter ---', value: null},
-                {text: 'Team', value: 'team', disabled: true},
+                {text: 'Team', value: 'team'},
                 {text: 'Country', value: 'country'},
                 {text: 'Map Bonus', value: 'map'}
             ],
@@ -330,6 +336,10 @@ export default {
             filter.countries = value
             this.applyFilter()
         },
+        updateTeamFilter(filter, value) {
+            filter.teams = value
+            this.applyFilter()
+        },
         selectRole(roleId) {
             this.selectedRole = roleId;
             this.applyFilter();
@@ -342,18 +352,29 @@ export default {
                 })
             }
             this.filters.forEach(filter => {
-                if (filter.type === 'map') {
-                    temp = temp.filter(player => {
-                        let weight = player.maps.find(map => {return map.mapId === filter.map}).weight
-                        return weight <= ((filter.max / 100) + 1) && weight >= ((filter.min / 100) + 1)
-                    })
-                }
-                if (filter.type === 'country') {
-                    if (filter.countries.length > 0) {
+                switch (filter.type) {
+                    case 'map':
                         temp = temp.filter(player => {
-                            return filter.countries.includes(player.country.toUpperCase())
+                            let weight = player.maps.find(map => {return map.mapId === filter.map}).weight
+                            return weight <= ((filter.max / 100) + 1) && weight >= ((filter.min / 100) + 1)
                         })
-                    }
+                        break;
+                    case 'country':
+                        if (filter.countries.length > 0) {
+                            temp = temp.filter(player => {
+                                return filter.countries.includes(player.country.toUpperCase())
+                            })
+                        }
+                        break;
+                    case 'team':
+                        if (filter.teams.length > 0) {
+                            temp = temp.filter(player => {
+                                return filter.teams.includes(player.playerFrames.find(frame => {
+                                    return !frame.dateEnd
+                                }).teamId)
+                            })
+                        }
+                        break;
                 }
             })
             this.filteredPlayers = temp
@@ -364,7 +385,8 @@ export default {
                 map: 1,
                 min: 0,
                 max: 100,
-                countries: []
+                countries: [],
+                teams: []
             })
         },
         sortPlayers(sortby, direction) {
