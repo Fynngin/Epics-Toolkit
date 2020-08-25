@@ -94,7 +94,7 @@
             <b-col class="mb-2">
                 <b-card border-variant="dark">
                     <b-row>
-                        <b-col cols="4">
+                        <b-col cols="5">
                             <b-form inline>
                                 <b-form-input placeholder="Search..." v-model="search"/>
                                 <b-form-select
@@ -121,7 +121,7 @@
                             </b-form>
                         </b-col>
 
-                        <b-col cols="8">
+                        <b-col cols="7">
                             <b-button style="float: right;" @click="addFilter" variant="primary">Add filter</b-button>
                             <b-form v-for="(filter, index) in filters" :key="index" inline class="mb-2">
                                 <b-button @click="filters.splice(filters.indexOf(filter), 1)" variant="danger">X</b-button>
@@ -179,8 +179,8 @@
                             <b-card no-body @click="loadPlayerCards(player)" class="h-100">
                                 <template v-slot:header>
                                     <h3 style="float: left">{{player.handle}}</h3>
+                                    <b-badge variant="light" style="top: 0; left: 0; position: absolute;">{{player.minSalary}}$ - {{player.maxSalary}}$</b-badge>
                                     <gb-flag :code="player.country" class="playerFlag"/>
-                                    <p style="float: right">{{player.minSalary}}$ - {{player.maxSalary}}$</p>
                                 </template>
 
                                 <b-img class="playerFrame"
@@ -225,13 +225,9 @@
     </div>
 </template>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@2.5/dist/vue.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@growthbunker/vueflags@latest/dist/vueflags.min.js"></script>
 <script>
 import Sidebar from "../components/Sidebar";
 import {getPlayerMaps, getPlayers, getRoles, getMaps, getCardsByPlayer} from "@/api";
-// import CountryFlag from 'vue-country-flag';
-// import VueFlags from "@growthbunker/vueflags";
 import CountrySearch from "@/components/CountrySearch";
 
 export default {
@@ -263,7 +259,9 @@ export default {
             sortOptions: [
                 {text: '--- Sort By ---', value: null},
                 {text: 'Name', value: 'name'},
-                {text: 'Map Bonus', value: 'map'}
+                {text: 'Map Bonus', value: 'map'},
+                {text: 'Min Salary', value: 'minsalary'},
+                {text: 'Max Salary', value: 'maxsalary'}
             ],
             filterOptions: [
                 {text: '--- Filter ---', value: null},
@@ -370,14 +368,27 @@ export default {
             })
         },
         sortPlayers(sortby, direction) {
-            if (sortby === 'name') {
-                this.filteredPlayers.sort((a,b) => {
-                    return a.handle.localeCompare(b.handle)
-                })
-            } else if (sortby === 'map') {
-                this.filteredPlayers.sort((a,b) => {
-                    return a.maps.find(map => {return map.mapId === this.mapSort}).weight - b.maps.find(map => {return map.mapId === this.mapSort}).weight
-                })
+            switch (sortby) {
+                case 'name':
+                    this.filteredPlayers.sort((a,b) => {
+                        return a.handle.localeCompare(b.handle)
+                    })
+                    break;
+                case 'map':
+                    this.filteredPlayers.sort((a,b) => {
+                        return a.maps.find(map => {return map.mapId === this.mapSort}).weight - b.maps.find(map => {return map.mapId === this.mapSort}).weight
+                    })
+                    break;
+                case 'minsalary':
+                    this.filteredPlayers.sort((a,b) => {
+                        return a.minSalary - b.minSalary
+                    })
+                    break;
+                case 'maxsalary':
+                    this.filteredPlayers.sort((a,b) => {
+                        return a.maxSalary - b.maxSalary
+                    })
+                    break;
             }
             if (direction === 'desc') {
                 this.filteredPlayers.reverse()
@@ -529,12 +540,11 @@ export default {
         top: 0;
         filter: opacity(0.5);
         -webkit-mask-position: 0 0;
-        -webkit-mask-size: 118px 66px;
         -webkit-mask-image: -webkit-gradient(linear, left bottom, right bottom,
                                 color-stop(0.00,  rgba(0,0,0,0)),
-                                color-stop(0.45,  rgba(0,0,0,0)),
-                                color-stop(0.60,  rgba(0,0,0,0)),
-                                color-stop(0.75,  rgba(0,0,0,1)),
+                                color-stop(0.05,  rgba(0,0,0,0)),
+                                color-stop(0.10,  rgba(0,0,0,0)),
+                                color-stop(0.25,  rgba(0,0,0,1)),
                                 color-stop(1.00,  rgba(0,0,0,1)));
     }
 
