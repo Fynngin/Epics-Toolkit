@@ -17,7 +17,9 @@ Vue.config.productionTip = false
 Vue.use(VueRouter)
 Vue.use(BootstrapVue)
 Vue.use(VueFlags, {
-  iconPath: '/flags'
+  iconPath: process.env.NODE_ENV === 'production'
+      ? '/Epics-Toolkit/flags'
+      : '/flags'
 })
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
