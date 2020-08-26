@@ -40,7 +40,7 @@
                         <b-col lg="2" md="4" sm="6" v-for="card in cards" :key="card.id" class="mb-3">
                             <b-card @click="selectCard(card)" no-body>
                                 <Checkmark v-if="card.selected" style="position: absolute;"/>
-                                <b-card-img :src="card.images.size402"/>
+                                <b-card-img :src="card.images['size402']"/>
                             </b-card>
                         </b-col>
                         <b-col lg="2" md="4" sm="6" v-for="sticker in stickers" :key="sticker.id" class="mb-3">
@@ -104,9 +104,6 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
             }
         },
         methods: {
-            timeout(ms) {
-                return new Promise(resolve => setTimeout(resolve, ms))
-            },
             loadCollections() {
                 getCollections(this.$store.state.userdata.jwt, this.$store.state.category,
                     this.season, this.$store.state.userdata.id).then(res => {
@@ -167,27 +164,27 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                         let cards = res.data.data.cards
                         let stickers = res.data.data.stickers
                         for (const card of cards) {
-                            if (this.selected.cards.includes(card.cardTemplate.id)
+                            if (this.selected.cards.includes(card['cardTemplate'].id)
                                 && card.mintBatch === this.mintBatch
                                 && card.mintNumber >= this.minMint
                                 && card.mintNumber <= this.maxMint) {
                                 this.cardsFound++
                                 this.found.push({
                                     mint: `${card.mintBatch}${card.mintNumber}`,
-                                    name: card.cardTemplate.title,
+                                    name: card['cardTemplate'].title,
                                     user: user.username
                                 })
                             }
                         }
                         for (const sticker of stickers) {
-                            if (this.selected.stickers.includes(sticker.stickerTemplate.id)
+                            if (this.selected.stickers.includes(sticker['stickerTemplate'].id)
                                 && sticker.mintBatch === this.mintBatch
                                 && sticker.mintNumber >= this.minMint
                                 && sticker.mintNumber <= this.maxMint) {
                                 this.cardsFound++
                                 this.found.push({
                                     mint: `${sticker.mintBatch}${sticker.mintNumber}`,
-                                    name: sticker.stickerTemplate.title,
+                                    name: sticker['stickerTemplate'].title,
                                     user: user.username
                                 })
                             }

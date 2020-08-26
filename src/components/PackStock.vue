@@ -56,9 +56,9 @@
 
                 this.packs.forEach(pack => {
                     let available = false;
-                    if (pack.inventoryCount > 0) {
-                        if (!pack.purchaseEnd) {
-                            if (pack.packPrimary === 'event') {
+                    if (pack['inventoryCount'] > 0) {
+                        if (!pack['purchaseEnd']) {
+                            if (pack['packPrimary'] === 'event') {
                                 if (pack.properties.seasons.includes(this.$store.state.currentSeasons[this.category])) {
                                     available = true;
                                 }
@@ -66,7 +66,7 @@
                                 available = true;
                             }
                         } else {
-                            let purchaseEnd = new Date(pack.purchaseEnd)
+                            let purchaseEnd = new Date(pack['purchaseEnd'])
                             if (purchaseEnd > today) {
                                 available = true;
                             }
@@ -76,7 +76,7 @@
                     if (available) {
                         unsorted.push({
                             label: pack.name,
-                            data: pack.inventoryCount
+                            data: pack['inventoryCount']
                         })
                     }
                 })

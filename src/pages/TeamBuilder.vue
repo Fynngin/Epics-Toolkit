@@ -29,12 +29,12 @@
                                     <b-img
                                         v-if="roster[role.id]"
                                         style="width: auto; height: 200px"
-                                        :src="roster[role.id].images.size402"
+                                        :src="roster[role.id].images['size402']"
                                     />
                                     <template v-slot:overlay>
                                         <div>
-                                            <h2 style="white-space: nowrap">{{roster[role.id].properties.salary}} $</h2>
-                                            <h3 style="white-space: nowrap">{{roster[role.id].properties.player_rating}} OVR</h3>
+                                            <h2 style="white-space: nowrap">{{roster[role.id].properties['salary']}} $</h2>
+                                            <h3 style="white-space: nowrap">{{roster[role.id].properties['player_rating']}} OVR</h3>
                                             <strong v-if="roster[role.id].price">{{roster[role.id].price}} <Epicoin/></strong>
                                             <strong v-else style="color: red">No market price</strong>
                                         </div>
@@ -64,12 +64,12 @@
                                     <b-img
                                         v-if="roster['flex']"
                                         style="max-height: 200px"
-                                        :src="roster['flex'].images.size402"
+                                        :src="roster['flex'].images['size402']"
                                     />
                                     <template v-slot:overlay>
                                         <div>
-                                            <h2 style="white-space: nowrap">{{roster['flex'].properties.salary}} $</h2>
-                                            <h3>{{roster['flex'].properties.player_rating}} OVR</h3>
+                                            <h2 style="white-space: nowrap">{{roster['flex'].properties['salary']}} $</h2>
+                                            <h3>{{roster['flex'].properties['player_rating']}} OVR</h3>
                                             <strong v-if="roster['flex'].price">{{roster['flex'].price}} <Epicoin/></strong>
                                             <strong v-else style="color: red">No market price</strong>
                                         </div>
@@ -195,7 +195,7 @@
                             <b-card no-body @click="loadPlayerCards(player)" class="h-100">
                                 <template v-slot:header>
                                     <h3 style="float: left">{{player.handle}}</h3>
-                                    <b-badge variant="light" style="top: 0; left: 0; position: absolute;">{{player.minSalary}}$ - {{player.maxSalary}}$</b-badge>
+                                    <b-badge variant="light" style="top: 0; left: 0; position: absolute;">{{player['minSalary']}}$ - {{player['maxSalary']}}$</b-badge>
                                     <gb-flag :code="player.country" class="playerFlag"/>
                                 </template>
 
@@ -208,8 +208,8 @@
                                         <b-img class="w-75 map_img" :src="`${$store.state.cdnUrl}${map.images[0].url}`"/>
                                         <b-badge pill
                                                  style="position: absolute; left: 10%"
-                                                 :variant="player.maps.find(m => {return m.mapId === map.id}).weight >= 1 ? 'success' : 'danger'">
-                                            {{ round((player.maps.find(m => {return m.mapId === map.id}).weight - 1) * 100, 3)}} %
+                                                 :variant="player.maps.find(m => {return m['mapId'] === map.id}).weight >= 1 ? 'success' : 'danger'">
+                                            {{ round((player.maps.find(m => {return m['mapId'] === map.id}).weight - 1) * 100, 3)}} %
                                         </b-badge>
                                     </b-col>
                                 </b-row>
@@ -223,12 +223,12 @@
                             <b-col class="mb-3" md="2" sm="4" v-for="(card, index) in cards[selectedPlayer.id]" :key="index">
                                 <b-overlay :show="overlay === card.id" style="pointer-events: none">
                                     <b-card style="pointer-events: all" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0" @click="addCardToRoster(card)">
-                                        <b-card-img :src="`${card.images.size402}`"/>
+                                        <b-card-img :src="`${card.images['size402']}`"/>
                                     </b-card>
                                     <template v-slot:overlay>
                                         <div>
-                                            <h2>{{card.properties.salary}} $</h2>
-                                            <h3>{{card.properties.player_rating}} OVR</h3>
+                                            <h2>{{card.properties['salary']}} $</h2>
+                                            <h3>{{card.properties['player_rating']}} OVR</h3>
                                         </div>
                                     </template>
                                 </b-overlay>
@@ -313,7 +313,7 @@ export default {
             let bonus = 1;
             for (const id in this.roster) {
                 if (this.roster[id]) {
-                    let map = this.roster[id].maps.find(m => {return m.mapId === mapId})
+                    let map = this.roster[id].maps.find(m => {return m['mapId'] === mapId})
                     bonus *= map.weight
                 }
             }
@@ -323,7 +323,7 @@ export default {
             let ovr = 0
             Object.values(this.roster).forEach(player => {
                 if (player) {
-                    ovr += player.properties.player_rating
+                    ovr += player['properties']['player_rating']
                 }
             })
             return (ovr / 5)
@@ -331,24 +331,24 @@ export default {
         addCardToRoster(card) {
             getMarketListings(this.$store.state.userdata.jwt, this.$store.state.category, card.id, 'card', 1).then(res => {
                 if (res.data.success) {
-                    card.price = res.data.data.market.length > 0 ? res.data.data.market[0][0].price : null;
+                    card.price = res.data.data['market'].length > 0 ? res.data.data['market'][0][0].price : null;
                 }
                 if (this.selectedRole === 0) {
                     card.maps = this.selectedPlayer.maps
                     if (this.roster['flex']) {
-                        this.rosterSalary -= this.roster['flex'].properties.salary
+                        this.rosterSalary -= this.roster['flex'].properties['salary']
                         this.rosterMarketPrice -= this.roster['flex'].price
                     }
                     this.roster['flex'] = card
                 } else {
                     card.maps = this.selectedPlayer.maps
                     if (this.roster[this.selectedRole]) {
-                        this.rosterSalary -= this.roster[this.selectedRole].properties.salary
+                        this.rosterSalary -= this.roster[this.selectedRole].properties['salary']
                         this.rosterMarketPrice -= this.roster[this.selectedRole].price
                     }
                     this.roster[this.selectedRole] = card
                 }
-                this.rosterSalary += card.properties.salary
+                this.rosterSalary += card.properties['salary']
                 this.rosterMarketPrice += card.price
                 this.marketPriceWarning = Object.values(this.roster).find(player => {
                     return player ? !player['price'] : false
@@ -372,14 +372,14 @@ export default {
             let temp = this.players
             if (this.selectedRole !== 0) {
                 temp = temp.filter(player => {
-                    return player.playerFrames[0].playerRoleId === this.selectedRole
+                    return player['playerFrames'][0]['playerRoleId'] === this.selectedRole
                 })
             }
             this.filters.forEach(filter => {
                 switch (filter.type) {
                     case 'map':
                         temp = temp.filter(player => {
-                            let weight = player.maps.find(map => {return map.mapId === filter.map}).weight
+                            let weight = player.maps.find(map => {return map['mapId'] === filter.map}).weight
                             return weight <= ((filter.max / 100) + 1) && weight >= ((filter.min / 100) + 1)
                         })
                         break;
@@ -393,9 +393,9 @@ export default {
                     case 'team':
                         if (filter.teams.length > 0) {
                             temp = temp.filter(player => {
-                                return filter.teams.includes(player.playerFrames.find(frame => {
-                                    return !frame.dateEnd
-                                }).teamId)
+                                return filter.teams.includes(player['playerFrames'].find(frame => {
+                                    return !frame['dateEnd']
+                                })['teamId'])
                             })
                         }
                         break;
@@ -422,17 +422,21 @@ export default {
                     break;
                 case 'map':
                     this.filteredPlayers.sort((a,b) => {
-                        return a.maps.find(map => {return map.mapId === this.mapSort}).weight - b.maps.find(map => {return map.mapId === this.mapSort}).weight
+                        return a.maps.find(map => {
+                            return map['mapId'] === this.mapSort
+                        }).weight - b.maps.find(map => {
+                            return map['mapId'] === this.mapSort
+                        }).weight
                     })
                     break;
                 case 'minsalary':
                     this.filteredPlayers.sort((a,b) => {
-                        return a.minSalary - b.minSalary
+                        return a['minSalary'] - b['minSalary']
                     })
                     break;
                 case 'maxsalary':
                     this.filteredPlayers.sort((a,b) => {
-                        return a.maxSalary - b.maxSalary
+                        return a['maxSalary'] - b['maxSalary']
                     })
                     break;
             }
@@ -453,10 +457,10 @@ export default {
             getPlayers(this.$store.state.userdata.jwt, this.$store.state.category).then(res => {
                 if (res.data.success) {
                     res.data.data.players.forEach(player => {
-                        if (player.maxSalary !== null && player.minSalary !== null) {
+                        if (player['maxSalary'] !== null && player['minSalary'] !== null) {
                             // write maps to player object
                             let playerMaps = this.playerMaps.find(p => {
-                                return p.playerId === player.id
+                                return p['playerId'] === player.id
                             })
                             if (playerMaps) {
                                 player.maps = playerMaps.properties.maps
@@ -512,9 +516,9 @@ export default {
                         neededRequests = Math.ceil(res.data.data.total / cards.length) - 1
                         cards.forEach(card => {
                             if (!this.cards[player.id].find(elem => {
-                                return elem.id === card.cardTemplate.id
+                                return elem.id === card['cardTemplate'].id
                             })) {
-                                this.cards[player.id].push(card.cardTemplate)
+                                this.cards[player.id].push(card['cardTemplate'])
                             }
                         })
                         page++
@@ -526,9 +530,9 @@ export default {
                             let cards = res.data.data.cards
                             cards.forEach(card => {
                                 if (!this.cards[player.id].find(elem => {
-                                    return elem.id === card.cardTemplate.id
+                                    return elem.id === card['cardTemplate'].id
                                 })) {
-                                    this.cards[player.id].push(card.cardTemplate)
+                                    this.cards[player.id].push(card['cardTemplate'])
                                 }
                             })
                             page++
@@ -537,7 +541,7 @@ export default {
                     })
                 }
                 this.cards[player.id].sort((a,b) => {
-                    return a.properties.player_rating - b.properties.player_rating
+                    return a.properties['player_rating'] - b.properties['player_rating']
                 })
                 this.spinner.cards = false;
                 this.$forceUpdate();

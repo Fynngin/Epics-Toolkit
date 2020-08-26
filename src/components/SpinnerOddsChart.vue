@@ -57,7 +57,7 @@
                 data.forEach(item => {
                     unsorted.push({
                         label: item.name,
-                        data: item.chance
+                        data: item['chance']
                     })
                 })
                 let sorted = unsorted.sort(function(a, b) {

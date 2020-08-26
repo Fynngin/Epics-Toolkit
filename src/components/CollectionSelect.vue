@@ -19,7 +19,7 @@
                 <b-collapse :id="`collapse-${index}`">
                     <b-list-group v-if="name !== 'Event'">
                         <b-list-group-item v-for="(collection, index) in colls" :key="index" button
-                                           @click="$emit('collectionChange', {id: collection.collection.id, entities: collection.collection.properties.entity_types})">
+                                           @click="$emit('collectionChange', {id: collection.collection.id, entities: collection.collection.properties['entity_types']})">
                             {{collection.collection.name}}
                         </b-list-group-item>
                     </b-list-group>
@@ -33,7 +33,7 @@
                             <b-collapse :id="`event-${index}`">
                                 <b-list-group>
                                     <b-list-group-item v-for="(collection, index) in collections" :key="index" button
-                                                       @click="$emit('collectionChange', {id: collection.collection.id, entities: collection.collection.properties.entity_types})">
+                                                       @click="$emit('collectionChange', {id: collection.collection.id, entities: collection.collection.properties['entity_types']})">
                                         {{collection.collection.name}}
                                     </b-list-group-item>
                                 </b-list-group>
@@ -63,7 +63,7 @@ export default {
     methods: {
         loadCollections() {
             getAppInfo(this.$store.state.userdata.jwt, this.$store.state.category).then(res => {
-                res.data.success ? this.tiers = res.data.data.treatment.tiersExtended : this.tiers = []
+                res.data.success ? this.tiers = res.data.data['treatment']['tiersExtended'] : this.tiers = []
             })
             getCollections(this.$store.state.userdata.jwt, this.$store.state.category,
                 this.season, this.$store.state.userdata.id).then(res => {

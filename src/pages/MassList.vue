@@ -188,7 +188,7 @@
             sortPacks() {
                 let sorted = []
                 this.packs.forEach(pack => {
-                    let template = sorted.find(s => {return s.templateId === pack.packTemplate.id})
+                    let template = sorted.find(s => {return s.templateId === pack['packTemplate'].id})
                     if (template) {
                         template.packs.push({
                             id: pack.id,
@@ -198,9 +198,9 @@
                     } else {
                         sorted.push({
                             disabled: false,
-                            templateId: pack.packTemplate.id,
-                            templateImage: `https://cdn.epics.gg${pack.packTemplate.images[0].url}`,
-                            name: pack.packTemplate.name,
+                            templateId: pack['packTemplate'].id,
+                            templateImage: `https://cdn.epics.gg${pack['packTemplate'].images[0].url}`,
+                            name: pack['packTemplate'].name,
                             count: 1,
                             sellCount: 0,
                             price: 1,
@@ -265,23 +265,23 @@
             sortByTemplate() {
                 let sorted = []
                 this.cards.forEach(card => {
-                    let template = sorted.find(s => {return s.templateId === card.cardTemplate.id})
+                    let template = sorted.find(s => {return s.templateId === card['cardTemplate'].id})
                     if (template) {
                         template.cards.push({
-                            name: card.cardTemplate.title,
+                            name: card['cardTemplate'].title,
                             id: card.id,
-                            image: card.images.size402,
+                            image: card.images['size402'],
                             mintBatch: card.mintBatch,
                             mintNumber: card.mintNumber
                         })
                     } else {
                         sorted.push({
-                            templateId: card.cardTemplate.id,
-                            templateImage: card.cardTemplate.images.size402,
+                            templateId: card['cardTemplate'].id,
+                            templateImage: card['cardTemplate'].images['size402'],
                             cards: [{
-                                name: card.cardTemplate.title,
+                                name: card['cardTemplate'].title,
                                 id: card.id,
-                                image: card.images.size402,
+                                image: card.images['size402'],
                                 mintBatch: card.mintBatch,
                                 mintNumber: card.mintNumber
                             }],
