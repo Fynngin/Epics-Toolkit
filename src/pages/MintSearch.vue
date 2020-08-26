@@ -158,19 +158,6 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                         } else {
                             this.searchDone = true
                         }
-                    }).catch(async () => {
-                        await this.timeout(60000);
-                        getLeaderboard(this.$store.state.userdata.jwt, this.$store.state.category, this.collection, page).then(res => {
-                            if (res.data.success && res.data.data.length > 0) {
-                                users = res.data.data
-                                page++
-                                for (const user of users) {
-                                    this.checkUser(user.user)
-                                }
-                            } else {
-                                this.searchDone = true
-                            }
-                        })
                     })
                 }
             },
@@ -210,44 +197,6 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                         }
                         this.accountsChecked++
                     }
-                }).catch(async () => {
-                    await this.timeout(60000);
-                    getItems(this.$store.state.userdata.jwt, this.$store.state.category, this.collection, user.id).then(res => {
-                        if (res.data.success) {
-                            let cards = res.data.data.cards
-                            let stickers = res.data.data.stickers
-                            for (const card of cards) {
-                                if (this.selected.cards.includes(card.cardTemplate.id)
-                                    && card.mintBatch === this.mintBatch
-                                    && card.mintNumber >= this.minMint
-                                    && card.mintNumber <= this.maxMint) {
-                                    this.cardsFound++
-                                    this.found.push({
-                                        mint: `${card.mintBatch}${card.mintNumber}`,
-                                        name: card.cardTemplate.title,
-                                        user: user.username
-                                    })
-                                }
-                            }
-                            for (const sticker of stickers) {
-                                if (this.selected.stickers.includes(sticker.stickerTemplate.id)
-                                    && sticker.mintBatch === this.mintBatch
-                                    && sticker.mintNumber >= this.minMint
-                                    && sticker.mintNumber <= this.maxMint) {
-                                    this.cardsFound++
-                                    this.found.push({
-                                        mint: `${sticker.mintBatch}${sticker.mintNumber}`,
-                                        name: sticker.stickerTemplate.title,
-                                        user: user.username
-                                    })
-                                }
-                            }
-                            if (this.cardsFound === this.totalCards) {
-                                this.searchDone = true
-                            }
-                            this.accountsChecked++
-                        }
-                    })
                 })
             },
             selectAll() {

@@ -1,4 +1,6 @@
 import axios from "axios";
+import axiosRateLimit from "axios-rate-limit";
+const http = axiosRateLimit(axios.create(), {maxRequests: 150, perMilliseconds: 60000})
 
 /**
  * Sends login request.
@@ -6,7 +8,7 @@ import axios from "axios";
  * @returns Promise, which can be awaited elsewhere
  */
 export function login(auth) {
-    return axios("https://api.epics.gg/api/v1/auth/login", {
+    return http("https://api.epics.gg/api/v1/auth/login", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -16,7 +18,7 @@ export function login(auth) {
 }
 
 export function getCollections(jwt, category, season, userId) {
-    return axios(`https://api.epics.gg/api/v1/collections/users/${userId}/user-summary`, {
+    return http(`https://api.epics.gg/api/v1/collections/users/${userId}/user-summary`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -30,7 +32,7 @@ export function getCollections(jwt, category, season, userId) {
 }
 
 export function getCardTemplates(jwt, category, collectionId) {
-    return axios(`https://api.epics.gg/api/v1/collections/${collectionId}/card-templates`, {
+    return http(`https://api.epics.gg/api/v1/collections/${collectionId}/card-templates`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -43,7 +45,7 @@ export function getCardTemplates(jwt, category, collectionId) {
 }
 
 export function getStickerTemplates(jwt, category, collectionId) {
-    return axios(`https://api.epics.gg/api/v1/collections/${collectionId}/sticker-templates`, {
+    return http(`https://api.epics.gg/api/v1/collections/${collectionId}/sticker-templates`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -56,7 +58,7 @@ export function getStickerTemplates(jwt, category, collectionId) {
 }
 
 export function getLeaderboard(jwt, category, collectionId, page) {
-    return axios(`https://api.epics.gg/api/v1/leaderboards/collections/${collectionId}`, {
+    return http(`https://api.epics.gg/api/v1/leaderboards/collections/${collectionId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -70,7 +72,7 @@ export function getLeaderboard(jwt, category, collectionId, page) {
 }
 
 export function getItems(jwt, category, collectionId, userId) {
-    return axios(`https://api.epics.gg/api/v1/collections/${collectionId}/users/${userId}/owned2`, {
+    return http(`https://api.epics.gg/api/v1/collections/${collectionId}/users/${userId}/owned2`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -83,7 +85,7 @@ export function getItems(jwt, category, collectionId, userId) {
 }
 
 export function getAppInfo(jwt, category) {
-    return axios("https://api.epics.gg/api/v1/settings/web", {
+    return http("https://api.epics.gg/api/v1/settings/web", {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -96,7 +98,7 @@ export function getAppInfo(jwt, category) {
 }
 
 export function getStorePacks(jwt, category, page) {
-    return axios("https://api.epics.gg/api/v1/packs", {
+    return http("https://api.epics.gg/api/v1/packs", {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -110,7 +112,7 @@ export function getStorePacks(jwt, category, page) {
 }
 
 export function getPlayers(jwt, category) {
-    return axios("https://api.epics.gg/api/v1/players", {
+    return http("https://api.epics.gg/api/v1/players", {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -123,7 +125,7 @@ export function getPlayers(jwt, category) {
 }
 
 export function getRoles(jwt, category) {
-    return axios("https://api.epics.gg/api/v1/players/roles", {
+    return http("https://api.epics.gg/api/v1/players/roles", {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -136,7 +138,7 @@ export function getRoles(jwt, category) {
 }
 
 export function getPlayerMaps(jwt, category) {
-    return axios("https://api.epics.gg/api/v1/ultimate-team/players", {
+    return http("https://api.epics.gg/api/v1/ultimate-team/players", {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -149,7 +151,7 @@ export function getPlayerMaps(jwt, category) {
 }
 
 export function getMaps(jwt, category) {
-    return axios("https://api.epics.gg/api/v1/ultimate-team/maps", {
+    return http("https://api.epics.gg/api/v1/ultimate-team/maps", {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -162,7 +164,7 @@ export function getMaps(jwt, category) {
 }
 
 export function getCardsByPlayer(jwt, category, userId, playerId, season, page) {
-    return axios(`https://api.epics.gg/api/v1/cards/owned/users/${userId}`, {
+    return http(`https://api.epics.gg/api/v1/cards/owned/users/${userId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -178,7 +180,7 @@ export function getCardsByPlayer(jwt, category, userId, playerId, season, page) 
 }
 
 export function getMarketListings(jwt, category, templateId, type, page) {
-    return axios(`https://api.epics.gg/api/v1/market/buy`, {
+    return http(`https://api.epics.gg/api/v1/market/buy`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -194,7 +196,7 @@ export function getMarketListings(jwt, category, templateId, type, page) {
 }
 
 export function getTeams(jwt) {
-    return axios(`https://api.epics.gg/api/v1/teams`, {
+    return http(`https://api.epics.gg/api/v1/teams`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
