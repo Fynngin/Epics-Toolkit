@@ -189,52 +189,71 @@
         <b-row class="ml-2 mr-2">
             <b-col>
                 <b-card border-variant="dark">
-                    <b-spinner v-if="spinner.players"/>
-                    <b-row v-else-if="selectedPlayer.id === 0">
-                        <b-col class="mb-3" xl="3" lg="4" md="6" sm="12" v-for="(player, index) in playersToShow" :key="index">
-                            <b-card no-body @click="loadPlayerCards(player)" class="h-100">
-                                <template v-slot:header>
-                                    <h3 style="float: left">{{player.handle}}</h3>
-                                    <b-badge variant="light" style="top: 0; left: 0; position: absolute;">{{player['minSalary']}}$ - {{player['maxSalary']}}$</b-badge>
-                                    <gb-flag :code="player.country" class="playerFlag"/>
-                                </template>
+                    <b-row>
+                        <b-spinner v-if="spinner.players"/>
+                        <b-col cols="8" v-else-if="selectedPlayer.id === 0">
+                            <b-row>
+                                <b-col class="mb-3" xl="3" lg="4" md="6" sm="12" v-for="(player, index) in playersToShow" :key="index">
+                                    <b-card no-body @click="loadPlayerCards(player)" class="h-100">
+                                        <template v-slot:header>
+                                            <h3 style="float: left">{{player.handle}}</h3>
+                                            <b-badge variant="light" style="top: 0; left: 0; position: absolute;">{{player['minSalary']}}$ - {{player['maxSalary']}}$</b-badge>
+                                            <gb-flag :code="player.country" class="playerFlag"/>
+                                        </template>
 
-                                <b-img class="playerFrame"
-                                       :src="`${$store.state.cdnUrl}${player.images[0].url}`"
-                                />
+                                        <b-img class="playerFrame"
+                                               :src="`${$store.state.cdnUrl}${player.images[0].url}`"
+                                        />
 
-                                <b-row>
-                                    <b-col cols="6" v-for="map in maps" :key="map.id" class="mb-2 p-1">
-                                        <b-img class="w-75 map_img" :src="`${$store.state.cdnUrl}${map.images[0].url}`"/>
-                                        <b-badge pill
-                                                 style="position: absolute; left: 10%"
-                                                 :variant="player.maps.find(m => {return m['mapId'] === map.id}).weight >= 1 ? 'success' : 'danger'">
-                                            {{ round((player.maps.find(m => {return m['mapId'] === map.id}).weight - 1) * 100, 3)}} %
-                                        </b-badge>
-                                    </b-col>
-                                </b-row>
-                            </b-card>
+                                        <b-row>
+                                            <b-col cols="6" v-for="map in maps" :key="map.id" class="mb-2 p-1">
+                                                <b-img class="w-75 map_img" :src="`${$store.state.cdnUrl}${map.images[0].url}`"/>
+                                                <b-badge pill
+                                                         style="position: absolute; left: 10%"
+                                                         :variant="player.maps.find(m => {return m['mapId'] === map.id}).weight >= 1 ? 'success' : 'danger'">
+                                                    {{ round((player.maps.find(m => {return m['mapId'] === map.id}).weight - 1) * 100, 3)}} %
+                                                </b-badge>
+                                            </b-col>
+                                        </b-row>
+                                    </b-card>
+                                </b-col>
+                            </b-row>
+                        </b-col>
+
+                        <b-col cols="8" v-else class="ml-2 mr-2">
+                            <b-spinner v-if="spinner.cards"/>
+                            <b-button class="mb-3" @click="selectedPlayer.id = 0" v-else>Back</b-button>
+                            <b-row>
+                                <b-col>
+                                    <b-row>
+                                        <b-col class="mb-3" md="2" sm="4" v-for="(card, index) in cards[selectedPlayer.id]" :key="index">
+                                            <b-overlay :show="overlay === card.id" style="pointer-events: none">
+                                                <b-card style="pointer-events: all" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0" @click="addCardToRoster(card)">
+                                                    <b-card-img :src="`${card.images['size402']}`"/>
+                                                </b-card>
+                                                <template v-slot:overlay>
+                                                    <div>
+                                                        <h2>{{card.properties['salary']}} $</h2>
+                                                        <h3>{{card.properties['player_rating']}} OVR</h3>
+                                                    </div>
+                                                </template>
+                                            </b-overlay>
+                                        </b-col>
+                                    </b-row>
+                                </b-col>
+                            </b-row>
+                        </b-col>
+                        <b-col cols="4">
+                            <b-row style="overflow-x: auto; white-space: nowrap; display: block;">
+                                <CardGlow class="col-1" style="display: inline-block; float: none;" :card="cardHighlight"/>
+                                <CardGlow class="col-1" style="display: inline-block; float: none;" :card="cardHighlight"/>
+                            </b-row>
+                            <b-row align-h="center">
+                                <CardStats :card="cardHighlight"/>
+                            </b-row>
                         </b-col>
                     </b-row>
-                    <b-container v-else>
-                        <b-spinner v-if="spinner.cards"/>
-                        <b-button class="mb-3" @click="selectedPlayer.id = 0" v-else>Back</b-button>
-                        <b-row>
-                            <b-col class="mb-3" md="2" sm="4" v-for="(card, index) in cards[selectedPlayer.id]" :key="index">
-                                <b-overlay :show="overlay === card.id" style="pointer-events: none">
-                                    <b-card style="pointer-events: all" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0" @click="addCardToRoster(card)">
-                                        <b-card-img :src="`${card.images['size402']}`"/>
-                                    </b-card>
-                                    <template v-slot:overlay>
-                                        <div>
-                                            <h2>{{card.properties['salary']}} $</h2>
-                                            <h3>{{card.properties['player_rating']}} OVR</h3>
-                                        </div>
-                                    </template>
-                                </b-overlay>
-                            </b-col>
-                        </b-row>
-                    </b-container>
+
                 </b-card>
             </b-col>
         </b-row>
@@ -247,10 +266,12 @@ import {getPlayerMaps, getPlayers, getRoles, getMaps, getCardsByPlayer, getMarke
 import CountrySearch from "@/components/CountrySearch";
 import TeamSearch from "@/components/TeamSearch";
 import Epicoin from "@/components/Epicoin";
+import CardStats from "@/components/CardStats";
+import CardGlow from "@/components/CardGlow";
 
 export default {
     name: "TeamBuilder",
-    components: {Epicoin, TeamSearch, CountrySearch, Sidebar},
+    components: {CardGlow, CardStats, Epicoin, TeamSearch, CountrySearch, Sidebar},
     data() {
         return {
             roster: {
@@ -293,7 +314,8 @@ export default {
             sortDirection: 'asc',
             mapSort: 1,
             filters: [],
-            search: ''
+            search: '',
+            cardHighlight: null
         }
     },
     created() {
@@ -329,6 +351,7 @@ export default {
             return (ovr / 5)
         },
         addCardToRoster(card) {
+            this.cardHighlight = card;
             getMarketListings(this.$store.state.userdata.jwt, this.$store.state.category, card.id, 'card', 1).then(res => {
                 if (res.data.success) {
                     card.price = res.data.data['market'].length > 0 ? res.data.data['market'][0][0].price : null;
