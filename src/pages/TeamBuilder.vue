@@ -228,7 +228,7 @@
                                     <b-row>
                                         <b-col class="mb-3" md="2" sm="4" v-for="(card, index) in cards[selectedPlayer.id]" :key="index">
                                             <b-overlay :show="overlay === card.id" style="pointer-events: none">
-                                                <b-card style="pointer-events: all" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0" @click="addCardToRoster(card)">
+                                                <b-card style="pointer-events: all" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0" @click="addCardToHighlight(card)">
                                                     <b-card-img :src="`${card.images['size402']}`"/>
                                                 </b-card>
                                                 <template v-slot:overlay>
@@ -243,13 +243,18 @@
                                 </b-col>
                             </b-row>
                         </b-col>
-                        <b-col cols="4">
+                        <b-col cols="3">
                             <b-row style="overflow-x: auto; white-space: nowrap; display: block;">
-                                <CardGlow class="col-1" style="display: inline-block; float: none;" :card="cardHighlight"/>
-                                <CardGlow class="col-1" style="display: inline-block; float: none;" :card="cardHighlight"/>
+                                <CardGlow
+                                    class="col-1"
+                                    style="display: inline-block; float: none"
+                                    v-for="(card, index) in cardHighlight"
+                                    :key="index"
+                                    :card="card"
+                                />
                             </b-row>
                             <b-row align-h="center">
-                                <CardStats :card="cardHighlight"/>
+                                <CardStats :cards="cardHighlight"/>
                             </b-row>
                         </b-col>
                     </b-row>
@@ -315,7 +320,7 @@ export default {
             mapSort: 1,
             filters: [],
             search: '',
-            cardHighlight: null
+            cardHighlight: []
         }
     },
     created() {
@@ -349,6 +354,9 @@ export default {
                 }
             })
             return (ovr / 5)
+        },
+        addCardToHighlight(card) {
+            this.cardHighlight.push(card)
         },
         addCardToRoster(card) {
             this.cardHighlight = card;
