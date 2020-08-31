@@ -25,7 +25,7 @@
                                 <template v-slot:header>
                                     <span style="white-space: nowrap">{{role.name}}</span>
                                 </template>
-                                <b-overlay :show="rosterOverlay === role.id" style="pointer-events: none">
+                                <b-overlay :show="rosterOverlay === role.id">
                                     <b-img
                                         v-if="roster[role.id]"
                                         style="width: auto; height: 200px"
@@ -36,7 +36,10 @@
                                             <h2 style="white-space: nowrap">{{roster[role.id].properties['salary']}} $</h2>
                                             <h3 style="white-space: nowrap">{{roster[role.id].properties['player_rating']}} OVR</h3>
                                             <strong v-if="roster[role.id].price">{{roster[role.id].price}} <Epicoin/></strong>
-                                            <strong v-else style="color: red">No market price</strong>
+                                            <strong v-else style="color: red">No market price</strong><br>
+                                            <b-button variant="outline-danger" @click="removeCardFromRoster(role.id)">
+                                                <font-awesome-icon icon="trash-alt"/>
+                                            </b-button>
                                         </div>
                                     </template>
                                 </b-overlay>
@@ -60,7 +63,7 @@
                                 @mouseover="roster['flex'] !== null ? rosterOverlay = 0 : ''"
                                 @mouseleave="roster['flex'] !== null ? rosterOverlay = null : ''"
                             >
-                                <b-overlay :show="rosterOverlay === 0" style="pointer-events: none">
+                                <b-overlay :show="rosterOverlay === 0">
                                     <b-img
                                         v-if="roster['flex']"
                                         style="max-height: 200px"
@@ -71,7 +74,10 @@
                                             <h2 style="white-space: nowrap">{{roster['flex'].properties['salary']}} $</h2>
                                             <h3>{{roster['flex'].properties['player_rating']}} OVR</h3>
                                             <strong v-if="roster['flex'].price">{{roster['flex'].price}} <Epicoin/></strong>
-                                            <strong v-else style="color: red">No market price</strong>
+                                            <strong v-else style="color: red">No market price</strong><br>
+                                            <b-button variant="outline-danger" @click="removeCardFromRoster('flex')">
+                                                <font-awesome-icon icon="trash-alt"/>
+                                            </b-button>
                                         </div>
                                     </template>
                                 </b-overlay>
@@ -348,6 +354,11 @@ export default {
         }
     },
     methods: {
+        removeCardFromRoster(roleId) {
+            this.rosterOverlay = null;
+            this.roster[roleId] = null;
+            this.$forceUpdate();
+        },
         mapBonus(mapId) {
             let bonus = 1;
             for (const id in this.roster) {
