@@ -29,15 +29,16 @@ export default {
         }
     },
     mounted() {
+        Object.values(this.cards[0]['playerStatsV2']).forEach(stat => {
+            this.data.labels.push(stat.name)
+        })
         this.cards.forEach((card, index) => {
             this.data.datasets[index] = {
-                label: card['title']
+                label: card['title'],
+                data: []
             }
             let stats = card['playerStatsV2']
             Object.values(stats).forEach(stat => {
-                if (this.data.labels.length === 0) {
-                    this.data.labels.push(stat.name)
-                }
                 this.data.datasets[index].data.push(stat.score)
             })
         })

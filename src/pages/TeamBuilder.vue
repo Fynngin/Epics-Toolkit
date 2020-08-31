@@ -251,7 +251,7 @@
                                         :card="card"
                                     />
                                     <b-button-group class="w-75">
-                                        <b-button variant="success">
+                                        <b-button variant="success" @click="addCardToRoster(card)">
                                             <font-awesome-icon icon="user-plus"/>
                                         </b-button>
                                         <b-button variant="danger" @click="cardHighlight.splice(index, 1)">
@@ -371,7 +371,6 @@ export default {
             this.cardHighlight.push(card)
         },
         addCardToRoster(card) {
-            this.cardHighlight = card;
             getMarketListings(this.$store.state.userdata.jwt, this.$store.state.category, card.id, 'card', 1).then(res => {
                 if (res.data.success) {
                     card.price = res.data.data['market'].length > 0 ? res.data.data['market'][0][0].price : null;
