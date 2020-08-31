@@ -1,5 +1,6 @@
 <script>
 import { Radar } from 'vue-chartjs';
+import 'chartjs-plugin-colorschemes';
 
 export default {
     name: "CardStats",
@@ -17,6 +18,11 @@ export default {
                         min: 0,
                         max: 100
                     }
+                },
+                plugins: {
+                    colorschemes: {
+                        scheme: 'brewer.SetThree12'
+                    }
                 }
             }
 
@@ -24,7 +30,9 @@ export default {
     },
     mounted() {
         this.cards.forEach((card, index) => {
-            this.data.datasets[index].label = card['title']
+            this.data.datasets[index] = {
+                label: card['title']
+            }
             let stats = card['playerStatsV2']
             Object.values(stats).forEach(stat => {
                 if (this.data.labels.length === 0) {

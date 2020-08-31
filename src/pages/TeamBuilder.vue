@@ -220,7 +220,7 @@
                             </b-row>
                         </b-col>
 
-                        <b-col cols="8" v-else class="ml-2 mr-2">
+                        <b-col cols="8" v-else>
                             <b-spinner v-if="spinner.cards"/>
                             <b-button class="mb-3" @click="selectedPlayer.id = 0" v-else>Back</b-button>
                             <b-row>
@@ -243,19 +243,31 @@
                                 </b-col>
                             </b-row>
                         </b-col>
-                        <b-col cols="3">
+                        <b-col cols="4" v-if="cardHighlight.length > 0">
                             <b-row style="overflow-x: auto; white-space: nowrap; display: block;">
-                                <CardGlow
-                                    class="col-1"
-                                    style="display: inline-block; float: none"
-                                    v-for="(card, index) in cardHighlight"
-                                    :key="index"
-                                    :card="card"
-                                />
+                                <b-col class="col-4" v-for="(card, index) in cardHighlight" :key="index" style="display: inline-block; float: none">
+                                    <strong class="ml-5">${{card.properties['salary']}}</strong>
+                                    <CardGlow
+                                        :card="card"
+                                    />
+                                    <b-button-group class="w-75">
+                                        <b-button variant="success">
+                                            <font-awesome-icon icon="user-plus"/>
+                                        </b-button>
+                                        <b-button variant="danger" @click="cardHighlight.splice(index, 1)">
+                                            <font-awesome-icon icon="trash-alt"/>
+                                        </b-button>
+                                    </b-button-group>
+                                </b-col>
+
                             </b-row>
                             <b-row align-h="center">
                                 <CardStats :cards="cardHighlight"/>
                             </b-row>
+                        </b-col>
+                        <b-col v-else>
+                            <h4>Select cards to see stats.</h4>
+                            <font-awesome-icon icon="chart-line" size="3x"/>
                         </b-col>
                     </b-row>
 
