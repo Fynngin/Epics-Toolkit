@@ -17,7 +17,6 @@
                     ></SpinnerOddsChart>
                 </b-card>
             </b-col>
-
             <b-col lg="5" sm="10" class="mb-2">
                 <b-card border-variant="dark" header="Pack Stock" header-bg-variant="light">
                     <b-spinner v-if="spinner.packStock"/>
@@ -28,7 +27,6 @@
                     ></PackStock>
                 </b-card>
             </b-col>
-
         </b-row>
     </div>
 </template>

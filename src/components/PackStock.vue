@@ -13,6 +13,13 @@
                     datasets: []
                 },
                 options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    },
                     plugins: {
                         colorschemes: {
                             scheme: 'brewer.SetThree12'
