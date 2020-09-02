@@ -355,6 +355,7 @@ export default {
     },
     methods: {
         removeCardFromRoster(roleId) {
+            this.rosterSalary -= this.roster[roleId].properties['salary']
             this.rosterOverlay = null;
             this.roster[roleId] = null;
             this.$forceUpdate();
