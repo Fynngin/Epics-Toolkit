@@ -356,8 +356,12 @@ export default {
     methods: {
         removeCardFromRoster(roleId) {
             this.rosterSalary -= this.roster[roleId].properties['salary']
+            this.rosterMarketPrice -= this.roster[roleId].price
             this.rosterOverlay = null;
             this.roster[roleId] = null;
+            this.marketPriceWarning = Object.values(this.roster).find(player => {
+                return player ? !player['price'] : false
+            }) !== undefined
             this.$forceUpdate();
         },
         mapBonus(mapId) {
