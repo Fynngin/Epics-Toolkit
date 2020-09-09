@@ -6,6 +6,7 @@ import store from "./store";
 import MassList from "./pages/MassList";
 import MintSearch from "./pages/MintSearch";
 import TeamBuilder from "@/pages/TeamBuilder";
+import AccountTransfer from "@/pages/AccountTransfer";
 
 Vue.use(VueRouter)
 
@@ -40,6 +41,13 @@ const router = new VueRouter({
         {
             path: '/teambuilder',
             component: TeamBuilder,
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/accounttransfer',
+            component: AccountTransfer,
             meta: {
                 requiresAuth: true
             }

@@ -25,6 +25,9 @@
             <b-button class="w-100" :variant="pageVariant('/teambuilder')" @click="$router.push('/teambuilder')">
                 Rush Team-Builder
             </b-button>
+            <b-button class="w-100" :variant="pageVariant('/accounttransfer')" @click="$router.push('/accounttransfer')">
+                Account Transfer
+            </b-button>
         </b-row>
     </b-sidebar>
 </template>

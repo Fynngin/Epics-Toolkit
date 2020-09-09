@@ -204,3 +204,47 @@ export function getTeams(jwt) {
         }
     })
 }
+
+export function searchUsers(jwt, category, username) {
+    return http(`https://api.epics.gg/api/v1/users/search`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            'username': username
+        }
+    })
+}
+
+export function getTrades(jwt, category, page) {
+    return http(`https://api.epics.gg/api/v1/trade?status=open`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            'page': page
+        }
+    })
+}
+
+export function acceptTrade(jwt, category, tradeId) {
+    return http(`https://api.epics.gg/api/v1/trade/accept-offer`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        },
+        data: JSON.stringify({
+            'tradeId': tradeId
+        })
+    })
+}
