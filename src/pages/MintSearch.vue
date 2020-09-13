@@ -57,6 +57,7 @@
         <SearchResults
             id="resultsModal"
             @hidden="resetSearch"
+            @save="saveSearch"
             :accsChecked="accountsChecked"
             :found="found"
             :progress="cardsFound"
@@ -71,6 +72,7 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
     import Checkmark from "../components/Checkmark";
     import SearchResults from "../components/SearchResults";
     import CollectionSelect from "@/components/CollectionSelect";
+import {mapActions} from "vuex";
 
     export default {
         name: "MintSearch",
@@ -104,6 +106,7 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
             }
         },
         methods: {
+            ...mapActions(['saveMintSearch']),
             loadCollections() {
                 getCollections(this.$store.state.userdata.jwt, this.$store.state.category,
                     this.season, this.$store.state.userdata.id).then(res => {
@@ -111,7 +114,7 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                 })
             },
             loadCards(collection) {
-                this.collection = collection.id
+                this.collection = collection
                 let entities = collection.entities
                 this.selected = {
                     cards: [],
@@ -120,7 +123,7 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                 this.cards = []
                 this.stickers = []
                 if (entities.includes('card')) {
-                    getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection).then(res => {
+                    getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection.id).then(res => {
                         res.data.success ? this.cards = res.data.data : this.cards = []
                         this.cards.sort((a,b) => {
                             return a.id - b.id
@@ -128,7 +131,7 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                     })
                 }
                 if (entities.includes('sticker')) {
-                    getStickerTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection).then(res => {
+                    getStickerTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection.id).then(res => {
                         res.data.success ? this.stickers = res.data.data : this.stickers = []
                         this.stickers.sort((a,b) => {
                             return a.id - b.id
@@ -145,7 +148,7 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                 let page = 1
                 let users = []
                 while (this.cardsFound < this.totalCards && !this.searchDone) {
-                    await getLeaderboard(this.$store.state.userdata.jwt, this.$store.state.category, this.collection, page).then(res => {
+                    await getLeaderboard(this.$store.state.userdata.jwt, this.$store.state.category, this.collection.id, page).then(res => {
                         if (res.data.success && res.data.data.length > 0) {
                             users = res.data.data
                             page++
@@ -159,7 +162,7 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                 }
             },
             checkUser(user) {
-                getItems(this.$store.state.userdata.jwt, this.$store.state.category, this.collection, user.id).then(res => {
+                getItems(this.$store.state.userdata.jwt, this.$store.state.category, this.collection.id, user.id).then(res => {
                     if (res.data.success) {
                         let cards = res.data.data.cards
                         let stickers = res.data.data.stickers
@@ -248,6 +251,17 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
                 this.searchDone = true
                 this.found = []
                 this.cardsFound = 0
+            },
+            saveSearch() {
+                this.saveMintSearch({
+                    title: `${this.collection.season} ${this.collection.name}`,
+                    items: this.found,
+                    complete: this.searchDone,
+                    date: new Date(),
+                    mintBatch: this.mintBatch,
+                    minMint: this.minMint,
+                    maxMint: this.maxMint
+                })
             }
         }
     }

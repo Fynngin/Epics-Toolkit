@@ -4,7 +4,7 @@ import {getAppInfo, login} from "@/api";
 
 Vue.use(Vuex)
 
-export default new Vuex.Store({
+const store = new Vuex.Store({
     state: {
         authenticated: false,
         cdnUrl: 'http://cdn.epics.gg',
@@ -22,7 +22,8 @@ export default new Vuex.Store({
             2: 'First Edition'
         },
         rushSeason: '2020',
-        seasons: []
+        seasons: [],
+        savedSearches: []
     },
     getters: {
         isAuthenticated: (state) => {
@@ -58,6 +59,9 @@ export default new Vuex.Store({
                     commit('changeCategory', {category: category, seasons: res.data.data.seasons})
                 }
             })
+        },
+        saveMintSearch({commit}, data) {
+            commit('saveSearch', data)
         }
     },
     mutations: {
@@ -72,6 +76,25 @@ export default new Vuex.Store({
         changeCategory(category, data) {
             this.state.category = data.category;
             this.state.seasons = data.seasons;
+        },
+        saveSearch(state, data) {
+            this.state.savedSearches.push(data)
         }
     }
 })
+
+let local = localStorage.getItem('store')
+if (local) {
+    if (JSON.parse(local)['savedSearches']) {
+        store.state.savedSearches = JSON.parse(local)['savedSearches']
+    } else {
+        store.state.savedSearches = []
+    }
+}
+
+store.subscribe((mutation, state) => {
+    // console.log(state)
+    localStorage.setItem('store', JSON.stringify(state));
+});
+
+export default store

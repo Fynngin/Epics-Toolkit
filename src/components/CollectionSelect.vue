@@ -19,7 +19,7 @@
                 <b-collapse :id="`collapse-${index}`">
                     <b-list-group v-if="name !== 'Event'">
                         <b-list-group-item v-for="(collection, index) in colls" :key="index" button
-                                           @click="$emit('collectionChange', {id: collection.collection.id, entities: collection.collection.properties['entity_types']})">
+                                           @click="selectCollection(collection, null)">
                             {{collection.collection.name}}
                         </b-list-group-item>
                     </b-list-group>
@@ -33,7 +33,7 @@
                             <b-collapse :id="`event-${index}`">
                                 <b-list-group>
                                     <b-list-group-item v-for="(collection, index) in collections" :key="index" button
-                                                       @click="$emit('collectionChange', {id: collection.collection.id, entities: collection.collection.properties['entity_types']})">
+                                                       @click="selectCollection(collection, event)">
                                         {{collection.collection.name}}
                                     </b-list-group-item>
                                 </b-list-group>
@@ -90,6 +90,18 @@ export default {
                     this.collectionOptions[tier] ? this.collectionOptions[tier].push(coll) :this.collectionOptions[tier] = [coll]
                 }
             }
+        },
+        selectCollection(collection, event) {
+            let coll = {
+                id: collection.collection.id,
+                entities: collection.collection.properties['entity_types'],
+                name: collection.collection.name,
+                season: collection.collection.properties['seasons'][0]
+            }
+            if (event) {
+                coll.event = event
+            }
+            this.$emit('collectionChange', coll)
         }
     }
 }
