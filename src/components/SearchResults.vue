@@ -30,7 +30,11 @@
         },
         methods: {
             exportCSV() {
-                this.jsoncsv.buffered(this.found, {fields: [
+                let sorted = this.found.sort((a,b) => {
+                    return a.mint.localeCompare(b.mint)
+                })
+                console.log(sorted)
+                this.jsoncsv.buffered(sorted, {fields: [
                     {name: 'mint', label: 'Mint'},
                     {name: 'name', label: 'Name'},
                     {name: 'user', label: 'User'}]}, (err, res) => {
