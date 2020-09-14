@@ -14,7 +14,6 @@
                 <p v-else>Done! Found {{progress}} of {{max}} cards!</p>
             </b-col>
             <b-col cols="3">
-                <b-button variant="outline-dark" class="mb-2 w-100" @click="$emit('save')">Save</b-button>
                 <b-button variant="outline-dark" class="mb-2 w-100">Export</b-button>
             </b-col>
         </b-row>

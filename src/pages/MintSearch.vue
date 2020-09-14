@@ -61,7 +61,6 @@
         <SearchResults
             id="resultsModal"
             @hidden="resetSearch"
-            @save="saveSearch"
             :accsChecked="accountsChecked"
             :found="found"
             :progress="cardsFound"
@@ -108,7 +107,8 @@ import SearchHistory from "@/components/SearchHistory";
                 searchDone: false,
                 found: [],
                 accountsChecked: 0,
-                historyResults: false
+                historyResults: false,
+                historyInterval: null
             }
         },
         computed: {
@@ -162,6 +162,10 @@ import SearchHistory from "@/components/SearchHistory";
                 this.$bvModal.show('resultsModal')
                 let page = 1
                 let users = []
+                this.saveSearch(true)
+                this.historyInterval = window.setInterval(() => {
+                    this.saveSearch(false)
+                }, 3000)
                 while (this.cardsFound < this.totalCards && !this.searchDone) {
                     await getLeaderboard(this.$store.state.userdata.jwt, this.$store.state.category, this.collection.id, page).then(res => {
                         if (res.data.success && res.data.data.length > 0) {
@@ -172,6 +176,7 @@ import SearchHistory from "@/components/SearchHistory";
                             }
                         } else {
                             this.searchDone = true
+                            window.clearInterval(this.historyInterval)
                         }
                     })
                 }
@@ -209,6 +214,7 @@ import SearchHistory from "@/components/SearchHistory";
                         }
                         if (this.cardsFound === this.totalCards) {
                             this.searchDone = true
+                            window.clearInterval(this.historyInterval)
                         }
                         this.accountsChecked++
                     }
@@ -264,11 +270,12 @@ import SearchHistory from "@/components/SearchHistory";
             },
             resetSearch() {
                 this.searchDone = true
+                window.clearInterval(this.historyInterval)
                 this.found = []
                 this.cardsFound = 0
             },
-            saveSearch() {
-                this.saveMintSearch({
+            saveSearch(isNew) {
+                this.saveMintSearch([{
                     title: `${this.collection.season} ${this.collection.name}`,
                     items: this.found,
                     complete: this.searchDone,
@@ -276,7 +283,7 @@ import SearchHistory from "@/components/SearchHistory";
                     mintBatch: this.mintBatch,
                     minMint: this.minMint,
                     maxMint: this.maxMint
-                })
+                }, isNew])
             },
             showHistory() {
                 this.$bvModal.show('historyModal')

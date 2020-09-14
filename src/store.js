@@ -78,7 +78,14 @@ const store = new Vuex.Store({
             this.state.seasons = data.seasons;
         },
         saveSearch(state, data) {
-            this.state.savedSearches.push(data)
+            if (data[1]) { //is new search?
+                this.state.savedSearches.push(data[0])
+                if (this.state.savedSearches.length > 20) {
+                    this.state.savedSearches.splice(0, 1)
+                }
+            } else {
+                this.state.savedSearches[this.state.savedSearches.length - 1] = data[0]
+            }
         }
     }
 })
