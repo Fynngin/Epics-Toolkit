@@ -1,6 +1,6 @@
 <template>
     <b-modal title="Results" id="resultsModal" hide-footer @hidden="$emit('hidden', true)">
-        <b-row>
+        <b-row v-if="!history">
             <b-col>
                 <b-progress :max="max">
                     <b-progress-bar :value="progress">
@@ -25,7 +25,7 @@
 <script>
     export default {
         name: "SearchResults",
-        props: ['found', 'progress', 'max', 'done', 'accsChecked'],
+        props: ['found', 'progress', 'max', 'done', 'accsChecked', 'history'],
         data() {
             return {
                 progressInfo: 'Searching for items can take a while, due to api rate limitations. When it\'s done, '

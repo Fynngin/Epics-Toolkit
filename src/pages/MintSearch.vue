@@ -19,7 +19,11 @@
                         <b-input-group prepend="Max" class="mr-2">
                             <b-form-input type="number" v-model="maxMint"></b-form-input>
                         </b-input-group>
-                        <b-button variant="primary" @click="startSearch">Search</b-button>
+                        <b-button variant="primary" class="mr-2" @click="startSearch">Search</b-button>
+                        <b-button variant="outline-dark" style="float: right" @click="showHistory">
+                            <font-awesome-icon icon="history"/>
+                            History
+                        </b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -62,7 +66,15 @@
             :found="found"
             :progress="cardsFound"
             :max="totalCards"
-            :done="searchDone"/>
+            :done="searchDone"
+            :history="historyResults"
+        />
+
+        <SearchHistory
+            id="historyModal"
+            @showHistoryItem="value => showHistoryItem(value)"
+            :items="$store.state.savedSearches"
+        />
     </div>
 </template>
 
@@ -73,10 +85,11 @@ import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTe
     import SearchResults from "../components/SearchResults";
     import CollectionSelect from "@/components/CollectionSelect";
 import {mapActions} from "vuex";
+import SearchHistory from "@/components/SearchHistory";
 
     export default {
         name: "MintSearch",
-        components: {CollectionSelect, SearchResults, Checkmark, Sidebar},
+        components: {SearchHistory, CollectionSelect, SearchResults, Checkmark, Sidebar},
         data() {
             return {
                 season: null,
@@ -94,7 +107,8 @@ import {mapActions} from "vuex";
                 cardsFound: 0,
                 searchDone: false,
                 found: [],
-                accountsChecked: 0
+                accountsChecked: 0,
+                historyResults: false
             }
         },
         computed: {
@@ -140,6 +154,7 @@ import {mapActions} from "vuex";
                 }
             },
             async startSearch() {
+                this.historyResults = false
                 this.found = []
                 this.cardsFound = 0
                 this.searchDone = false
@@ -262,6 +277,15 @@ import {mapActions} from "vuex";
                     minMint: this.minMint,
                     maxMint: this.maxMint
                 })
+            },
+            showHistory() {
+                this.$bvModal.show('historyModal')
+            },
+            showHistoryItem(item) {
+                this.found = item.items
+                this.historyResults = true
+                this.$bvModal.hide('historyModal')
+                this.$bvModal.show('resultsModal')
             }
         }
     }
