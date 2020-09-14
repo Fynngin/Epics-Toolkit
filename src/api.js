@@ -1,6 +1,6 @@
 import axios from "axios";
 import axiosRateLimit from "axios-rate-limit";
-const http = axiosRateLimit(axios.create(), {maxRequests: 150, perMilliseconds: 60000})
+const http = axiosRateLimit(axios.create(), {maxRequests: 130, perMilliseconds: 60000})
 
 /**
  * Sends login request.
