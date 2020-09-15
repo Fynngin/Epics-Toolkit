@@ -129,7 +129,7 @@
                 season: null,
                 type: null,
                 typeOptions: [
-                    'Cards',
+                    {text: 'Cards', value: 'Cards', disabled: true},
                     'Packs'
                 ],
                 collection: [],
