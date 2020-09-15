@@ -203,7 +203,15 @@
                                     <b-card no-body @click="loadPlayerCards(player)" class="h-100">
                                         <template v-slot:header>
                                             <h3 style="float: left">{{player.handle}}</h3>
-                                            <b-badge variant="light" style="top: 0; left: 0; position: absolute;">{{player['minSalary']}}$ - {{player['maxSalary']}}$</b-badge>
+                                            <b-badge variant="light" style="top: 0; left: 0; position: absolute;" v-if="player['minSalary'] !== player['maxSalary']">
+                                                {{player['minSalary']}}$ - {{player['maxSalary']}}$
+                                            </b-badge>
+                                            <b-badge variant="light" style="top: 0; left: 0; position: absolute;" v-else>
+                                                {{player['minSalary']}}$
+                                            </b-badge>
+                                            <b-badge variant="light" style="top: 46px; left: 0; position: absolute;">
+                                                {{player['minRating']}}-{{player['maxRating']}} OVR
+                                            </b-badge>
                                             <gb-flag :code="player.country" class="playerFlag"/>
                                         </template>
 
@@ -321,14 +329,16 @@ export default {
                 'cards': false
             },
             sortOptions: [
-                {text: '--- Sort By ---', value: null},
+                {text: '--- Sort By ---', value: null, disabled: true},
                 {text: 'Name', value: 'name'},
                 {text: 'Map Bonus', value: 'map'},
                 {text: 'Min Salary', value: 'minsalary'},
-                {text: 'Max Salary', value: 'maxsalary'}
+                {text: 'Max Salary', value: 'maxsalary'},
+                {text: 'Min Rating', value: 'minrating'},
+                {text: 'Max Rating', value: 'maxrating'}
             ],
             filterOptions: [
-                {text: '--- Filter ---', value: null},
+                {text: '--- Filter ---', value: null, disabled: true},
                 {text: 'Team', value: 'team'},
                 {text: 'Country', value: 'country'},
                 {text: 'Map Bonus', value: 'map'}
@@ -495,6 +505,16 @@ export default {
                 case 'maxsalary':
                     this.filteredPlayers.sort((a,b) => {
                         return a['maxSalary'] - b['maxSalary']
+                    })
+                    break;
+                case 'minrating':
+                    this.filteredPlayers.sort((a,b) => {
+                        return a['minRating'] - b['minRating']
+                    })
+                    break;
+                case 'maxrating':
+                    this.filteredPlayers.sort((a,b) => {
+                        return a['maxRating'] - b['maxRating']
                     })
                     break;
             }
