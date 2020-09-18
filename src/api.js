@@ -248,3 +248,31 @@ export function acceptTrade(jwt, category, tradeId) {
         })
     })
 }
+
+export function getCardIds(jwt, category, collection, userId) {
+    return http(`https://api.epics.gg/api/v1/collections/users/${userId}/cardids`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            'collectionId': collection
+        }
+    })
+}
+
+export function getStickerIds(jwt, category, collection, userId) {
+    return http(`https://api.epics.gg/api/v1/collections/users/${userId}/stickerids`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            'collectionId': collection
+        }
+    })
+}

@@ -9,6 +9,7 @@
             <b-col cols="6">
                 <h1>Send trades</h1>
                 <p>Coming soon...</p>
+                <b-button @click="createTradeList">TEST</b-button>
             </b-col>
             <b-col cols="6">
                 <h1>Accept trades</h1>
@@ -45,7 +46,7 @@
 
 <script>
 import Sidebar from "@/components/Sidebar";
-import {acceptTrade, getTrades, searchUsers} from "@/api";
+import {acceptTrade, getCardIds, getCollections, getStickerIds, getTrades, searchUsers} from "@/api";
 
 export default {
     name: "AccountTransfer",
@@ -58,6 +59,7 @@ export default {
             userOptions: [],
             selectedUser: null,
             tradeList: [],
+            idList: [],
             showUserList: false,
             showAcceptProgress: false,
             spinner: {
@@ -115,6 +117,58 @@ export default {
                 })
             })
             this.spinner.accepting = false
+        },
+        async createTradeList() {
+            let collections = []
+            let cardids = []
+            let stickerids = []
+            let progress = 0
+
+            for (const season of this.$store.state.seasons) {
+                await getCollections(this.$store.state.userdata.jwt, this.$store.state.category, season, this.selectedUser.id).then(res => {
+                    if (res.data.success) {
+                        collections = collections.concat(res.data.data.filter(coll => {
+                            return coll.count > 0
+                        }))
+                    }
+                })
+            }
+            for (const coll of collections) {
+                if (coll.collection.properties['entity_types'].includes('card')) {
+                    await getCardIds(this.$store.state.userdata.jwt, this.$store.state.category, coll.collection.id, this.selectedUser.id).then(res => {
+                        if (res.data.success) {
+                            res.data.data.forEach(template => {
+                                cardids = cardids.concat(template['cardIds'])
+                            })
+                        }
+                    })
+                }
+                if (coll.collection.properties['entity_types'].includes('sticker')) {
+                    await getStickerIds(this.$store.state.userdata.jwt, this.$store.state.category, coll.collection.id, this.selectedUser.id).then(res => {
+                        if (res.data.success) {
+                            res.data.data.forEach(template => {
+                                stickerids = stickerids.concat(template['stickerIds'])
+                            })
+                        }
+                    })
+                }
+                console.log(`${++progress} / ${collections.length}`)
+            }
+
+            let startIdx = 0
+            let endIdx = 49
+            for (let i = 0; i < (cardids.length / 49); i++) {
+                this.idList.push(cardids.slice(startIdx, endIdx))
+                startIdx += 49
+                endIdx += 49
+            }
+            startIdx = 0
+            endIdx = 0
+            for (let i = 0; i < (stickerids.length / 49); i++) {
+                this.idList.push(stickerids.slice(startIdx, endIdx))
+                startIdx += 49
+                endIdx += 49
+            }
         }
     }
 }
