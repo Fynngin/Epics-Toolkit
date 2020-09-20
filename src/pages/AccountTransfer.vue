@@ -46,7 +46,7 @@
 
 <script>
 import Sidebar from "@/components/Sidebar";
-import {acceptTrade, getCardIds, getCollections, getStickerIds, getTrades, searchUsers} from "@/api";
+import {acceptTrade, getCardIds, getCollections, getStickerIds, getTrades, searchUsers, sendTrade} from "@/api";
 
 export default {
     name: "AccountTransfer",
@@ -64,7 +64,9 @@ export default {
             showAcceptProgress: false,
             spinner: {
                 accepting: false
-            }
+            },
+            purples: [],
+            tradeProgress: 0
         }
     },
     async created() {
@@ -158,16 +160,48 @@ export default {
             let startIdx = 0
             let endIdx = 49
             for (let i = 0; i < (cardids.length / 49); i++) {
-                this.idList.push(cardids.slice(startIdx, endIdx))
+                let temp = cardids.slice(startIdx, endIdx)
+                this.idList.push(temp.map(elem => {
+                    return {id: elem, type: 'card'}
+                }))
                 startIdx += 49
                 endIdx += 49
             }
             startIdx = 0
             endIdx = 0
             for (let i = 0; i < (stickerids.length / 49); i++) {
-                this.idList.push(stickerids.slice(startIdx, endIdx))
+                let temp = stickerids.slice(startIdx, endIdx)
+                this.idList.push(temp.map(elem => {
+                    return {id: elem, type: 'sticker'}
+                }))
                 startIdx += 49
                 endIdx += 49
+            }
+
+            await getCardIds(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.category === 1 ? 2969 : 1883, this.$store.state.userdata.id).then(res => {
+                if (res.data.success) {
+                    let arr = res.data.data
+                    this.purples = arr.sort((a,b) => {
+                        return b['cardIds'].length - a['cardIds'].length
+                    })
+                }
+            })
+
+            await this.sendTrades().then(() => console.log('Done!'))
+        },
+        async sendTrades() {
+            this.tradeProgress = 0
+            for (const batch of this.idList) {
+                let entities = batch.concat([{id: this.purples[0]['cardIds'][0], type: 'card'}])
+                this.purples[0]['cardIds'].splice(0, 1)
+                await sendTrade(this.$store.state.userdata.jwt, this.$store.state.category, this.selectedUser.id, entities).then(res => {
+                    if (res.data.success) {
+                        console.log(`${++this.tradeProgress} / ${this.idList.length}`)
+                        this.purples = this.purples.sort((a,b) => {
+                            return b['cardIds'].length - a['cardIds'].length
+                        })
+                    }
+                })
             }
         }
     }

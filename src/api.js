@@ -276,3 +276,31 @@ export function getStickerIds(jwt, category, collection, userId) {
         }
     })
 }
+
+/**
+ * Sends trade to the given user with userId
+ * @param jwt, authentication token
+ * @param category, game category (either 1 or 2)
+ * @param userId, the userId to recieve the trade
+ * @param entities, array of items, i.e. [{id: 12345, type: 'card'}, {id: 54321, type: 'sticker'}, ...]
+ * @returns Promise to be awaited
+ */
+export function sendTrade(jwt, category, userId, entities) {
+    return http(`https://api.epics.gg/api/v1/trade/create-offer`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        },
+        data: JSON.stringify({
+            user2Id: userId,
+            user1Balance: 0,
+            user2Balance: 0,
+            entities: entities
+        })
+
+    })
+}
