@@ -286,7 +286,7 @@ export default {
             this.progress.grouping.max = Math.ceil(cardids.length / 49) + Math.ceil(stickerids.length / 49)
             let startIdx = 0
             let endIdx = 50
-            for (let i = 0; i < (cardids.length / 49); i++) {
+            for (let i = 0; i < (cardids.length / 50); i++) {
                 let temp = cardids.slice(startIdx, endIdx)
                 this.idList.push(temp.map(elem => {
                     return {id: elem, type: 'card'}
@@ -297,7 +297,7 @@ export default {
             }
             startIdx = 0
             endIdx = 50
-            for (let i = 0; i < (stickerids.length / 49); i++) {
+            for (let i = 0; i < (stickerids.length / 50); i++) {
                 let temp = stickerids.slice(startIdx, endIdx)
                 this.idList.push(temp.map(elem => {
                     return {id: elem, type: 'sticker'}
