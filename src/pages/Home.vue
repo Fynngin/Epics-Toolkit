@@ -8,22 +8,36 @@
 
         <b-row align-h="center">
             <b-col lg="5" sm="10" class="mb-2">
-                <b-card border-variant="dark" header="Spinner Odds" header-bg-variant="light">
+                <b-card border-variant="dark" header-bg-variant="light">
+                    <template v-slot:header>
+                        Spinner Odds
+                        <b-button style="float: right" variant="outline-dark" @click="keys.spinnerodds++">
+                            <font-awesome-icon icon="redo-alt"/>
+                        </b-button>
+                    </template>
                     <b-spinner v-if="spinner.spinnerOdds"/>
                     <SpinnerOddsChart
-                            :hidden="spinner.spinnerOdds"
-                            :category="$store.state.category"
-                            @loading="value => {value ? this.spinner.spinnerOdds = true : this.spinner.spinnerOdds = false}"
+                        :key="keys.spinnerodds"
+                        :hidden="spinner.spinnerOdds"
+                        :category="$store.state.category"
+                        @loading="value => {value ? this.spinner.spinnerOdds = true : this.spinner.spinnerOdds = false}"
                     ></SpinnerOddsChart>
                 </b-card>
             </b-col>
             <b-col lg="5" sm="10" class="mb-2">
                 <b-card border-variant="dark" header="Pack Stock" header-bg-variant="light">
+                    <template v-slot:header>
+                        Pack Stock
+                        <b-button style="float: right" variant="outline-dark" @click="keys.packstock++">
+                            <font-awesome-icon icon="redo-alt"/>
+                        </b-button>
+                    </template>
                     <b-spinner v-if="spinner.packStock"/>
                     <PackStock
-                            :hidden="spinner.packStock"
-                            :category="$store.state.category"
-                            @loading="value => {value ? this.spinner.packStock = true : this.spinner.packStock = false}"
+                        :key="keys.packstock"
+                        :hidden="spinner.packStock"
+                        :category="$store.state.category"
+                        @loading="value => {value ? this.spinner.packStock = true : this.spinner.packStock = false}"
                     ></PackStock>
                 </b-card>
             </b-col>
@@ -45,6 +59,10 @@
                 spinner: {
                     spinnerOdds: true,
                     packStock: true
+                },
+                keys: {
+                    packstock: 0,
+                    spinnerodds: 0
                 }
             }
         },
