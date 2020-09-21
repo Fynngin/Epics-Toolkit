@@ -11,15 +11,16 @@
                 <b-card border-variant="dark">
                     <b-form inline>
                         <b-input-group prepend="MintBatch" class="mr-2">
-                            <b-form-input v-model="mintBatch"></b-form-input>
+                            <b-form-input v-model="mintBatch" :disabled="sigSearch"/>
                         </b-input-group>
                         <b-input-group prepend="Min" class="mr-2">
-                            <b-form-input type="number" v-model="minMint"></b-form-input>
+                            <b-form-input type="number" v-model="minMint" :disabled="sigSearch"/>
                         </b-input-group>
                         <b-input-group prepend="Max" class="mr-2">
-                            <b-form-input type="number" v-model="maxMint"></b-form-input>
+                            <b-form-input type="number" v-model="maxMint" :disabled="sigSearch"/>
                         </b-input-group>
-                        <b-button variant="primary" class="mr-2" @click="startSearch">Search</b-button>
+                        <b-checkbox v-model="sigSearch">Search signatures</b-checkbox>
+                        <b-button variant="primary" class="mr-2 ml-2" @click="startSearch">Search</b-button>
                         <b-button variant="outline-dark" style="float: right" @click="showHistory">
                             <font-awesome-icon icon="history"/>
                             History
@@ -108,7 +109,8 @@ import SearchHistory from "@/components/SearchHistory";
                 found: [],
                 accountsChecked: 0,
                 historyResults: false,
-                historyInterval: null
+                historyInterval: null,
+                sigSearch: false
             }
         },
         computed: {
@@ -186,35 +188,49 @@ import SearchHistory from "@/components/SearchHistory";
                     if (res.data.success) {
                         let cards = res.data.data.cards
                         let stickers = res.data.data.stickers
-                        for (const card of cards) {
-                            if (this.selected.cards.includes(card['cardTemplate'].id)
-                                && card.mintBatch === this.mintBatch
-                                && card.mintNumber >= this.minMint
-                                && card.mintNumber <= this.maxMint) {
-                                this.cardsFound++
-                                this.found.push({
-                                    mint: `${card.mintBatch}${card.mintNumber}`,
-                                    name: card['cardTemplate'].title,
-                                    user: user.username
-                                })
+                        if (this.sigSearch) {
+                            for (const card of cards) {
+                                if (this.selected.cards.includes(card['cardTemplate'].id)
+                                    && card['signatureImage']) {
+                                    this.cardsFound++
+                                    this.found.push({
+                                        mint: `${card.mintBatch}${card.mintNumber}`,
+                                        name: card['cardTemplate'].title,
+                                        user: user.username
+                                    })
+                                }
                             }
-                        }
-                        for (const sticker of stickers) {
-                            if (this.selected.stickers.includes(sticker['stickerTemplate'].id)
-                                && sticker.mintBatch === this.mintBatch
-                                && sticker.mintNumber >= this.minMint
-                                && sticker.mintNumber <= this.maxMint) {
-                                this.cardsFound++
-                                this.found.push({
-                                    mint: `${sticker.mintBatch}${sticker.mintNumber}`,
-                                    name: sticker['stickerTemplate'].title,
-                                    user: user.username
-                                })
+                        } else {
+                            for (const card of cards) {
+                                if (this.selected.cards.includes(card['cardTemplate'].id)
+                                    && card.mintBatch === this.mintBatch
+                                    && card.mintNumber >= this.minMint
+                                    && card.mintNumber <= this.maxMint) {
+                                    this.cardsFound++
+                                    this.found.push({
+                                        mint: `${card.mintBatch}${card.mintNumber}`,
+                                        name: card['cardTemplate'].title,
+                                        user: user.username
+                                    })
+                                }
                             }
-                        }
-                        if (this.cardsFound === this.totalCards) {
-                            this.searchDone = true
-                            window.clearInterval(this.historyInterval)
+                            for (const sticker of stickers) {
+                                if (this.selected.stickers.includes(sticker['stickerTemplate'].id)
+                                    && sticker.mintBatch === this.mintBatch
+                                    && sticker.mintNumber >= this.minMint
+                                    && sticker.mintNumber <= this.maxMint) {
+                                    this.cardsFound++
+                                    this.found.push({
+                                        mint: `${sticker.mintBatch}${sticker.mintNumber}`,
+                                        name: sticker['stickerTemplate'].title,
+                                        user: user.username
+                                    })
+                                }
+                            }
+                            if (this.cardsFound === this.totalCards) {
+                                this.searchDone = true
+                                window.clearInterval(this.historyInterval)
+                            }
                         }
                         this.accountsChecked++
                     }
