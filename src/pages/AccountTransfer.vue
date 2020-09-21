@@ -285,47 +285,48 @@ export default {
             this.progress.grouping.progress = 0
             this.progress.grouping.max = Math.ceil(cardids.length / 49) + Math.ceil(stickerids.length / 49)
             let startIdx = 0
-            let endIdx = 49
+            let endIdx = 50
             for (let i = 0; i < (cardids.length / 49); i++) {
                 let temp = cardids.slice(startIdx, endIdx)
                 this.idList.push(temp.map(elem => {
                     return {id: elem, type: 'card'}
                 }))
                 this.progress.grouping.progress++
-                startIdx += 49
-                endIdx += 49
+                startIdx += 50
+                endIdx += 50
             }
             startIdx = 0
-            endIdx = 0
+            endIdx = 50
             for (let i = 0; i < (stickerids.length / 49); i++) {
                 let temp = stickerids.slice(startIdx, endIdx)
                 this.idList.push(temp.map(elem => {
                     return {id: elem, type: 'sticker'}
                 }))
                 this.progress.grouping.progress++
-                startIdx += 49
-                endIdx += 49
+                startIdx += 50
+                endIdx += 50
             }
 
-            await getCardIds(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.category === 1 ? 2969 : 1883, this.$store.state.userdata.id).then(res => {
-                if (res.data.success) {
-                    let arr = res.data.data
-                    this.purples = arr.sort((a,b) => {
-                        return b['cardIds'].length - a['cardIds'].length
-                    })
-                }
-            })
+            // await getCardIds(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.category === 1 ? 2969 : 1883, this.$store.state.userdata.id).then(res => {
+            //     if (res.data.success) {
+            //         let arr = res.data.data
+            //         this.purples = arr.sort((a,b) => {
+            //             return b['cardIds'].length - a['cardIds'].length
+            //         })
+            //     }
+            // })
         },
         async sendTrades() {
             this.progress.sending = 0
             for (const batch of this.idList) {
-                let entities = batch.concat([{id: this.purples[0]['cardIds'][0], type: 'card'}])
-                this.purples[0]['cardIds'].splice(0, 1)
+                // let entities = batch.concat([{id: this.purples[0]['cardIds'][0], type: 'card'}])
+                let entities = batch
+                // this.purples[0]['cardIds'].splice(0, 1)
                 await sendTrade(this.$store.state.userdata.jwt, this.$store.state.category, this.selectedUser.id, entities).then(res => {
                     if (res.data.success) {
-                        this.purples = this.purples.sort((a,b) => {
-                            return b['cardIds'].length - a['cardIds'].length
-                        })
+                        // this.purples = this.purples.sort((a,b) => {
+                        //     return b['cardIds'].length - a['cardIds'].length
+                        // })
                         this.progress.sending++
                     }
                 })
