@@ -37,6 +37,9 @@
                 :variant="action === 'accept' ? 'success' : 'outline-success'"
                 class="ml-2 button"
             >Accept</b-button>
+            <h1 style="color: red" class="mt-4">WARNING!</h1>
+            <h3 style="color: red" class="mt-4">Although I'm confident that this tool works, it has yet to be tested with a real transfer.</h3>
+            <h3 style="color: red" class="mt-4">If you want to use it, do it at your own risk. Message me on discord for more information.</h3>
         </div>
 
         <div v-if="step === 2">
