@@ -228,18 +228,18 @@ export default {
             this.selectedUser = user
             this.showUserList = false
         },
-        acceptTrades() {
+        async acceptTrades() {
             this.spinner.accepting = true
             this.showAcceptProgress = true
-            this.filteredTrades.forEach(trade => {
-                acceptTrade(this.$store.state.userdata.jwt, this.$store.state.category, trade.id).then(res => {
+            for (const trade of this.filteredTrades) {
+                await acceptTrade(this.$store.state.userdata.jwt, this.$store.state.category, trade.id).then(res => {
                     if (res.data.success) {
                         this.acceptProgress++
                     } else {
                         this.amountFailedAccepts++
                     }
                 })
-            })
+            }
             this.spinner.accepting = false
         },
         async createTradeList() {
