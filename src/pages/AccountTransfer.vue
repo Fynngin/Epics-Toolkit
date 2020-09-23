@@ -283,7 +283,7 @@ export default {
             }
 
             this.progress.grouping.progress = 0
-            this.progress.grouping.max = Math.ceil(cardids.length / 49) + Math.ceil(stickerids.length / 49)
+            this.progress.grouping.max = Math.ceil(cardids.length / 50) + Math.ceil(stickerids.length / 50)
             let startIdx = 0
             let endIdx = 50
             for (let i = 0; i < (cardids.length / 50); i++) {
