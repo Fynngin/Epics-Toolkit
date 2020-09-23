@@ -20,7 +20,17 @@
                             <b-form-input type="number" v-model="maxMint" :disabled="sigSearch"/>
                         </b-input-group>
                         <b-checkbox v-model="sigSearch">Search signatures</b-checkbox>
-                        <b-button variant="primary" class="mr-2 ml-2" @click="startSearch">Search</b-button>
+                        <b-button-group class="ml-2 mr-2">
+                            <b-button variant="outline-success" @click="startSearch(true)">
+                                <font-awesome-icon icon="shopping-cart"/>
+                                Search market
+                            </b-button>
+                            <b-button variant="outline-success" @click="startSearch(false)">
+                                <font-awesome-icon icon="user"/>
+                                Search users
+                            </b-button>
+                        </b-button-group>
+
                         <b-button variant="outline-dark" style="float: right" @click="showHistory">
                             <font-awesome-icon icon="history"/>
                             History
@@ -68,6 +78,7 @@
             :max="totalCards"
             :done="searchDone"
             :history="historyResults"
+            :market="marketResults"
         />
 
         <SearchHistory
@@ -79,7 +90,14 @@
 </template>
 
 <script>
-import {getCardTemplates, getCollections, getItems, getLeaderboard, getStickerTemplates} from '@/api';
+import {
+    getCardTemplates,
+    getCollections,
+    getItems,
+    getLeaderboard,
+    getMarketListings,
+    getStickerTemplates
+} from '@/api';
     import Sidebar from "../components/Sidebar";
     import Checkmark from "../components/Checkmark";
     import SearchResults from "../components/SearchResults";
@@ -109,6 +127,7 @@ import SearchHistory from "@/components/SearchHistory";
                 found: [],
                 accountsChecked: 0,
                 historyResults: false,
+                marketResults: false,
                 historyInterval: null,
                 sigSearch: false
             }
@@ -155,7 +174,7 @@ import SearchHistory from "@/components/SearchHistory";
                     })
                 }
             },
-            async startSearch() {
+            async startSearch(market) {
                 this.historyResults = false
                 this.found = []
                 this.cardsFound = 0
@@ -164,23 +183,83 @@ import SearchHistory from "@/components/SearchHistory";
                 this.$bvModal.show('resultsModal')
                 let page = 1
                 let users = []
-                this.saveSearch(true)
+                this.saveSearch(true, market)
                 this.historyInterval = window.setInterval(() => {
-                    this.saveSearch(false)
+                    this.saveSearch(false, market)
                 }, 3000)
-                while (this.cardsFound < this.totalCards && !this.searchDone) {
-                    await getLeaderboard(this.$store.state.userdata.jwt, this.$store.state.category, this.collection.id, page).then(res => {
-                        if (res.data.success && res.data.data.length > 0) {
-                            users = res.data.data
-                            page++
-                            for (const user of users) {
-                                this.checkUser(user.user)
-                            }
-                        } else {
-                            this.searchDone = true
-                            window.clearInterval(this.historyInterval)
+                if (market) {
+                    this.marketResults = true
+                    for (const card of this.selected.cards) {
+                        let done = false
+                        page = 1
+                        while (!done) {
+                            await getMarketListings(this.$store.state.userdata.jwt, this.$store.state.category, card, 'card', page).then(res => {
+                                if (res.data.success && res.data.data.count > 0) {
+                                    let listings
+                                    if (this.sigSearch) {
+                                        listings = res.data.data['market'][0].filter(item => {
+                                            return item['card']['signatureImage'] !== null
+                                        })
+                                    } else {
+                                        listings = res.data.data['market'][0].filter(item => {
+                                            return item['card']['mintBatch'] === this.mintBatch && this.minMint <= item['card']['mintNumber'] && item['card']['mintNumber'] <= this.maxMint
+                                        })
+                                    }
+                                    this.found = this.found.concat(listings.map(item => {
+                                        return {
+                                            mint: `${item['card']['mintBatch']}${item['card']['mintNumber']}`,
+                                            name: item['card']['cardTemplate'].title,
+                                            user: item['user']['username'],
+                                            price: item['price']
+                                        }
+                                    }))
+                                    page++
+                                } else {
+                                    done = true
+                                }
+                            })
                         }
-                    })
+                    }
+                    for (const sticker of this.selected.stickers) {
+                        let done = false
+                        page = 1
+                        while (!done) {
+                            await getMarketListings(this.$store.state.userdata.jwt, this.$store.state.category, sticker, 'sticker', page).then(res => {
+                                if (res.data.success && res.data.data.count > 0) {
+                                    let listings = res.data.data['market'][0].filter(item => {
+                                        return item['sticker']['mintBatch'] === this.mintBatch && this.minMint <= item['sticker']['mintNumber'] && item['sticker']['mintNumber'] <= this.maxMint
+                                    })
+                                    this.found = this.found.concat(listings.map(item => {
+                                        return {
+                                            mint: `${item['sticker']['mintBatch']}${item['sticker']['mintNumber']}`,
+                                            name: item['sticker']['stickerTemplate'].title,
+                                            user: item['user']['username'],
+                                            price: item['price']
+                                        }
+                                    }))
+                                    page++
+                                } else {
+                                    done = true
+                                }
+                            })
+                        }
+                    }
+                } else {
+                    this.marketResults = false
+                    while (this.cardsFound < this.totalCards && !this.searchDone) {
+                        await getLeaderboard(this.$store.state.userdata.jwt, this.$store.state.category, this.collection.id, page).then(res => {
+                            if (res.data.success && res.data.data.length > 0) {
+                                users = res.data.data
+                                page++
+                                for (const user of users) {
+                                    this.checkUser(user.user)
+                                }
+                            } else {
+                                this.searchDone = true
+                                window.clearInterval(this.historyInterval)
+                            }
+                        })
+                    }
                 }
             },
             checkUser(user) {
@@ -290,7 +369,7 @@ import SearchHistory from "@/components/SearchHistory";
                 this.found = []
                 this.cardsFound = 0
             },
-            saveSearch(isNew) {
+            saveSearch(isNew, market) {
                 this.saveMintSearch([{
                     title: `${this.collection.season} ${this.collection.name}`,
                     items: this.found,
@@ -298,7 +377,9 @@ import SearchHistory from "@/components/SearchHistory";
                     date: new Date(),
                     mintBatch: this.mintBatch,
                     minMint: this.minMint,
-                    maxMint: this.maxMint
+                    maxMint: this.maxMint,
+                    market: market,
+                    signatures: this.sigSearch
                 }, isNew])
             },
             showHistory() {

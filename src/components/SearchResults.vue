@@ -20,7 +20,7 @@
 <script>
     export default {
         name: "SearchResults",
-        props: ['found', 'progress', 'max', 'done', 'accsChecked', 'history'],
+        props: ['found', 'progress', 'max', 'done', 'accsChecked', 'history', 'market'],
         data() {
             return {
                 progressInfo: 'Searching for items can take a while, due to api rate limitations. When it\'s done, '
@@ -33,11 +33,22 @@
                 let sorted = this.found.sort((a,b) => {
                     return a.mint.localeCompare(b.mint)
                 })
-                console.log(sorted)
-                this.jsoncsv.buffered(sorted, {fields: [
-                    {name: 'mint', label: 'Mint'},
-                    {name: 'name', label: 'Name'},
-                    {name: 'user', label: 'User'}]}, (err, res) => {
+                let fields = []
+                if (this.market) {
+                    fields = [
+                        {name: 'mint', label: 'Mint'},
+                        {name: 'name', label: 'Name'},
+                        {name: 'user', label: 'User'},
+                        {name: 'price', label: 'Price'}
+                    ]
+                } else {
+                    fields = [
+                        {name: 'mint', label: 'Mint'},
+                        {name: 'name', label: 'Name'},
+                        {name: 'user', label: 'User'}
+                    ]
+                }
+                this.jsoncsv.buffered(sorted, {fields: fields}, (err, res) => {
                     let hiddenElement = document.createElement('a');
                     hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(res);
                     hiddenElement.target = '_blank';

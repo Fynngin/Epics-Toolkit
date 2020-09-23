@@ -7,7 +7,12 @@
                 </b-button>
             </template>
             <template v-slot:cell(mintRange)="row">
-                {{row.item.mintBatch}}{{row.item.minMint}} - {{row.item.mintBatch}}{{row.item.maxMint}}
+                <template  v-if="row.item.signatures">
+                    Signatures
+                </template>
+                <template v-else>
+                    {{row.item.mintBatch}}{{row.item.minMint}} - {{row.item.mintBatch}}{{row.item.maxMint}}
+                </template>
             </template>
         </b-table>
     </b-modal>
@@ -20,6 +25,9 @@ export default {
     data() {
         return {
             fields: [
+                {key: 'market', label: 'Type', formatter: value => {
+                    return value ? 'Market' : 'User'
+                }},
                 {key: 'date', label: 'Date', formatter: value => {
                     let obj = new Date(value)
                         let date = obj.getFullYear()+'-'+(obj.getMonth()+1)+'-'+obj.getDate();
