@@ -143,7 +143,7 @@
 
 <script>
 import Sidebar from "@/components/Sidebar";
-import { VStepper } from 'vue-stepper-component'
+import {VStepper} from 'vue-stepper-component'
 import {acceptTrade, getCardIds, getCollections, getStickerIds, getTrades, searchUsers, sendTrade} from "@/api";
 
 export default {
@@ -288,7 +288,7 @@ export default {
             let endIdx = 50
             for (let i = 0; i < (cardids.length / 50); i++) {
                 let temp = cardids.slice(startIdx, endIdx)
-                this.idList.push(temp.map(elem => {
+                await this.idList.push(temp.map(elem => {
                     return {id: elem, type: 'card'}
                 }))
                 this.progress.grouping.progress++
@@ -299,34 +299,19 @@ export default {
             endIdx = 50
             for (let i = 0; i < (stickerids.length / 50); i++) {
                 let temp = stickerids.slice(startIdx, endIdx)
-                this.idList.push(temp.map(elem => {
+                await this.idList.push(temp.map(elem => {
                     return {id: elem, type: 'sticker'}
                 }))
                 this.progress.grouping.progress++
                 startIdx += 50
                 endIdx += 50
             }
-
-            // await getCardIds(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.category === 1 ? 2969 : 1883, this.$store.state.userdata.id).then(res => {
-            //     if (res.data.success) {
-            //         let arr = res.data.data
-            //         this.purples = arr.sort((a,b) => {
-            //             return b['cardIds'].length - a['cardIds'].length
-            //         })
-            //     }
-            // })
         },
         async sendTrades() {
             this.progress.sending = 0
             for (const batch of this.idList) {
-                // let entities = batch.concat([{id: this.purples[0]['cardIds'][0], type: 'card'}])
-                let entities = batch
-                // this.purples[0]['cardIds'].splice(0, 1)
-                await sendTrade(this.$store.state.userdata.jwt, this.$store.state.category, this.selectedUser.id, entities).then(res => {
+                await sendTrade(this.$store.state.userdata.jwt, this.$store.state.category, this.selectedUser.id, batch).then(res => {
                     if (res.data.success) {
-                        // this.purples = this.purples.sort((a,b) => {
-                        //     return b['cardIds'].length - a['cardIds'].length
-                        // })
                         this.progress.sending++
                     }
                 })
