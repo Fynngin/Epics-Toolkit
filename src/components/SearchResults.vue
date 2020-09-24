@@ -1,18 +1,28 @@
 <template>
     <b-modal title="Results" id="resultsModal" hide-footer @hidden="$emit('hidden', true)">
         <b-container v-if="!history">
-            <b-progress :max="max">
+            <b-progress v-if="!market && !history" :max="max">
                 <b-progress-bar :value="progress">
                     {{progress}} / {{max}}
                 </b-progress-bar>
             </b-progress>
             <p v-if="!done">
-                Search in progress... <br><strong>{{accsChecked}}</strong> accounts checked...
-                <b-badge v-b-tooltip:hover :title="progressInfo">?</b-badge>
+                <b-spinner v-if="!done && !history"/>
+                Search in progress... <br>
+                <template v-if="!market && !history">
+                    <strong>{{accsChecked}}</strong> accounts checked...
+                    <b-badge v-b-tooltip:hover :title="progressInfo">?</b-badge>
+                </template>
             </p>
             <p v-else>Done! Found {{progress}} of {{max}} cards!</p>
         </b-container>
-        <b-table :items="found" sort-by="mint" sort-asc sticky-header="true"></b-table>
+        <b-table :items="found" :fields="fields" sort-by="mint" sort-asc sticky-header="true">
+            <template v-slot:cell(view)="row" v-if="market">
+                <b-button variant="outline-dark" @click="openMarketPage(row.item)">
+                    <font-awesome-icon icon="search"/>
+                </b-button>
+            </template>
+        </b-table>
         <b-button variant="outline-dark" class="mb-2 w-100" @click="exportCSV">Export</b-button>
     </b-modal>
 </template>
@@ -26,6 +36,25 @@
                 progressInfo: 'Searching for items can take a while, due to api rate limitations. When it\'s done, '
                     + 'the text will say \'Done!\' and tell you how many items were found.',
                 jsoncsv: require('json-csv')
+            }
+        },
+        computed: {
+            fields() {
+                if (this.market) {
+                    return [
+                        {key: 'mint', label: 'Mint'},
+                        {key: 'name', label: 'Item'},
+                        {key: 'user', label: 'User'},
+                        {key: 'price', label: 'Price'},
+                        {key: 'view', label: ''},
+                    ]
+                } else {
+                    return [
+                        {key: 'mint', label: 'Mint'},
+                        {key: 'name', label: 'Item'},
+                        {key: 'user', label: 'User'}
+                    ]
+                }
             }
         },
         methods: {
@@ -56,6 +85,9 @@
                     hiddenElement.click();
                 })
 
+            },
+            openMarketPage(item) {
+                window.open(`https://app.epics.gg/csgo/marketplace/${item.type}/${item.templateId}/${item.marketId}`, '_blank')
             }
         }
     }
