@@ -137,7 +137,11 @@ import SearchHistory from "@/components/SearchHistory";
                 return this.cards.length === this.selected.length && this.stickers.length === this.selected.length
             },
             totalCards() {
-                return (this.selected.cards.length + this.selected.stickers.length) * (this.maxMint - this.minMint + 1)
+                if (this.marketResults) {
+                    return this.selected.cards.length + this.selected.stickers.length
+                } else {
+                    return (this.selected.cards.length + this.selected.stickers.length) * (this.maxMint - this.minMint + 1)
+                }
             }
         },
         methods: {
@@ -210,7 +214,10 @@ import SearchHistory from "@/components/SearchHistory";
                                             mint: `${item['card']['mintBatch']}${item['card']['mintNumber']}`,
                                             name: item['card']['cardTemplate'].title,
                                             user: item['user']['username'],
-                                            price: item['price']
+                                            price: item['price'],
+                                            type: 'card',
+                                            templateId: item['card']['cardTemplate'].id,
+                                            marketId: item['marketId']
                                         }
                                     }))
                                     page++
@@ -219,6 +226,7 @@ import SearchHistory from "@/components/SearchHistory";
                                 }
                             })
                         }
+                        this.cardsFound++
                     }
                     for (const sticker of this.selected.stickers) {
                         let done = false
@@ -234,7 +242,10 @@ import SearchHistory from "@/components/SearchHistory";
                                             mint: `${item['sticker']['mintBatch']}${item['sticker']['mintNumber']}`,
                                             name: item['sticker']['stickerTemplate'].title,
                                             user: item['user']['username'],
-                                            price: item['price']
+                                            price: item['price'],
+                                            type: 'sticker',
+                                            templateId: item['sticker']['stickerTemplate'].id,
+                                            marketId: item['marketId']
                                         }
                                     }))
                                     page++
@@ -243,7 +254,9 @@ import SearchHistory from "@/components/SearchHistory";
                                 }
                             })
                         }
+                        this.cardsFound++
                     }
+                    this.searchDone = true
                 } else {
                     this.marketResults = false
                     while (this.cardsFound < this.totalCards && !this.searchDone) {

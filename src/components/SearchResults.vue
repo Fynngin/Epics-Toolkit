@@ -1,20 +1,19 @@
 <template>
     <b-modal title="Results" id="resultsModal" hide-footer @hidden="$emit('hidden', true)">
         <b-container v-if="!history">
-            <b-progress v-if="!market && !history" :max="max">
-                <b-progress-bar :value="progress">
-                    {{progress}} / {{max}}
-                </b-progress-bar>
+            <b-progress :max="max" show-progress animated>
+                <b-progress-bar :value="progress"/>
             </b-progress>
             <p v-if="!done">
-                <b-spinner v-if="!done && !history"/>
+
                 Search in progress... <br>
                 <template v-if="!market && !history">
                     <strong>{{accsChecked}}</strong> accounts checked...
                     <b-badge v-b-tooltip:hover :title="progressInfo">?</b-badge>
                 </template>
             </p>
-            <p v-else>Done! Found {{progress}} of {{max}} cards!</p>
+            <p v-else-if="!market">Done! Found {{progress}} of {{max}} cards!</p>
+            <p v-else>Done!</p>
         </b-container>
         <b-table :items="found" :fields="fields" sort-by="mint" sort-asc sticky-header="true">
             <template v-slot:cell(view)="row" v-if="market">
