@@ -86,7 +86,7 @@
 
             },
             openMarketPage(item) {
-                window.open(`https://app.epics.gg/csgo/marketplace/${item.type}/${item.templateId}/${item.marketId}`, '_blank')
+                window.open(`https://app.epics.gg/${this.$store.state.category === 1 ? 'csgo' : 'streamers'}/marketplace/${item.type}/${item.templateId}/${item.marketId}`, '_blank')
             }
         }
     }
