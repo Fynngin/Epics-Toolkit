@@ -44,6 +44,32 @@ export function getCardTemplates(jwt, category, collectionId) {
     })
 }
 
+export function getCardsByTemplate(jwt, category, userId, templateId) {
+    return http(`https://api.epics.gg/api/v1/collections/users/${userId}/card-templates/${templateId}/cards`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
+
+export function getStickersByTemplate(jwt, category, userId, templateId) {
+    return http(`https://api.epics.gg/api/v1/collections/users/${userId}/sticker-templates/${templateId}/stickers`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
+
 export function getStickerTemplates(jwt, category, collectionId) {
     return http(`https://api.epics.gg/api/v1/collections/${collectionId}/sticker-templates`, {
         method: 'GET',
