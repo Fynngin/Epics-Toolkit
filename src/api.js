@@ -137,6 +137,20 @@ export function getStorePacks(jwt, category, page) {
     })
 }
 
+export function getUserPacks(jwt, category, page) {
+    return http("https://api.epics.gg/api/v1/packs/user", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            page: page
+        }
+    })
+}
+
 export function getPlayers(jwt, category) {
     return http("https://api.epics.gg/api/v1/players", {
         method: 'GET',

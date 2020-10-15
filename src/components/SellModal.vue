@@ -39,7 +39,8 @@
                 </b-collapse>
             </b-list-group-item>
             <b-list-group-item v-for="sticker in selected.stickers" :key="sticker.id">
-                <p class="font-weight-bold">{{sticker.name}}</p>
+                <p class="font-weight-bold" style="display: inline;">{{sticker.name}}</p>
+                <b-badge v-if="sticker.marketPrice" style="float: right;" variant="success">Price: {{sticker.marketPrice}}</b-badge>
                 <b-input-group prepend="Amount" :append="`max: ${sticker.max}`">
                     <b-form-input type="number" v-model="sticker.amount" :max="sticker.max" min="0"/>
                 </b-input-group>
@@ -56,6 +57,18 @@
                         </span>
                     </p>
                 </b-collapse>
+            </b-list-group-item>
+
+            <b-list-group-item v-for="pack in selected.packs" :key="pack.id">
+                <p class="font-weight-bold" style="display: inline;">{{pack.name}}</p>
+                <b-badge v-if="pack.marketPrice" style="float: right;" variant="success">Price: {{pack.marketPrice}}</b-badge>
+                <b-input-group prepend="Amount" :append="`max: ${pack.max}`">
+                    <b-form-input type="number" v-model="pack.amount" :max="pack.max" min="0"/>
+                </b-input-group>
+                <span>
+                    <b-spinner v-if="sellingSpinner.includes(pack.templateId)" class="mt-2" style="float: right"/>
+                    <font-awesome-icon v-else-if="sellingInProgress" icon="check-circle" class="mt-2" style="float: right; color: forestgreen" size="lg"/>
+                </span>
             </b-list-group-item>
         </b-list-group>
 
@@ -102,7 +115,7 @@ export default {
     },
     computed: {
         maxSets() {
-            let temp = this.selected.cards.concat(this.selected.stickers).map(el => el.max)
+            let temp = this.selected.cards.concat(this.selected.stickers).concat(this.selected.packs).map(el => el.max)
             return temp.reduce((a, b) => {
                 return Math.min(a, b)
             }, temp[0])
@@ -112,6 +125,7 @@ export default {
         selectSets() {
             this.selected.cards.forEach(card => card.amount = this.sets)
             this.selected.stickers.forEach(sticker => sticker.amount = this.sets)
+            this.selected.packs.forEach(pack => pack.amount = this.sets)
         },
         getLowestPrices() {
             this.showPriceSpinner = true
@@ -128,6 +142,13 @@ export default {
                     if (res.data.success)
                         if (res.data.data.total > 0)
                             sticker.marketPrice = res.data.data.market[0][0].price > 3 ? res.data.data.market[0][0].price - 1 : res.data.data.market[0][0].price
+                }))
+            })
+            this.selected.packs.forEach(pack => {
+                promises.push(getMarketListings(this.$store.state.userdata.jwt, this.$store.state.category, pack.templateId, "pack", 1).then(res => {
+                    if (res.data.success)
+                        if (res.data.data.total > 0)
+                            pack.marketPrice = res.data.data.market[0][0].price > 3 ? res.data.data.market[0][0].price - 1 : res.data.data.market[0][0].price
                 }))
             })
             Promise.all(promises).then(() => {
@@ -181,6 +202,29 @@ export default {
                 }
                 Promise.all(promises).then(() => {
                     this.sellingSpinner.splice(this.sellingSpinner.indexOf(sticker.templateId), 1)
+                    if (this.sellingSpinner.length === 0) {
+                        this.sellingInProgress = false
+                        this.sellingDone = true
+                    }
+                })
+            }
+            for (let pack of this.selected.packs) {
+                let promises = []
+                for (let i = 0; i < pack.amount; i++) {
+                    let item = pack.items[i]
+                    if (!pack.marketPrice) {
+                        await getMarketListings(this.$store.state.userdata.jwt, this.$store.state.category, pack.templateId, "pack", 1).then(res => {
+                            if (res.data.success)
+                                if (res.data.data.total > 0)
+                                    pack.marketPrice = res.data.data.market[0][0].price > 3 ? res.data.data.market[0][0].price - 1 : res.data.data.market[0][0].price
+                        })
+                    }
+                    promises.push(listItem(this.$store.state.userdata.jwt, this.$store.state.category, item.id, null, pack.marketPrice, "pack").then(() => {
+                        this.itemsSold++
+                    }))
+                }
+                Promise.all(promises).then(() => {
+                    this.sellingSpinner.splice(this.sellingSpinner.indexOf(pack.templateId), 1)
                     if (this.sellingSpinner.length === 0) {
                         this.sellingInProgress = false
                         this.sellingDone = true
