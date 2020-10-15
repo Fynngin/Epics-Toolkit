@@ -29,6 +29,13 @@ const router = new VueRouter({
             component: MassList,
             meta: {
                 requiresAuth: true
+            },
+            beforeEnter: (to, from, next) => {
+                if (store.getters.isMassListWhitelisted) {
+                    next()
+                } else {
+                    next('/')
+                }
             }
         },
         {

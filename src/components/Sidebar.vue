@@ -17,6 +17,8 @@
                 Dashboard
             </b-button>
             <b-button class="w-100" :variant="pageVariant('/masslist')" @click="$router.push('/masslist')">
+                <font-awesome-icon v-if="$store.getters.isMassListWhitelisted" icon="lock-open"/>
+                <font-awesome-icon v-else icon="lock"/>
                 Mass-List
             </b-button>
             <b-button class="w-100" :variant="pageVariant('/mintsearch')" @click="$router.push('/mintsearch')">

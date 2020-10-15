@@ -3,7 +3,7 @@ import Vuex from "vuex";
 import {getAppInfo, login} from "@/api";
 
 Vue.use(Vuex)
-
+const massListWhitelist = [32876, 78998]
 const store = new Vuex.Store({
     state: {
         authenticated: false,
@@ -28,6 +28,9 @@ const store = new Vuex.Store({
     getters: {
         isAuthenticated: (state) => {
             return state.authenticated
+        },
+        isMassListWhitelisted: (state) => {
+            return massListWhitelist.includes(state.userdata.id)
         }
     },
     actions: {
@@ -100,7 +103,6 @@ if (local) {
 }
 
 store.subscribe((mutation, state) => {
-    // console.log(state)
     localStorage.setItem('store', JSON.stringify(state));
 });
 

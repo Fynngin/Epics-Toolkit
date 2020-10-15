@@ -202,7 +202,17 @@
                 let promises = []
                 if (entities.includes('card')) {
                     await getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection.id).then(res => {
-                        res.data.success ? this.cards = res.data.data : this.cards = []
+                        if (res.data.success) {
+                            this.cards = res.data.data.map(it => {
+                                return {
+                                    id: it.id,
+                                    images: it.images,
+                                    title: it.title
+                                }
+                            })
+                        } else {
+                            this.cards = []
+                        }
                     })
                     for (let card of this.cards) {
                         promises.push(getCardsByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, card.id).then(res => {
@@ -213,6 +223,12 @@
                                         return b.mintNumber - a.mintNumber
                                     else
                                         return b.mintBatch.localeCompare(a.mintBatch)
+                                }).map(it => {
+                                    return {
+                                        mintBatch: it.mintBatch,
+                                        mintNumber: it.mintNumber,
+                                        id: it.id
+                                    }
                                 })
                                 card.selected = false
                             } else {
@@ -226,7 +242,17 @@
                 }
                 if (entities.includes('sticker')) {
                     await getStickerTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection.id).then(res => {
-                        res.data.success ? this.stickers = res.data.data : this.stickers = []
+                        if (res.data.success) {
+                            this.stickers = res.data.data.map(it => {
+                                return {
+                                    id: it.id,
+                                    images: it.images,
+                                    title: it.title
+                                }
+                            })
+                        } else {
+                            this.stickers = []
+                        }
                     })
                     for (let sticker of this.stickers) {
                         promises.push(getStickersByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, sticker.id).then(res => {
@@ -237,6 +263,12 @@
                                         return b.mintNumber - a.mintNumber
                                     else
                                         return b.mintBatch.localeCompare(a.mintBatch)
+                                }).map(it => {
+                                    return {
+                                        mintBatch: it.mintBatch,
+                                        mintNumber: it.mintNumber,
+                                        id: it.id
+                                    }
                                 })
                                 sticker.selected = false
                             } else {
