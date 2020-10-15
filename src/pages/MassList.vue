@@ -223,20 +223,26 @@
                 }
                 this.cards = []
                 this.stickers = []
+                let promises = []
                 if (entities.includes('card')) {
                     await getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, this.collection.id).then(res => {
                         res.data.success ? this.cards = res.data.data : this.cards = []
                     })
                     for (let card of this.cards) {
-                        await getCardsByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, card.id).then(res => {
+                        promises.push(getCardsByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, card.id).then(res => {
                             if (res.data.success && res.data.data.length > 0) {
                                 card.amount = res.data.data.length
-                                card.items = res.data.data
+                                card.items = res.data.data.sort((a,b) => {
+                                    if (a.mintBatch === b.mintBatch)
+                                        return b.mintNumber - a.mintNumber
+                                    else
+                                        return b.mintBatch.localeCompare(a.mintBatch)
+                                })
                                 card.selected = false
                             } else {
                                 this.cards.splice(this.cards.indexOf(card), 1)
                             }
-                        })
+                        }))
                     }
                     this.cards.sort((a,b) => {
                         return a.id - b.id
@@ -247,21 +253,26 @@
                         res.data.success ? this.stickers = res.data.data : this.stickers = []
                     })
                     for (let sticker of this.stickers) {
-                        await getStickersByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, sticker.id).then(res => {
+                        promises.push(getStickersByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, sticker.id).then(res => {
                             if (res.data.success && res.data.data.length > 0) {
                                 sticker.amount = res.data.data.length
-                                sticker.items = res.data.data
+                                sticker.items = res.data.data.sort((a,b) => {
+                                    if (a.mintBatch === b.mintBatch)
+                                        return b.mintNumber - a.mintNumber
+                                    else
+                                        return b.mintBatch.localeCompare(a.mintBatch)
+                                })
                                 sticker.selected = false
                             } else {
                                 this.stickers.splice(this.stickers.indexOf(sticker), 1)
                             }
-                        })
+                        }))
                     }
                     this.stickers.sort((a,b) => {
                         return a.id - b.id
                     })
                 }
-                this.spinner.cardImages = false
+                Promise.all(promises).then(() => {this.spinner.cardImages = false})
             },
             selectAll() {
                 if (this.type === "Packs") {
