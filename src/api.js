@@ -221,6 +221,25 @@ export function getMarketListings(jwt, category, templateId, type, page) {
     })
 }
 
+export function listItem(jwt, category, id, minOffer, price, type) {
+    return http("https://api.epics.gg/api/v1/market/list", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        },
+        data: {
+            'id': id,
+            'minOffer': minOffer,
+            'price': price,
+            'type': type
+        }
+    })
+}
+
 export function getTeams(jwt) {
     return http(`https://api.epics.gg/api/v1/teams`, {
         method: 'GET',

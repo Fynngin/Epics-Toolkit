@@ -97,7 +97,11 @@
             <b-progress :value="itemsSold" :max="totalItems" show-progress/>
         </b-modal>
 
-        <SellModal id="sellModal" :selected="selected"/>
+        <SellModal
+            id="sellModal"
+            :selected="selected"
+            @hide="$bvModal.hide('sellModal')"
+        />
     </div>
 </template>
 
@@ -117,7 +121,7 @@
                 season: null,
                 type: null,
                 typeOptions: [
-                    {text: 'Cards', value: 'Cards', disabled: false},
+                    {text: 'Cards / Stickers', value: 'Cards', disabled: false},
                     'Packs'
                 ],
                 collection: [],
