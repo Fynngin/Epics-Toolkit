@@ -121,7 +121,7 @@
                 </span>
             </b-button>
             <b-button v-if="!sellingDone" variant="outline-success" @click="sellItems">Sell</b-button>
-            <b-button v-if="sellingDone" variant="primary" @click="$emit('hide')">Done</b-button>
+            <b-button v-if="sellingDone" variant="primary" @click="$emit('saleDone')">Done</b-button>
         </template>
     </b-modal>
 </template>

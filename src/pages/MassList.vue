@@ -75,7 +75,7 @@
         <SellModal
             id="sellModal"
             :selected="selected"
-            @hide="$bvModal.hide('sellModal')"
+            @saleDone="reloadItems"
         />
     </div>
 </template>
@@ -125,6 +125,13 @@
             }
         },
         methods: {
+            reloadItems() {
+                this.$bvModal.hide('sellModal')
+                if (this.type === 'Packs')
+                    this.getPacks(1)
+                else
+                    this.loadCards(this.collection)
+            },
             getPacks(page) {
                 this.spinner.cardImages = true
                 if (page === 1) {
