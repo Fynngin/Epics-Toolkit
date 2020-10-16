@@ -39,10 +39,10 @@
                 <b-card border-variant="dark" v-if="type === 'Packs'">
                     <b-row :align-h="spinner.cardImages ? 'center' : 'start'">
                         <b-spinner v-if="spinner.cardImages"/>
-                        <b-col lg="2" md="4" sm="6" v-else v-for="pack in packs" :key="pack.id" class="mb-3">
+                        <b-col lg="2" md="4" sm="6" v-else v-for="pack in packs" :key="pack.templateId" class="mb-3">
                             <b-card @click="selectItem(pack, 'pack')" no-body>
                                 <Checkmark v-if="pack.selected" style="position: absolute;"/>
-                                <b-badge variant="info">x{{pack.amount}}</b-badge>
+                                <b-badge variant="info">x{{pack.max}}</b-badge>
                                 <b-card-img :src="pack.templateImage"/>
                             </b-card>
                         </b-col>
@@ -52,17 +52,17 @@
                     <b-row :align-h="spinner.cardImages ? 'center' : 'start'">
                         <b-spinner v-if="spinner.cardImages"/>
                         <b-row v-else align-h="start">
-                            <b-col lg="2" md="4" sm="6" v-for="card in cards" :key="card.id" class="mb-3">
+                            <b-col lg="2" md="4" sm="6" v-for="card in cards" :key="card.templateId" class="mb-3">
                                 <b-card @click="selectItem(card, 'card')" no-body>
                                     <Checkmark v-if="card.selected" style="position: absolute;"/>
-                                    <b-badge variant="info">{{card.amount}}x</b-badge>
+                                    <b-badge variant="info">{{card.max}}x</b-badge>
                                     <b-card-img :src="card.images['size402']"/>
                                 </b-card>
                             </b-col>
-                            <b-col lg="2" md="4" sm="6" v-for="sticker in stickers" :key="sticker.id" class="mb-3">
+                            <b-col lg="2" md="4" sm="6" v-for="sticker in stickers" :key="sticker.templateId" class="mb-3">
                                 <b-card @click="selectItem(sticker, 'sticker')" no-body>
                                     <Checkmark v-if="sticker.selected" style="position: absolute;"/>
-                                    <b-badge variant="info">{{sticker.amount}}x</b-badge>
+                                    <b-badge variant="info">{{sticker.max}}x</b-badge>
                                     <b-card-img :src="`${$store.state.cdnUrl}${sticker.images[1].url}`"/>
                                 </b-card>
                             </b-col>
@@ -71,10 +71,6 @@
                 </b-card>
             </b-col>
         </b-row>
-
-        <b-modal id="progressModal" :title="spinner.selling ? 'Selling in progress...' : 'Done!'" hide-footer>
-            <b-progress :value="itemsSold" :max="totalItems" show-progress/>
-        </b-modal>
 
         <SellModal
             id="sellModal"
@@ -128,20 +124,16 @@
                 itemsSold: 0
             }
         },
-        computed: {
-            totalItems() {
-                // let total = 0
-                // this.selected.forEach(template => {
-                //     total += template.sellCount
-                // })
-                return 0;
-            }
-        },
         methods: {
             getPacks(page) {
                 this.spinner.cardImages = true
                 if (page === 1) {
                     this.packs = []
+                    this.selected = {
+                        packs: [],
+                        cards: [],
+                        stickers: []
+                    }
                 }
                 if (this.type === 'Packs') {
                     getUserPacks(this.$store.state.userdata.jwt, this.$store.state.category, page).then(res => {
@@ -159,19 +151,20 @@
             sortPacks() {
                 let sorted = []
                 this.packs.forEach(pack => {
-                    let template = sorted.find(s => {return s.id === pack['packTemplate'].id})
+                    let template = sorted.find(s => {return s.templateId === pack['packTemplate'].id})
                     if (template) {
                         template.items.push({
                             id: pack.id,
                             created: new Date(pack.created)
                         })
-                        template.amount++
+                        template.max++
                     } else {
                         sorted.push({
                             selected: false,
-                            id: pack['packTemplate'].id,
+                            templateId: pack['packTemplate'].id,
                             templateImage: `https://cdn.epics.gg${pack['packTemplate'].images[0].url}`,
-                            title: pack['packTemplate'].name,
+                            name: pack['packTemplate'].name,
+                            max: 1,
                             amount: 1,
                             items: [{
                                 id: pack.id,
@@ -205,9 +198,10 @@
                         if (res.data.success) {
                             this.cards = res.data.data.map(it => {
                                 return {
-                                    id: it.id,
+                                    templateId: it.id,
                                     images: it.images,
-                                    title: it.title
+                                    name: it.title,
+                                    amount: 1
                                 }
                             })
                         } else {
@@ -215,15 +209,15 @@
                         }
                     })
                     for (let card of this.cards) {
-                        promises.push(getCardsByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, card.id).then(res => {
+                        promises.push(getCardsByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, card.templateId).then(res => {
                             if (res.data.success && res.data.data.length > 0) {
-                                card.amount = res.data.data.length
+                                card.max = res.data.data.length
                                 card.items = res.data.data.sort((a,b) => {
                                     if (a.mintBatch === b.mintBatch)
                                         return b.mintNumber - a.mintNumber
                                     else
                                         return b.mintBatch.localeCompare(a.mintBatch)
-                                }).map(it => {
+                                }).filter(it => !it['isMarketList']).map(it => {
                                     return {
                                         mintBatch: it.mintBatch,
                                         mintNumber: it.mintNumber,
@@ -245,9 +239,10 @@
                         if (res.data.success) {
                             this.stickers = res.data.data.map(it => {
                                 return {
-                                    id: it.id,
+                                    templateId: it.id,
                                     images: it.images,
-                                    title: it.title
+                                    name: it.title,
+                                    amount: 1
                                 }
                             })
                         } else {
@@ -255,9 +250,9 @@
                         }
                     })
                     for (let sticker of this.stickers) {
-                        promises.push(getStickersByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, sticker.id).then(res => {
+                        promises.push(getStickersByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, sticker.templateId).then(res => {
                             if (res.data.success && res.data.data.length > 0) {
-                                sticker.amount = res.data.data.length
+                                sticker.max = res.data.data.length
                                 sticker.items = res.data.data.sort((a,b) => {
                                     if (a.mintBatch === b.mintBatch)
                                         return b.mintNumber - a.mintNumber
@@ -319,33 +314,12 @@
                 this.$forceUpdate();
             },
             selectItem(item, type) {
-                let obj = {
-                    name: item.title,
-                    items: item.items,
-                    max: item.amount,
-                    templateId: item.id,
-                    amount: 1
-                }
                 item.selected = !item.selected
-                switch (type) {
-                    case "card":
-                        if (item.selected)
-                            this.selected.cards.push(obj)
-                        else
-                            this.selected.cards.splice(this.selected.cards.indexOf(item), 1)
-                        break;
-                    case "sticker":
-                        if (item.selected)
-                            this.selected.stickers.push(obj)
-                        else
-                            this.selected.stickers.splice(this.selected.stickers.indexOf(item), 1)
-                        break;
-                    case "pack":
-                        if (item.selected)
-                            this.selected.packs.push(obj)
-                        else
-                            this.selected.packs.splice(this.selected.packs.indexOf(item), 1)
-                        break;
+                if (item.selected)
+                    this.selected[type+'s'].push(item)
+                else {
+                    let idx = this.selected[type+'s'].indexOf(this.selected[type+'s'].find(el => el.templateId === item.templateId))
+                    this.selected[type+'s'].splice(idx, 1)
                 }
                 this.$forceUpdate();
             }
