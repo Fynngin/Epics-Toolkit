@@ -29,13 +29,6 @@ const router = new VueRouter({
             component: MassList,
             meta: {
                 requiresAuth: true
-            },
-            beforeEnter: (to, from, next) => {
-                if (store.getters.isMassListWhitelisted) {
-                    next()
-                } else {
-                    next('/')
-                }
             }
         },
         {
@@ -65,8 +58,17 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
     if(to.matched.some(record => record.meta.requiresAuth)) {
         if (store.getters.isAuthenticated) {
-            next()
-            return
+            if (to['path'] === '/masslist') {
+                if (store.getters.isMassListWhitelisted) {
+                    next()
+                    return
+                } else {
+                    return
+                }
+            } else {
+                next()
+                return
+            }
         }
         next('/login')
     } else {
