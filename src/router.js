@@ -7,6 +7,7 @@ import MassList from "./pages/MassList";
 import MintSearch from "./pages/MintSearch";
 import TeamBuilder from "@/pages/TeamBuilder";
 import AccountTransfer from "@/pages/AccountTransfer";
+import RushWeeklies from "@/pages/RushWeeklies";
 
 Vue.use(VueRouter)
 
@@ -41,6 +42,13 @@ const router = new VueRouter({
         {
             path: '/teambuilder',
             component: TeamBuilder,
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/rushweeklies',
+            component: RushWeeklies,
             meta: {
                 requiresAuth: true
             }

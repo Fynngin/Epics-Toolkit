@@ -360,6 +360,96 @@ export function sendTrade(jwt, category, userId, entities) {
             user2Balance: 0,
             entities: entities
         })
+    })
+}
 
+export function getCircuit(jwt, category, circuitId) {
+    return http(`https://api.epics.gg/api/v1/ultimate-team/circuits/${circuitId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
+
+export function getRushAchievements(jwt, category, userId) {
+    return http(`https://api.epics.gg/api/v1/achievements/${userId}/user`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            'subGroup': 'ut_game'
+        }
+    })
+}
+
+export function getUserRosters(jwt, category, userId) {
+    return http(`https://api.epics.gg/api/v1/ultimate-team/rosters`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            'userId': userId
+        }
+    })
+}
+
+export function getRostersById(jwt, category, rosterIds) {
+    return http(`https://api.epics.gg/api/v1/ultimate-team/pve/rosters`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            'ids': rosterIds
+        }
+    })
+}
+
+export function getTotw(jwt, category) {
+    return http(`https://api.epics.gg/api/v1/ultimate-team/pve/rosters`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category,
+            'tier': 'team_of_the_week'
+        }
+    })
+}
+
+export function playRushPve(jwt, category, circuitId, stageId, bannedMaps, rosterId, enemyRosterId, isTotw) {
+    let data = {
+        categoryId: category,
+        rosterId: rosterId,
+        enemyRosterId: enemyRosterId,
+        bannedMapIds: bannedMaps
+    }
+    if (!isTotw)
+        data.circuit = {
+            id: circuitId,
+            stageId: stageId
+        }
+    return http(`https://api.epics.gg/api/v1/ultimate-team/pve/games`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        data: JSON.stringify(data)
     })
 }

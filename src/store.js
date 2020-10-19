@@ -22,6 +22,7 @@ const store = new Vuex.Store({
             2: 'First Edition'
         },
         rushSeason: '2020',
+        coreCircuitId: 35,
         seasons: [],
         savedSearches: []
     },
