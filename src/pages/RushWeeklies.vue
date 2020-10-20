@@ -60,12 +60,18 @@
                         <b-col cols="2">
                             <b-list-group>
                                 <b-list-group-item>
-                                    <h5><strong>Team:</strong></h5>
-                                    <span>{{achievement.roster.name}}</span>
+                                    <b-row align-v="center">
+                                        <h5><strong>Team: &#160; </strong></h5>
+                                        {{achievement.roster.name}}
+                                    </b-row>
                                 </b-list-group-item>
                                 <b-list-group-item>
-                                    <h5><strong>Stage:</strong></h5>
-                                    <span>{{achievement.stageName}}</span>
+                                    <b-row align-v="center">
+                                        <h5 style="float: left;"><strong>Stage:</strong></h5>
+                                        <b-img v-if="achievement.stageBadge" style="height: 60px; float: right" :src="achievement.stageBadge"/>
+                                        <span v-else>TOTW</span>
+                                    </b-row>
+
                                 </b-list-group-item>
                             </b-list-group>
                         </b-col>
@@ -186,6 +192,7 @@ export default {
                     ach.stageName = temp[0].match("[a-zA-Z ]+")[0]
                     let stage = this.stages.find(stage => stage.name === ach.stageName)
                     ach.stageId = stage.id
+                    ach.stageBadge = `${this.$store.state.cdnUrl}${stage.images[0].url}`
                     ach.stageRosters = stage['rosters']
                     let rosterIds = ach.stageRosters.map(el => el['ut_pve_roster_id'])
                     await getRostersById(this.$store.state.userdata.jwt, this.$store.state.category, JSON.stringify(rosterIds).replace(/(\[|\])/g, "")).then(res => {
