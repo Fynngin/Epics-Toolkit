@@ -32,6 +32,15 @@
         <b-row>
             <b-col v-if="teamsReady" cols="7">
                 <b-card class="mb-2 ml-2" border-variant="dark" v-for="achievement in filteredAchievements" :key="achievement.id">
+                    <b-row class="mb-2">
+                        <b-col>
+                            <b-progress :max="achievement.progress.max" :variant="achievement.progress.min < achievement.progress.max ? 'primary' : 'success'">
+                                <b-progress-bar :value="achievement.progress.min">
+                                    {{achievement.progress.min}} / {{achievement.progress.max}}
+                                </b-progress-bar>
+                            </b-progress>
+                        </b-col>
+                    </b-row>
                     <b-row align-v="center">
                         <b-col cols="1">
                             <b-img
@@ -44,7 +53,7 @@
                             <b-img
                                 class="team_card"
                                 v-for="card in achievement.roster.cards"
-                                :key="card['roleId']"
+                                :key="card['card'].id"
                                 :src="card['card'].images['size402']"
                             />
                         </b-col>
@@ -63,11 +72,12 @@
                         <b-col>
                             <b-button
                                 size="lg"
-                                :active="selectedUserRoster !== null"
-                                :variant="selectedUserRoster === null ? 'secondary' : 'outline-success'"
+                                :disabled="!selectedUserRoster || gameDelay"
+                                :variant="!selectedUserRoster || gameDelay ? 'secondary' : 'outline-success'"
                                 @click="playMatch(achievement)"
                             >
-                                Play
+                                <b-spinner v-if="gameDelay"/>
+                                <span v-else>Play</span>
                             </b-button>
                         </b-col>
                     </b-row>
@@ -82,16 +92,16 @@
                         :active="selectedUserRoster === roster.id"
                         v-for="(roster, idx) in userRosters"
                         :key="idx">
-                        <b-row>
+                        <b-row align-v="center">
                             <b-col cols="3">
                                 <h3>{{roster.name}}</h3>
-                                <h5>Rating: <strong>{{roster['rating']}}</strong></h5>
+                                <RushRating :rating="roster.rating"/>
                             </b-col>
                             <b-col>
                                 <b-img
                                     class="team_card"
                                     v-for="card in roster.cards"
-                                    :key="card['roleId']"
+                                    :key="card['card'].id"
                                     :src="card['card'].images['size402']"
                                 />
                             </b-col>
@@ -118,9 +128,10 @@ import {
     playRushPve
 } from "@/api";
 import FeedbackToast from "@/components/FeedbackToast";
+import RushRating from "@/components/RushRating";
 export default {
     name: "RushWeeklies",
-    components: {FeedbackToast, Sidebar},
+    components: {RushRating, FeedbackToast, Sidebar},
     data() {
         return {
             teamsReady: false,
@@ -134,7 +145,8 @@ export default {
             filteredAchievements: [],
             toastTitle: "",
             toastType: "",
-            toastDescription: ""
+            toastDescription: "",
+            gameDelay: false
         }
     },
     async created() {
@@ -203,11 +215,19 @@ export default {
         playMatch(achievement) {
             let isTotw = achievement.stageName === "TOTW"
             playRushPve(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.coreCircuitId, achievement.stageId, this.bannedMaps, this.selectedUserRoster, achievement.roster.id, isTotw).then(res => {
-                console.log(res)
+                if (res.data.success) {
+                    if (res.data.data['game']['user1']['winner'] && achievement.progress.min < achievement.progress.max)
+                        achievement.progress.min++
+                    this.gameDelay = true
+                    window.setTimeout(() => this.gameDelay = false, 2000)
+                }
             }).catch(err => {
                 this.toastType = "error"
                 if (err.response.data['errorCode'] === "invalid_number_of_ut_map_bans") {
                     this.toastTitle = "Invalid Map Bans"
+                    this.toastDescription = err.response.data.error
+                } else if (err.response.data['errorCode'] === "ut_game_in_progress") {
+                    this.toastTitle = "You are clicking too fast."
                     this.toastDescription = err.response.data.error
                 } else if (!this.selectedUserRoster) {
                     this.toastTitle = "Invalid Roster Selection"
