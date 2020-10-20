@@ -15,7 +15,7 @@ const store = new Vuex.Store({
             id: null,
             avatar: null
         },
-        whaleId: 26108,
+        whaleId: 93233,
         category: 1,
         currentSeasons: {
             1: '2020',
