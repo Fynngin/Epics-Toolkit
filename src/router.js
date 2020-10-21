@@ -8,6 +8,7 @@ import MintSearch from "./pages/MintSearch";
 import TeamBuilder from "@/pages/TeamBuilder";
 import AccountTransfer from "@/pages/AccountTransfer";
 import RushWeeklies from "@/pages/RushWeeklies";
+import PackOpener from "@/pages/PackOpener";
 
 Vue.use(VueRouter)
 
@@ -56,6 +57,13 @@ const router = new VueRouter({
         {
             path: '/accounttransfer',
             component: AccountTransfer,
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/packopener',
+            component: PackOpener,
             meta: {
                 requiresAuth: true
             }

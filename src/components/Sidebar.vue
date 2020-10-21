@@ -33,6 +33,9 @@
             <b-button class="w-100" :variant="pageVariant('/accounttransfer')" @click="$router.push('/accounttransfer')">
                 Account Transfer
             </b-button>
+            <b-button class="w-100" :variant="pageVariant('/packopener')" @click="$router.push('/packopener')">
+                Pack Opener
+            </b-button>
         </b-row>
     </b-sidebar>
 </template>
