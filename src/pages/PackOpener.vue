@@ -66,16 +66,16 @@ export default {
             this.packs.forEach(pack => {
                 pack.created = pack.created.split('T')[0]
             })
-            let temp = groupBy(this.packs, 'created')
-            for (const key in temp) {
-                let test = groupBy(temp[key], 'packTemplate.name')
-                for (const it in test) {
+            let groupByDate = groupBy(this.packs, 'created')
+            for (const key in groupByDate) {
+                let groupByName = groupBy(groupByDate[key], 'packTemplate.name')
+                for (const it in groupByName) {
                     res.push({
-                        items: test[it].map(el => el.id),
+                        items: groupByName[it].map(el => el.id),
                         id: Math.floor(Math.random() * 10000000),
                         startDate: new Date(key),
                         title: it,
-                        image: `${this.$store.state.cdnUrl}${test[it][0]['packTemplate']['images'][0].url}`
+                        image: `${this.$store.state.cdnUrl}${groupByName[it][0]['packTemplate']['images'][0].url}`
                     })
                 }
             }
