@@ -112,11 +112,20 @@ export default {
             toastDescription: "",
         }
     },
+    watch: {
+        category() {
+            this.packs = []
+            this.getPacks(1)
+        }
+    },
     mounted() {
         this.packs = []
         this.getPacks(1)
     },
     computed: {
+        category() {
+            return this.$store.state.category
+        },
         filteredPacks() {
             return this.packs.filter(pack => {
                 if (this.search.length > 0)
