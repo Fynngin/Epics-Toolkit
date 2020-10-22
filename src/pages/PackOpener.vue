@@ -18,7 +18,9 @@
         <b-row class="ml-2">
             <b-col class="mb-2">
                 <div class="calendar-parent">
+                    <b-spinner v-if="spinner"/>
                     <calendar-view
+                        v-else
                         class="theme-default"
                         :items="filteredPacks"
                         :startingDayOfWeek="1"
@@ -38,7 +40,7 @@
             </b-col>
         </b-row>
 
-        <b-row class="ml-2" v-if="selectedItem">
+        <b-row class="ml-2 mb-2" v-if="selectedItem">
             <b-col>
                 <b-card border-variant="dark">
                     <b-row>
@@ -54,20 +56,37 @@
                             <h5>Amount to open:</h5>
                             <b-form-input type="range" min="1" :max="selectedItem.items.length" v-model="openAmount"/>
                             <b-form-input type="number" min="1" :max="selectedItem.items.length" v-model="openAmount"/>
-                            <b-button class="mt-2" variant="outline-success">Open</b-button>
+                            <b-button class="mt-2" variant="outline-success" @click="openPacks">Open</b-button>
                         </b-col>
                     </b-row>
                 </b-card>
             </b-col>
         </b-row>
 
+        <b-row class="ml-2" v-if="opening">
+            <b-col>
+                <b-card border-variant="dark">
+                    <b-row>
+                        <b-row align-h="start">
+                            <b-col class="mb-2" v-for="item in newItems" :key="item.id">
+                                <b-img v-if="item['cardTemplate']" :src="item.images['size402']" style="height: 200px"/>
+                                <b-img v-else :src="`${$store.state.cdnUrl}${item['stickerTemplate'].images[1].url}`" style="height: 200px"/>
+                            </b-col>
+                        </b-row>
+                    </b-row>
+                </b-card>
+            </b-col>
+        </b-row>
+
+        <FeedbackToast id="feedback-toast" :title="toastTitle" :type="toastType" :description="toastDescription"/>
     </div>
 </template>
 
 <script>
 import { CalendarView, CalendarViewHeader } from "vue-simple-calendar"
 import Sidebar from "@/components/Sidebar";
-import {getUserPacks} from "@/api";
+import FeedbackToast from "@/components/FeedbackToast";
+import {getUserPacks, openPack} from "@/api";
 import {groupBy} from 'lodash';
 
 export default {
@@ -75,7 +94,8 @@ export default {
     components: {
         CalendarView,
         CalendarViewHeader,
-        Sidebar
+        Sidebar,
+        FeedbackToast
     },
     data() {
         return {
@@ -83,7 +103,13 @@ export default {
             showDate: new Date(),
             search: "",
             selectedItem: null,
-            openAmount: 1
+            openAmount: 1,
+            opening: false,
+            newItems: [],
+            spinner: false,
+            toastTitle: "",
+            toastType: "",
+            toastDescription: "",
         }
     },
     mounted() {
@@ -110,6 +136,7 @@ export default {
     },
     methods: {
         getPacks(page) {
+            this.spinner = true
             getUserPacks(this.$store.state.userdata.jwt, this.$store.state.category, page).then(res => {
                 if (res.data.success) {
                     if (res.data.data.count > 0) {
@@ -141,12 +168,41 @@ export default {
                 }
             }
             this.packs = res
+            this.spinner = false
         },
         setShowDate(d) {
             this.showDate = d
         },
         onClickItem(item) {
             this.selectedItem = item.originalItem
+        },
+        openPacks() {
+            this.opening = true
+            this.newItems = []
+            let promises = []
+            for (let i = 0; i < this.openAmount; i++) {
+                let packId = this.selectedItem.items[i]
+                promises.push(openPack(this.$store.state.userdata.jwt, this.$store.state.category, packId).then(res => {
+                    if (res.data.success) {
+                        this.newItems = this.newItems.concat(res.data.data.cards).concat(res.data.data.stickers)
+                    }
+                }).catch(err => {
+                    this.toastType = "error"
+                    if (err.response.data['errorCode'] === "pack_already_opened") {
+                        this.toastTitle = "Pack already opened."
+                        this.toastDescription = err.response.data.error
+                    } else {
+                        this.toastTitle = "Error 404"
+                        this.toastDescription = "Ooops... Something went wrong"
+                    }
+                    this.$bvToast.show("feedback-toast")
+                }))
+            }
+            Promise.all(promises).then(() => {
+                this.selectedItem.items.splice(0, this.openAmount)
+                this.packs = []
+                this.getPacks(1)
+            })
         }
     }
 }

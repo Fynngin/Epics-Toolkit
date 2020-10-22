@@ -453,3 +453,19 @@ export function playRushPve(jwt, category, circuitId, stageId, bannedMaps, roste
         data: JSON.stringify(data)
     })
 }
+
+export function openPack(jwt, category, packId) {
+    return http(`https://api.epics.gg/api/v1/packs/open2`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+        'categoryId': category
+        },
+        data: JSON.stringify({
+            packId: packId
+        })
+    })
+}
