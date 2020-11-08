@@ -205,7 +205,7 @@ export default {
                     })
                 } else {
                     ach.stageName = "TOTW"
-                    getTotw(this.$store.state.userdata.jwt, this.$store.state.category).then(res => {
+                    await getTotw(this.$store.state.userdata.jwt, this.$store.state.category).then(res => {
                         if (res.data.success)
                             ach.roster = res.data.data['rosters'].find(r => new Date(r.start) < Date.now())
                     })
