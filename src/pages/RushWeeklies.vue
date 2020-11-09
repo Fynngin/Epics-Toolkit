@@ -198,7 +198,9 @@ export default {
                     await getRostersById(this.$store.state.userdata.jwt, this.$store.state.category, JSON.stringify(rosterIds).replace(/(\[|\])/g, "")).then(res => {
                         if (res.data.success) {
                             let rosters = res.data.data['rosters']
-                            ach.roster = rosters.find(roster => ach.description.match(roster.name))
+                            ach.roster = rosters.find(roster => {
+                                return ach.description.toUpperCase().match(roster.name.toUpperCase())
+                            })
                             ach.roster.logoUrl = this.teams.find(team => team.id === ach.roster.teamId).images
                                 .find(im => im.name === "team_logo").url
                         }
