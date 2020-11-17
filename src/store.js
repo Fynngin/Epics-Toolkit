@@ -1,6 +1,8 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import {getAppInfo, login} from "@/api";
+import firebase from "./firebaseConfig";
+const db = firebase.firestore();
 
 Vue.use(Vuex)
 const massListWhitelist = [32876, 78998, 140880, 26108]
@@ -40,11 +42,20 @@ const store = new Vuex.Store({
                 login(auth).then(response => {
                     if (response.status === 200 && response.data.success === true) {
                         let data = {
-                            jwt: response.data.data.jwt,
                             username: response.data.data.user.username,
                             id: response.data.data.user.id,
                             avatar: `http://cdn.epics.gg${response.data.data.user.avatar}`,
                         }
+                        db.collection("users")
+                            .doc(data.id.toString())
+                            .set(data)
+                            .then(() => {
+                                console.log("Document successfully written!");
+                            })
+                            .catch((error) => {
+                                console.error("Error writing document: ", error);
+                            });
+                        data.jwt = response.data.data.jwt
                         commit('authenticate', data)
                         resolve()
                     } else {
