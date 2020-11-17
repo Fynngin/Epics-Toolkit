@@ -3,7 +3,7 @@ import Vuex from "vuex";
 import {getAppInfo, login} from "@/api";
 
 Vue.use(Vuex)
-const massListWhitelist = [32876, 78998]
+const massListWhitelist = [32876, 78998, 140880, 26108]
 const store = new Vuex.Store({
     state: {
         authenticated: false,
