@@ -24,7 +24,8 @@ const store = new Vuex.Store({
         rushSeason: '2020',
         coreCircuitId: 35,
         seasons: [],
-        savedSearches: []
+        savedSearches: [],
+        noUndercutMarketAt: 3
     },
     getters: {
         isAuthenticated: (state) => {

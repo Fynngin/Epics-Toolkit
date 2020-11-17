@@ -14,7 +14,7 @@
                 :max="maxSets"
                 @input="selectSets"
             ></b-form-input>
-            <p>Amount: {{ sets }} {{sets == 1 ? 'set' : 'sets'}}</p>
+            <p>r: {{ sets }} {{sets == 1 ? 'set' : 'sets'}}</p>
         </b-collapse>
 
         <b-list-group v-if="!sellingDone" style="max-height: 300px; overflow: scroll;">

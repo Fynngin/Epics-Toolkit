@@ -12,7 +12,8 @@
                     <b-form inline>
                         <b-button variant="outline-dark" class="mr-2" @click="selectAll">Select all</b-button>
                         <b-button variant="outline-dark" class="mr-2" @click="deselectAll">Deselect all</b-button>
-                        <b-button v-b-modal.sellModal variant="outline-success">Sell</b-button>
+                        <b-button v-b-modal.sellModal variant="outline-success" class="mr-2">Sell</b-button>
+                        <b-button v-b-modal.updateModal variant="outline-success">Update Listings</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -77,6 +78,9 @@
             :selected="selected"
             @saleDone="reloadItems"
         />
+        <UpdateModal
+            id="updateModal"
+        />
     </div>
 </template>
 
@@ -92,10 +96,11 @@
         getUserPacks
     } from "@/api";
     import SellModal from "@/components/SellModal";
+    import UpdateModal from "@/components/UpdateModal";
 
     export default {
         name: "MassList",
-        components: {SellModal, CollectionSelect, Sidebar, Checkmark},
+        components: {UpdateModal, SellModal, CollectionSelect, Sidebar, Checkmark},
         data() {
             return {
                 season: null,
@@ -218,20 +223,23 @@
                     for (let card of this.cards) {
                         promises.push(getCardsByTemplate(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id, card.templateId).then(res => {
                             if (res.data.success && res.data.data.length > 0) {
-                                card.max = res.data.data.length
                                 card.items = res.data.data.sort((a,b) => {
                                     if (a.mintBatch === b.mintBatch)
                                         return b.mintNumber - a.mintNumber
                                     else
                                         return b.mintBatch.localeCompare(a.mintBatch)
-                                }).filter(it => !it['isMarketList']).map(it => {
+                                }).filter(it => !it['isMarketList'] && !it['signatureImage']).map(it => {
                                     return {
                                         mintBatch: it.mintBatch,
                                         mintNumber: it.mintNumber,
                                         id: it.id
                                     }
                                 })
+                                card.max = card.items.length
                                 card.selected = false
+                                if (card.max === 0) {
+                                    this.cards.splice(this.cards.indexOf(card), 1)
+                                }
                             } else {
                                 this.cards.splice(this.cards.indexOf(card), 1)
                             }
