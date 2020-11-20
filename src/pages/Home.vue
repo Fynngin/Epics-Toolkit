@@ -9,6 +9,7 @@
         <b-row>
             <b-col>
                 <b-card border-variant="dark" class="mb-2 ml-2">
+                    <b-button variant="primary" @click="testquery">Test query</b-button>
                     <b-button variant="primary" @click="reloadTeamDatabase">Reload Teams</b-button>
                     <b-button variant="primary" class="ml-2" @click="reloadPlayerDatabase">Reload Players</b-button>
                     <b-button variant="primary" class="ml-2" @click="reloadTemplateDatabase">Reload Card Templates</b-button>
@@ -101,6 +102,7 @@
                     if (res.data.success) {
                         let players = res.data.data.players
                         for (const player of players) {
+                            player.cardTemplates = []
                             db.collection("players")
                                 .doc(player.id.toString())
                                 .set(player, {merge: true})
@@ -109,12 +111,13 @@
                 })
             },
             reloadTemplateDatabase() {
-                for (const season of this.$store.state.seasons) {
+                for (const season of ['2020']) {
                     getCollections(this.$store.state.userdata.jwt, this.$store.state.category, season, this.$store.state.userdata.id).then(res => {
                         if (res.data.success) {
                             for (const collection of res.data.data) {
                                 let collId = collection.collection.id
-                                getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, collId).then(res => {
+                                let collCardTemplates = []
+                                getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, collId).then(async res => {
                                     if (res.data.success) {
                                         let templates = res.data.data
                                         for (const template of templates) {
@@ -124,17 +127,42 @@
                                                 template.team = db.doc('teams/' + template.team.id)
                                             }
 
-                                            db.collection("cardTemplates")
+                                            await db.collection("cardTemplates")
                                                 .doc(template.id.toString())
                                                 .set(template, {merge: true})
+
+                                            let newTemplates = await (template.player.get()).data().cardTemplates
+                                            newTemplates.push(db.doc('cardTemplates/' + template.id))
+                                            await template.player.set({cardTemplates: newTemplates}, {merge: true})
+
+                                            collCardTemplates.push(db.doc('cardTemplates/' + template.id))
                                         }
-                                        console.log(collId)
+
+                                        collection.collection.cardTemplates = collCardTemplates
+                                        await db.collection("collections")
+                                            .doc(collId.toString())
+                                            .set(collection.collection, {merge: true})
+
+                                        console.log(collection.id)
                                     }
                                 })
                             }
                         }
                     })
                 }
+            },
+            async testquery() {
+                // let player = db.collection('players').doc('33')
+                // let query = db.collection("cardTemplates").where("player", "==", player)
+                // query.get().then(res => {
+                //     console.log(res.docs.map(el => el.data()))
+                // })
+
+                let template = (await db.collection("cardTemplates").doc("1").get()).data()
+                console.log((await template.player.get()).data().cardTemplates[0])
+                let player = (await template.player.get())
+                template.player.set({cardTemplates: [db.doc('cardTemplates/' + template.id)]}, {merge: true})
+                console.log(player)
             }
         }
     }
