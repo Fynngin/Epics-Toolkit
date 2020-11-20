@@ -4,6 +4,7 @@
             <b-col>
                 <p v-if="spinner.userStickerListings || spinner.userCardListings">Getting user listings...</p>
                 <p v-else-if="spinner.getMarketPrice">Getting new market prices...</p>
+                <p v-else-if="spinner.updateListings">Updating market listings...</p>
                 <b-progress v-if="spinner.userCardListings" :max="max.userCardListings">
                     <b-progress-bar :value="progress.userCardListings">
                         {{progress.userCardListings}} / {{max.userCardListings}}
@@ -21,6 +22,12 @@
                         {{progress.getMarketPrice}} / {{Object.keys(listings).length}}
                     </b-progress-bar>
                 </b-progress>
+
+                <b-progress v-else-if="spinner.updateListings" :max="Object.keys(listingsToUpdate).length">
+                    <b-progress-bar :value="progress.updateListings">
+                        {{progress.updateListings}} / {{Object.keys(listingsToUpdate).length}}
+                    </b-progress-bar>
+                </b-progress>
             </b-col>
         </b-row>
 
@@ -28,10 +35,21 @@
             <b-col>
                 <b-list-group style="max-height: 300px; overflow: scroll;">
                     <b-list-group-item v-for="(listing, idx) in listingsToUpdate" :key="idx">
-                        <h5>{{listing.items[0].name}}</h5>
-                        {{listing.items[0].price}}
-                        <font-awesome-icon class="mr-2 ml-2" icon="arrow-right"/>
-                        <strong>{{listing.newPrice}}</strong>
+                        <b-row>
+                            <b-col cols="10">
+                                <h5>{{listing.items[0].name}}</h5>
+                            </b-col>
+                            <b-col cols=1>
+                                <b-button variant="danger" @click="listingsToUpdate.splice(idx, 1)">X</b-button>
+                            </b-col>
+                        </b-row>
+                        <b-row>
+                            <b-col>
+                                {{listing.items[0].price}}
+                                <font-awesome-icon class="mr-2 ml-2" icon="arrow-right"/>
+                                <strong>{{listing.newPrice}}</strong>
+                            </b-col>
+                        </b-row>
                     </b-list-group-item>
                 </b-list-group>
             </b-col>
@@ -42,13 +60,16 @@
                 <h5>Summary:</h5>
                 {{totalItemsToUpdate}} items will be updated!
             </b-col>
+            <b-col>
+                <b-button variant="outline-success" @click="updateListings">Update Listings</b-button>
+            </b-col>
         </b-row>
 
     </b-modal>
 </template>
 
 <script>
-import {getMarketListings, getUserMarketListings} from "@/api";
+import {getMarketListings, getUserMarketListings, updateMarketListing} from "@/api";
 import _ from 'lodash';
 
 export default {
@@ -59,12 +80,14 @@ export default {
             spinner: {
                 userCardListings: false,
                 userStickerListings: false,
-                getMarketPrice: false
+                getMarketPrice: false,
+                updateListings: false
             },
             progress: {
                 userCardListings: 0,
                 userStickerListings: 0,
-                getMarketPrice: 0
+                getMarketPrice: 0,
+                updateListings: 0
             },
             max: {
                 userCardListings: null,
@@ -76,9 +99,6 @@ export default {
     },
     methods: {
         async sortData() {
-            this.listings = []
-            this.listingsToUpdate = []
-            this.totalItemsToUpdate = 0
             this.progress = {
                 userCardListings: 0,
                 userStickerListings: 0,
@@ -89,10 +109,16 @@ export default {
                 userStickerListings: null,
                 getMarketPrice: null
             }
-            await this.getListings(1, "card")
-            await this.getListings(1, "sticker")
-            this.listings = await _(this.listings).groupBy('templateId').value()
-            this.checkMarketPrices()
+
+            if (this.listings.length === 0) {
+                this.listings = []
+                this.listingsToUpdate = []
+                this.totalItemsToUpdate = 0
+                await this.getListings(1, "card")
+                await this.getListings(1, "sticker")
+                this.listings = await _(this.listings).groupBy('templateId').value()
+                this.checkMarketPrices()
+            }
         },
         async getListings(page, type) {
             if (type === 'card')
@@ -136,7 +162,7 @@ export default {
                 }
             })
         },
-        async checkMarketPrices() {
+        checkMarketPrices() {
             this.listingsToUpdate = []
             this.spinner.getMarketPrice = true
             let promises = []
@@ -161,6 +187,19 @@ export default {
                 }))
             }
             Promise.all(promises).then(() => this.spinner.getMarketPrice = false)
+        },
+        updateListings() {
+            this.progress.updateListings = 0;
+            this.spinner.updateListings = true;
+            this.listingsToUpdate.forEach(async template => {
+                let price = template.newPrice;
+                let promises = [];
+                template.items.forEach(item => {
+                    promises.push(updateMarketListing(this.$store.state.userdata.jwt, this.$store.state.category, item.marketId, item.minOffer, price))
+                })
+                await Promise.all(promises).then(() => this.progress.updateListings++)
+            })
+            this.spinner.updateListings = false;
         }
     }
 }
