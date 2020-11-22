@@ -4,7 +4,12 @@
             <b-col>
                 <p v-if="spinner.userStickerListings || spinner.userCardListings">Getting user listings...</p>
                 <p v-else-if="spinner.getMarketPrice">Getting new market prices...</p>
-                <p v-else-if="spinner.updateListings">Updating market listings...</p>
+                <p v-else-if="spinner.updateListings && progress.updateListings < Object.keys(listingsToUpdate).length">
+                    Updating market listings...
+                </p>
+                <p v-else-if="spinner.updateListings">
+                    Done!
+                </p>
                 <b-progress v-if="spinner.userCardListings" :max="max.userCardListings">
                     <b-progress-bar :value="progress.userCardListings">
                         {{progress.userCardListings}} / {{max.userCardListings}}
@@ -24,7 +29,7 @@
                 </b-progress>
 
                 <b-progress v-else-if="spinner.updateListings" :max="Object.keys(listingsToUpdate).length">
-                    <b-progress-bar :value="progress.updateListings">
+                    <b-progress-bar :value="progress.updateListings" :variant="progress.updateListings < Object.keys(listingsToUpdate).length ? 'primary' : 'success'">
                         {{progress.updateListings}} / {{Object.keys(listingsToUpdate).length}}
                     </b-progress-bar>
                 </b-progress>
@@ -36,11 +41,14 @@
                 <b-list-group style="max-height: 300px; overflow: scroll;">
                     <b-list-group-item v-for="(listing, idx) in listingsToUpdate" :key="idx">
                         <b-row>
-                            <b-col cols="10">
+                            <b-col cols="9">
                                 <h5>{{listing.items[0].name}}</h5>
                             </b-col>
+                            <b-col cols="1">
+                                <b-badge variant="info">x{{listing.items.length}}</b-badge>
+                            </b-col>
                             <b-col cols=1>
-                                <b-button variant="danger" @click="listingsToUpdate.splice(idx, 1)">X</b-button>
+                                <b-button variant="danger" @click="removeListing(listing, idx)">X</b-button>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -55,13 +63,20 @@
             </b-col>
         </b-row>
 
-        <b-row>
+        <b-row class="mt-2">
             <b-col>
                 <h5>Summary:</h5>
                 {{totalItemsToUpdate}} items will be updated!
             </b-col>
             <b-col>
-                <b-button variant="outline-success" @click="updateListings">Update Listings</b-button>
+                <b-button class="mr-2" variant="outline-dark" @click="reloadData">
+                    <font-awesome-icon icon="redo-alt"/>
+                </b-button>
+                <b-button
+                    variant="outline-success"
+                    @click="updateListings"
+                    :disabled="spinner.getMarketPrice || spinner.userCardListings || spinner.userStickerListings"
+                >Update Listings</b-button>
             </b-col>
         </b-row>
 
@@ -98,6 +113,14 @@ export default {
         }
     },
     methods: {
+        removeListing(listing, idx) {
+            this.listingsToUpdate.splice(idx, 1);
+            this.totalItemsToUpdate -= listing.items.length;
+        },
+        reloadData() {
+            this.listings = []
+            this.sortData();
+        },
         async sortData() {
             this.progress = {
                 userCardListings: 0,
@@ -188,18 +211,19 @@ export default {
             }
             Promise.all(promises).then(() => this.spinner.getMarketPrice = false)
         },
-        updateListings() {
+        async updateListings() {
             this.progress.updateListings = 0;
             this.spinner.updateListings = true;
-            this.listingsToUpdate.forEach(async template => {
+            for (const template of this.listingsToUpdate) {
                 let price = template.newPrice;
                 let promises = [];
-                template.items.forEach(item => {
+                for (const item of template.items) {
                     promises.push(updateMarketListing(this.$store.state.userdata.jwt, this.$store.state.category, item.marketId, item.minOffer, price))
-                })
-                await Promise.all(promises).then(() => this.progress.updateListings++)
-            })
-            this.spinner.updateListings = false;
+                }
+                this.progress.updateListings++
+                this.$forceUpdate();
+                await Promise.all(promises)
+            }
         }
     }
 }
