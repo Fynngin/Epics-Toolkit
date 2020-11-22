@@ -160,8 +160,8 @@ export default {
                         let listings = res.data.data.market.map(el => {
                             return {
                                 templateId: type === "card" ? el['card']['cardTemplate'].id : el['sticker']['stickerTemplate'].id,
-                                mintBatch: type === "card" ? el['card']['mintBatch'] : el['sticker']['mintBatch'],
-                                mintNumber: type === "card" ? el['card']['mintNumber'] : el['sticker']['mintNumber'],
+                                // mintBatch: type === "card" ? el['card']['mintBatch'] : el['sticker']['mintBatch'],
+                                // mintNumber: type === "card" ? el['card']['mintNumber'] : el['sticker']['mintNumber'],
                                 name: type === "card" ? el['card']['cardTemplate'].title : el['sticker']['stickerTemplate'].title,
                                 marketId: el.marketId,
                                 type: type,
