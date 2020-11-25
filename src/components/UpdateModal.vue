@@ -22,9 +22,9 @@
                     </b-progress-bar>
                 </b-progress>
 
-                <b-progress v-else-if="spinner.getMarketPrice" :max="Object.keys(listings).length">
+                <b-progress v-else-if="spinner.getMarketPrice" :max="max.getMarketPrice">
                     <b-progress-bar :value="progress.getMarketPrice">
-                        {{progress.getMarketPrice}} / {{Object.keys(listings).length}}
+                        {{progress.getMarketPrice}} / {{max.getMarketPrice}}
                     </b-progress-bar>
                 </b-progress>
 
@@ -106,7 +106,8 @@ export default {
             },
             max: {
                 userCardListings: null,
-                userStickerListings: null
+                userStickerListings: null,
+                getMarketPrice: null
             },
             listingsToUpdate: [],
             totalItemsToUpdate: 0
@@ -188,6 +189,7 @@ export default {
         checkMarketPrices() {
             this.listingsToUpdate = []
             this.spinner.getMarketPrice = true
+            this.max.getMarketPrice = Object.keys(this.listings).length;
             let promises = []
             for (const templateId of Object.keys(this.listings)) {
                 let type = this.listings[templateId][0].type
@@ -206,6 +208,7 @@ export default {
                             }
                         }
                         this.progress.getMarketPrice++
+                        delete this.listings[templateId];
                     }
                 }))
             }
