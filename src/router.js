@@ -9,6 +9,7 @@ import TeamBuilder from "@/pages/TeamBuilder";
 import AccountTransfer from "@/pages/AccountTransfer";
 import RushWeeklies from "@/pages/RushWeeklies";
 import PackOpener from "@/pages/PackOpener";
+import Admin from "@/pages/Admin";
 
 Vue.use(VueRouter)
 
@@ -67,6 +68,13 @@ const router = new VueRouter({
             meta: {
                 requiresAuth: true
             }
+        },
+        {
+            path: '/admin',
+            component: Admin,
+            meta: {
+                requiresAuth: true
+            }
         }
     ]
 })
@@ -76,6 +84,13 @@ router.beforeEach((to, from, next) => {
         if (store.getters.isAuthenticated) {
             if (to['path'] === '/masslist') {
                 if (store.getters.isMassListWhitelisted) {
+                    next()
+                    return
+                } else {
+                    return
+                }
+            } else if (to['path'] === '/admin') {
+                if (store.getters.isAdmin) {
                     next()
                     return
                 } else {

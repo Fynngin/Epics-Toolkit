@@ -6,10 +6,11 @@ const db = firebase.firestore();
 
 Vue.use(Vuex)
 const massListWhitelist = [32876, 78998, 140880, 26108]
+const admins = [32876]
 const store = new Vuex.Store({
     state: {
         authenticated: false,
-        cdnUrl: 'http://cdn.epics.gg',
+        cdnUrl: 'https://cdn.epics.gg',
         repoUrl: 'https://github.com/Fynngin/Epics-Toolkit',
         userdata: {
             jwt: null,
@@ -34,6 +35,9 @@ const store = new Vuex.Store({
         },
         isMassListWhitelisted: (state) => {
             return massListWhitelist.includes(state.userdata.id)
+        },
+        isAdmin: (state) => {
+            return admins.includes(state.userdata.id)
         }
     },
     actions: {

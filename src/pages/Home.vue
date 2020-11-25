@@ -6,17 +6,6 @@
         </b-button>
         <h1>Welcome {{this.$store.state.userdata.username}}!</h1>
 
-        <b-row>
-            <b-col>
-                <b-card border-variant="dark" class="mb-2 ml-2">
-                    <b-button variant="primary" @click="testquery">Test query</b-button>
-                    <b-button variant="primary" @click="reloadTeamDatabase">Reload Teams</b-button>
-                    <b-button variant="primary" class="ml-2" @click="reloadPlayerDatabase">Reload Players</b-button>
-                    <b-button variant="primary" class="ml-2" @click="reloadTemplateDatabase">Reload Card Templates</b-button>
-                </b-card>
-            </b-col>
-        </b-row>
-
         <b-row align-h="center">
             <b-col lg="5" sm="10" class="mb-2">
                 <b-card border-variant="dark" header-bg-variant="light">
@@ -61,9 +50,6 @@
     import SpinnerOddsChart from "../components/SpinnerOddsChart";
     import PackStock from "../components/PackStock";
     import {mapActions} from "vuex";
-    import {getCardTemplates, getCollections, getPlayers, getTeams} from "@/api";
-    import firebase from "../firebaseConfig";
-    const db = firebase.firestore();
 
     export default {
         name: "Home",
@@ -84,86 +70,7 @@
             this.changeCategory(this.$store.state.category)
         },
         methods: {
-            ...mapActions(['changeCategory']),
-            reloadTeamDatabase() {
-                getTeams(this.$store.state.userdata.jwt).then(res => {
-                    if (res.data.success) {
-                        let teams = res.data.data.teams
-                        for (const team of teams) {
-                            db.collection("teams")
-                                .doc(team.id.toString())
-                                .set(team, {merge: true})
-                        }
-                    }
-                })
-            },
-            reloadPlayerDatabase() {
-                getPlayers(this.$store.state.userdata.jwt, this.$store.state.category).then(res => {
-                    if (res.data.success) {
-                        let players = res.data.data.players
-                        for (const player of players) {
-                            player.cardTemplates = []
-                            db.collection("players")
-                                .doc(player.id.toString())
-                                .set(player, {merge: true})
-                        }
-                    }
-                })
-            },
-            reloadTemplateDatabase() {
-                for (const season of ['2020']) {
-                    getCollections(this.$store.state.userdata.jwt, this.$store.state.category, season, this.$store.state.userdata.id).then(res => {
-                        if (res.data.success) {
-                            for (const collection of res.data.data) {
-                                let collId = collection.collection.id
-                                let collCardTemplates = []
-                                getCardTemplates(this.$store.state.userdata.jwt, this.$store.state.category, collId).then(async res => {
-                                    if (res.data.success) {
-                                        let templates = res.data.data
-                                        for (const template of templates) {
-                                            if (template['cardType'] === "player") {
-                                                template.player = db.doc('players/' + template.player.id)
-                                            } else if (template['cardType'] === "team") {
-                                                template.team = db.doc('teams/' + template.team.id)
-                                            }
-
-                                            await db.collection("cardTemplates")
-                                                .doc(template.id.toString())
-                                                .set(template, {merge: true})
-
-                                            let newTemplates = await (template.player.get()).data().cardTemplates
-                                            newTemplates.push(db.doc('cardTemplates/' + template.id))
-                                            await template.player.set({cardTemplates: newTemplates}, {merge: true})
-
-                                            collCardTemplates.push(db.doc('cardTemplates/' + template.id))
-                                        }
-
-                                        collection.collection.cardTemplates = collCardTemplates
-                                        await db.collection("collections")
-                                            .doc(collId.toString())
-                                            .set(collection.collection, {merge: true})
-
-                                        console.log(collection.id)
-                                    }
-                                })
-                            }
-                        }
-                    })
-                }
-            },
-            async testquery() {
-                // let player = db.collection('players').doc('33')
-                // let query = db.collection("cardTemplates").where("player", "==", player)
-                // query.get().then(res => {
-                //     console.log(res.docs.map(el => el.data()))
-                // })
-
-                let template = (await db.collection("cardTemplates").doc("1").get()).data()
-                console.log((await template.player.get()).data().cardTemplates[0])
-                let player = (await template.player.get())
-                template.player.set({cardTemplates: [db.doc('cardTemplates/' + template.id)]}, {merge: true})
-                console.log(player)
-            }
+            ...mapActions(['changeCategory'])
         }
     }
 </script>

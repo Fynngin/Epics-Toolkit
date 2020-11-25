@@ -13,6 +13,9 @@
             >Streamers</b-button>
         </div>
         <b-row class="mt-2" align-h="center">
+            <b-button v-if="$store.getters.isAdmin" class="w-100" :variant="pageVariant('/admin')" @click="$router.push('/admin')">
+                Admin
+            </b-button>
             <b-button class="w-100" :variant="pageVariant('/')" @click="$router.push('/')">
                 Dashboard
             </b-button>
