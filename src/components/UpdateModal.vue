@@ -3,8 +3,10 @@
         <b-row>
             <b-col>
                 <p v-if="spinner.userStickerListings || spinner.userCardListings">Getting user listings...</p>
-                <p v-else-if="spinner.getMarketPrice">Getting new market prices...</p>
-                <p v-else-if="spinner.updateListings && progress.updateListings < Object.keys(listingsToUpdate).length">
+                <p v-else-if="spinner.getMarketPrice">
+                    Getting new market prices... Items will show when complete!
+                </p>
+                <p v-else-if="spinner.updateListings && progress.updateListings < Object.keys(listings).length">
                     Updating market listings...
                 </p>
                 <p v-else-if="spinner.updateListings">
@@ -28,18 +30,18 @@
                     </b-progress-bar>
                 </b-progress>
 
-                <b-progress v-else-if="spinner.updateListings" :max="Object.keys(listingsToUpdate).length">
-                    <b-progress-bar :value="progress.updateListings" :variant="progress.updateListings < Object.keys(listingsToUpdate).length ? 'primary' : 'success'">
-                        {{progress.updateListings}} / {{Object.keys(listingsToUpdate).length}}
+                <b-progress v-else-if="spinner.updateListings" :max="Object.keys(listings).length">
+                    <b-progress-bar :value="progress.updateListings" :variant="progress.updateListings < Object.keys(listings).length ? 'primary' : 'success'">
+                        {{progress.updateListings}} / {{Object.keys(listings).length}}
                     </b-progress-bar>
                 </b-progress>
             </b-col>
         </b-row>
 
-        <b-row class="mt-2">
+        <b-row class="mt-2" v-if="progress.getMarketPrice === max.getMarketPrice">
             <b-col>
                 <b-list-group style="max-height: 300px; overflow: scroll;">
-                    <b-list-group-item v-for="(listing, idx) in listingsToUpdate" :key="idx">
+                    <b-list-group-item v-for="(listing, idx) in listings" :key="idx">
                         <b-row>
                             <b-col cols="9">
                                 <h5>{{listing.items[0].name}}</h5>
@@ -109,13 +111,12 @@ export default {
                 userStickerListings: null,
                 getMarketPrice: null
             },
-            listingsToUpdate: [],
             totalItemsToUpdate: 0
         }
     },
     methods: {
         removeListing(listing, idx) {
-            this.listingsToUpdate.splice(idx, 1);
+            this.listings.splice(idx, 1);
             this.totalItemsToUpdate -= listing.items.length;
         },
         reloadData() {
@@ -136,7 +137,6 @@ export default {
 
             if (this.listings.length === 0) {
                 this.listings = []
-                this.listingsToUpdate = []
                 this.totalItemsToUpdate = 0
                 await this.getListings(1, "card")
                 await this.getListings(1, "sticker")
@@ -187,7 +187,6 @@ export default {
             })
         },
         checkMarketPrices() {
-            this.listingsToUpdate = []
             this.spinner.getMarketPrice = true
             this.max.getMarketPrice = Object.keys(this.listings).length;
             let promises = []
@@ -200,16 +199,22 @@ export default {
                             let currLowest = res.data.data.market[0][0].price
                             let toUpdate = this.listings[templateId].filter(item => item.price > currLowest)
                             if (toUpdate.length > 0) {
-                                this.listingsToUpdate.push({
+                                this.listings[templateId] = {
                                     newPrice: currLowest <= this.$store.state.noUndercutMarketAt ? currLowest : currLowest - 1,
                                     items: toUpdate
-                                })
+                                }
                                 this.totalItemsToUpdate += toUpdate.length
+                            } else {
+                                delete this.listings[templateId];
                             }
+                        } else {
+                            delete this.listings[templateId];
                         }
                         this.progress.getMarketPrice++
-                        delete this.listings[templateId];
                     }
+                }).catch(() => {
+                    delete this.listings[templateId];
+                    this.progress.getMarketPrice++
                 }))
             }
             Promise.all(promises).then(() => this.spinner.getMarketPrice = false)
@@ -217,7 +222,7 @@ export default {
         async updateListings() {
             this.progress.updateListings = 0;
             this.spinner.updateListings = true;
-            for (const template of this.listingsToUpdate) {
+            for (const template of this.listings) {
                 let price = template.newPrice;
                 let promises = [];
                 for (const item of template.items) {
