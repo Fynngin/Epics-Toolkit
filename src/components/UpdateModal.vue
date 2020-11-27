@@ -222,7 +222,8 @@ export default {
         async updateListings() {
             this.progress.updateListings = 0;
             this.spinner.updateListings = true;
-            for (const template of this.listings) {
+            for (const templateId of Object.keys(this.listings)) {
+                let template = this.listings[templateId]
                 let price = template.newPrice;
                 let promises = [];
                 for (const item of template.items) {
