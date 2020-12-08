@@ -230,7 +230,7 @@ export default {
                     promises.push(updateMarketListing(this.$store.state.userdata.jwt, this.$store.state.category, item.marketId, item.minOffer, price))
                 }
                 this.progress.updateListings++
-                // this.$forceUpdate();
+                this.$forceUpdate();
                 await Promise.all(promises)
             }
         }
