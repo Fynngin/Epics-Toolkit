@@ -379,9 +379,10 @@ export default {
             for (const id in this.roster) {
                 if (this.roster[id]) {
                     let map = this.roster[id].maps.find(m => {return m['mapId'] === mapId})
-                    bonus *= map.weight
+                    bonus += map.weight
                 }
             }
+            bonus -= 5;
             return this.round((bonus - 1) * 100, 3)
         },
         teamOvr() {
