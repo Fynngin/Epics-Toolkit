@@ -9,6 +9,7 @@ import TeamBuilder from "@/pages/TeamBuilder";
 import AccountTransfer from "@/pages/AccountTransfer";
 import RushWeeklies from "@/pages/RushWeeklies";
 import PackOpener from "@/pages/PackOpener";
+import PhysicalTracker from "./pages/PhysicalTracker";
 
 Vue.use(VueRouter)
 
@@ -64,6 +65,13 @@ const router = new VueRouter({
         {
             path: '/packopener',
             component: PackOpener,
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/physicaltracker',
+            component: PhysicalTracker,
             meta: {
                 requiresAuth: true
             }

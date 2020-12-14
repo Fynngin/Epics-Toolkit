@@ -36,6 +36,9 @@
             <b-button class="w-100" :variant="pageVariant('/packopener')" @click="$router.push('/packopener')">
                 Pack Opener
             </b-button>
+            <b-button class="w-100" :variant="pageVariant('/physicaltracker')" @click="$router.push('/physicaltracker')">
+                Physical Tracker
+            </b-button>
         </b-row>
     </b-sidebar>
 </template>
