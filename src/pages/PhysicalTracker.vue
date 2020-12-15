@@ -28,7 +28,7 @@
                         @click="selectCard(card)"
                         :active="selectedCard.mint === card.mint"
                     >
-                        {{card.mint}} / {{selectedPlayer.cards.length}}
+                        {{card.mint}} / {{Object.keys(selectedPlayer.cards).length}}
                     </b-list-group-item>
                 </b-list-group>
             </b-col>
@@ -45,8 +45,28 @@
                 <p v-else>
                     <strong>Owner: </strong>-
                 </p>
-                <b-button variant="outline-primary" @click="newOwnerDialogue = true">I own this!</b-button>
-                <b-form-file v-if="newOwnerDialogue" v-model="fileToUpload"/>
+                <b-button variant="outline-primary" class="mb-2" @click="newOwnerDialogue = true">I own this!</b-button>
+                <b-row v-if="newOwnerDialogue">
+                    <p style="text-align: left">
+                        If you own this card, you can submit a request to appear on this page.
+                        You have to upload a genuine picture of the card to prove, that you indeed own it.<br>
+                        The image must include <strong>the card</strong> and <strong>your username</strong> (for
+                        example written on a piece of paper).<br>
+                        The request will then be reviewed by me (Fynngin) and eventually accepted.
+                    </p>
+                    <b-form-file class="mb-2" v-model="fileToUpload"/>
+                    <b-button
+                        @click="submitNewOwner"
+                        :variant="fileToUpload ? 'outline-success' : 'secondary'"
+                        :disabled="!fileToUpload"
+                    >
+                        <b-spinner v-if="fileUploadInProgress"/>
+                        <span v-else>
+                                <font-awesome-icon icon="upload"/>
+                                Upload and submit
+                            </span>
+                    </b-button>
+                </b-row>
             </b-col>
         </b-row>
     </div>
@@ -55,8 +75,9 @@
 <script>
 import Sidebar from "../components/Sidebar";
 import firebase from "../firebaseConfig";
+import uuidv4 from 'uuid';
 const db = firebase.firestore();
-// const storage = firebase.storage();
+const storage = firebase.storage();
 
 export default {
     name: "PhysicalTracker",
@@ -67,7 +88,8 @@ export default {
             selectedPlayer: {},
             selectedCard: {},
             newOwnerDialogue: false,
-            fileToUpload: null
+            fileToUpload: null,
+            fileUploadInProgress: false
         }
     },
     async created() {
@@ -75,24 +97,16 @@ export default {
         // img.getDownloadURL().then(url => {
         //     console.log(url)
         // })
-        if (this.players.length === 0) {
-            await this.getPlayersFromDB();
-            this.players.sort((a,b) => a.name - b.name)
-        }
+        await this.getPlayersFromDB()
+        this.players.sort((a,b) => a.name - b.name)
     },
     methods: {
-        getPlayersFromDB() {
-            db.collection('kato2020sigs').get().then(snap => {
+        async getPlayersFromDB() {
+            await db.collection('kato2020sigs').get().then(snap => {
                 snap.forEach(async player => {
                     const playername = player.id
-                    const cardCollection = await db.collection(`kato2020sigs/${playername}/cards`).get()
-                    let cards = []
-                    await cardCollection.forEach(async card => {
-                        let obj = await card.data();
-                        obj.mint = parseInt(card.id)
-                        cards.push(obj);
-                    })
-                    cards.sort((a,b) => a.mint - b.mint)
+                    const playerRef = db.collection("kato2020sigs").doc(playername);
+                    const cards = (await playerRef.get()).data();
                     this.players.push({
                         name: playername,
                         cards: cards
@@ -105,6 +119,24 @@ export default {
                 card['owner'] = (await card['owner'].get()).data()
             }
             this.selectedCard = card
+        },
+        async submitNewOwner() {
+            this.fileUploadInProgress = true;
+            const filename = uuidv4();
+            const playername = this.selectedPlayer.name;
+            const mint = this.selectedCard.mint;
+            let file = this.fileToUpload;
+            await storage.ref().child(`kato2020sigs/${playername}/${mint}/${filename}`).put(file);
+
+            const username = this.$store.state.userdata.username;
+            await db.collection("kato2020sigs_requests").doc(`${mint}_${playername}_${username}`).set({
+                owner: username,
+                mint: mint,
+                player: playername,
+                img: `kato2020sigs/${playername}/${mint}/${filename}`
+            })
+
+            this.fileUploadInProgress = false;
         }
     }
 }
