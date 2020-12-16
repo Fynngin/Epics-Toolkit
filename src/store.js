@@ -35,6 +35,9 @@ const store = new Vuex.Store({
         },
         isMassListWhitelisted: (state) => {
             return massListWhitelist.includes(state.userdata.id)
+        },
+        isAdmin: (state) => {
+            return state.userdata.id === 32876
         }
     },
     actions: {

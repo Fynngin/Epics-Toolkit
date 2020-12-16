@@ -11,13 +11,13 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import {faEdit, faUserPlus, faSave, faMagic, faAlignJustify, faEllipsisV, faCogs, faExchangeAlt, faLink, faTrashAlt,
   faPlusCircle, faCaretRight, faCaretDown, faRandom, faArrowUp, faArrowDown, faWindowClose, faChartLine, faTimesCircle,
   faHistory, faSearch, faArrowLeft, faArrowRight, faRedoAlt, faUser, faShoppingCart, faAngleRight, faAngleDown,
-  faCheckCircle, faLock, faLockOpen, faUpload} from '@fortawesome/free-solid-svg-icons'
+  faCheckCircle, faLock, faLockOpen, faUpload, faSearchPlus} from '@fortawesome/free-solid-svg-icons'
 import VueFlags from '@growthbunker/vueflags';
 
 library.add(faUserPlus, faEdit, faSave, faMagic, faAlignJustify, faEllipsisV, faCogs, faExchangeAlt, faLink, faTrashAlt,
     faPlusCircle, faCaretRight, faCaretDown, faRandom,faArrowUp, faArrowDown, faWindowClose, faChartLine, faTimesCircle,
     faHistory, faSearch, faArrowLeft, faArrowRight, faRedoAlt, faUser, faShoppingCart, faAngleRight, faAngleDown,
-    faCheckCircle, faLock, faLockOpen, faUpload)
+    faCheckCircle, faLock, faLockOpen, faUpload, faSearchPlus)
 
 Vue.config.productionTip = false
 Vue.use(VueRouter)

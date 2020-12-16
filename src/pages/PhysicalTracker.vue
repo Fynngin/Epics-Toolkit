@@ -5,7 +5,40 @@
             <font-awesome-icon icon="align-justify" style="color: black"></font-awesome-icon>
         </b-button>
 
-        <b-row>
+        <b-row class="mb-2" v-if="$store.getters.isAdmin">
+            <b-col>
+                <b-card border-variant="dark">
+                    <b-row>
+                        <b-col>
+                            <b-button variant="outline-primary" class="mr-2" @click="getRequests">Load Requests</b-button>
+                            <b-button variant="outline-success" class="mr-2" @click="approveRequest">Approve</b-button>
+                            <b-button variant="outline-danger" @click="removeRequest">Reject</b-button>
+                        </b-col>
+                        <b-col>
+                            <b-list-group>
+                                <b-list-group-item
+                                    v-for="(req, idx) in requests" :key="idx"
+                                    href="#"
+                                    @click="selectRequest(req)"
+                                    :active="selectedRequest === req"
+                                >
+                                    {{req.mint}} - {{req.player}}: {{req.owner}}
+                                </b-list-group-item>
+                            </b-list-group>
+                        </b-col>
+                        <b-col v-if="selectedRequest">
+                            <b-card-img class="requestImg mr-2" :src="selectedRequest.url"/>
+                            <b-button variant="outline-dark" v-if="selectedRequest.url" @click="openImgModal">
+                                <font-awesome-icon icon="search-plus"/>
+                            </b-button>
+
+                        </b-col>
+                    </b-row>
+                </b-card>
+            </b-col>
+        </b-row>
+
+        <b-row class="ml-5 mr-2">
             <b-col cols="2">
                 <b-list-group>
                     <b-list-group-item
@@ -24,7 +57,7 @@
                 <b-list-group>
                     <b-list-group-item
                         href="#"
-                        v-for="card in selectedPlayer.cards" :key="card.mint"
+                        v-for="(card, idx) in selectedPlayer.cards" :key="idx"
                         @click="selectCard(card)"
                         :active="selectedCard.mint === card.mint"
                     >
@@ -34,17 +67,25 @@
             </b-col>
 
             <b-col v-if="selectedCard.mint">
-                <h1>{{selectedCard.mint}} / {{selectedPlayer.cards.length}} {{selectedPlayer.name}}</h1>
-                <p v-if="selectedCard['owner'] !== ''">
-                    <strong>Owner: </strong>
-                    <b-avatar :src="selectedCard['owner']['avatar']"/>
-                    <span>
+                <b-row class="mb-2" align-v="center">
+                    <b-col>
+                        <h1>{{selectedCard.mint}} / {{selectedPlayer.cards.length}} {{selectedPlayer.name}}</h1>
+                        <p v-if="selectedCard['owner'] !== ''">
+                            <strong>Owner: </strong>
+                            <b-avatar :src="selectedCard['owner']['avatar']"/>
+                            <span>
                         {{selectedCard['owner']['username']}}
                     </span>
-                </p>
-                <p v-else>
-                    <strong>Owner: </strong>-
-                </p>
+                        </p>
+                        <p v-else>
+                            <strong>Owner: </strong>-
+                        </p>
+                    </b-col>
+                    <b-col>
+                        <b-card-img class="ownerImg" v-if="selectedCard.url" :src="selectedCard.url"/>
+                    </b-col>
+                </b-row>
+
                 <b-button variant="outline-primary" class="mb-2" @click="newOwnerDialogue = true">I own this!</b-button>
                 <b-row v-if="newOwnerDialogue">
                     <p style="text-align: left">
@@ -69,6 +110,13 @@
                 </b-row>
             </b-col>
         </b-row>
+
+        <b-modal
+            id="requestImg" hide-footer
+            :title="`${selectedRequest.mint} - ${selectedRequest.player}: ${selectedRequest.owner}`"
+        >
+            <b-card-img :src="selectedRequest.url"/>
+        </b-modal>
     </div>
 </template>
 
@@ -87,16 +135,14 @@ export default {
             players: [],
             selectedPlayer: {},
             selectedCard: {},
+            selectedRequest: {},
             newOwnerDialogue: false,
             fileToUpload: null,
-            fileUploadInProgress: false
+            fileUploadInProgress: false,
+            requests: []
         }
     },
     async created() {
-        // let img = storage.ref().child('Screenshot_2020-11-10_at_21.38.22_2.png');
-        // img.getDownloadURL().then(url => {
-        //     console.log(url)
-        // })
         await this.getPlayersFromDB()
         this.players.sort((a,b) => a.name - b.name)
     },
@@ -115,10 +161,23 @@ export default {
             })
         },
         async selectCard(card) {
-            if (card['owner'] !== "") {
+            if (card['owner'] !== "" && !card['owner'].avatar) {
                 card['owner'] = (await card['owner'].get()).data()
+                let img = storage.ref().child(card.img);
+                img.getDownloadURL().then(url => {
+                    card.url = url;
+                    this.$forceUpdate();
+                })
             }
             this.selectedCard = card
+        },
+        selectRequest(req) {
+            this.selectedRequest = req
+            let img = storage.ref().child(req.img);
+            img.getDownloadURL().then(url => {
+                this.selectedRequest.url = url;
+                this.$forceUpdate();
+            })
         },
         async submitNewOwner() {
             this.fileUploadInProgress = true;
@@ -137,11 +196,55 @@ export default {
             })
 
             this.fileUploadInProgress = false;
+        },
+        getRequests() {
+            this.requests = []
+            db.collection("kato2020sigs_requests").get().then(snap => {
+                snap.forEach(async request => {
+                    const data = await request.data()
+                    this.requests.push(data)
+                })
+            })
+        },
+        openImgModal() {
+            this.$bvModal.show('requestImg')
+        },
+        async approveRequest() {
+            const userId = this.$store.state.userdata.id;
+            const userRef = db.collection('users').doc(userId.toString())
+            const playername = this.selectedRequest.player
+            const mint = this.selectedRequest.mint
+            const filename = this.selectedRequest.img
+
+            await db.collection("kato2020sigs")
+                .doc(playername)
+                .update({[mint]: {
+                    owner: userRef,
+                    mint: mint,
+                    player: playername,
+                    img: filename
+                }})
+            await this.removeRequest()
+        },
+        async removeRequest() {
+            const req = this.selectedRequest
+            await db.collection("kato2020sigs_requests")
+                .doc(`${req.mint}_${req.player}_${req.owner}`)
+                .delete()
+            this.requests.splice(this.requests.indexOf(req), 1)
         }
     }
 }
 </script>
 
 <style scoped>
+    .requestImg {
+        height: 100px;
+        width: auto;
+    }
 
+    .ownerImg {
+        max-height: 250px;
+        width: auto;
+    }
 </style>
