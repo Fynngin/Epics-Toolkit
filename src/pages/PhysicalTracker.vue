@@ -26,7 +26,7 @@
                                 </b-list-group-item>
                             </b-list-group>
                         </b-col>
-                        <b-col v-if="selectedRequest">
+                        <b-col v-if="selectedRequest.url">
                             <b-card-img class="requestImg mr-2" :src="selectedRequest.url"/>
                             <b-button variant="outline-dark" v-if="selectedRequest.url" @click="openImgModal">
                                 <font-awesome-icon icon="search-plus"/>
@@ -115,7 +115,7 @@
             id="requestImg" hide-footer
             :title="`${selectedRequest.mint} - ${selectedRequest.player}: ${selectedRequest.owner}`"
         >
-            <b-card-img :src="selectedRequest.url"/>
+            <b-card-img v-if="selectedRequest.url" :src="selectedRequest.url"/>
         </b-modal>
     </div>
 </template>

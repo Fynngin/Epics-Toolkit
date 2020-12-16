@@ -12,31 +12,40 @@
                     @click="changeCategory(2)"
             >Streamers</b-button>
         </div>
-        <b-row class="mt-2" align-h="center">
+        <b-row class="mt-2 pr-2 pl-2">
             <b-button class="w-100" :variant="pageVariant('/')" @click="$router.push('/')">
                 Dashboard
             </b-button>
-            <b-button class="w-100" :variant="pageVariant('/masslist')" @click="$router.push('/masslist')">
-                <font-awesome-icon v-if="$store.getters.isMassListWhitelisted" icon="lock-open"/>
-                <font-awesome-icon v-else icon="lock"/>
+            <b-button class="w-100 text-left" :variant="pageVariant('/masslist')" @click="$router.push('/masslist')">
+                <font-awesome-icon icon="dollar-sign"/>
                 Mass-List
+                <span style="float: right">
+                    <font-awesome-icon v-if="$store.getters.isMassListWhitelisted" icon="lock-open"/>
+                    <font-awesome-icon v-else icon="lock"/>
+                </span>
             </b-button>
-            <b-button class="w-100" :variant="pageVariant('/mintsearch')" @click="$router.push('/mintsearch')">
+            <b-button class="w-100 text-left" :variant="pageVariant('/mintsearch')" @click="$router.push('/mintsearch')">
+                <font-awesome-icon icon="search"/>
                 Mint-Search
             </b-button>
-            <b-button class="w-100" :variant="pageVariant('/teambuilder')" @click="$router.push('/teambuilder')">
+            <b-button class="w-100 text-left" :variant="pageVariant('/teambuilder')" @click="$router.push('/teambuilder')">
+                <font-awesome-icon icon="users-cog"/>
                 Rush Team-Builder
             </b-button>
-            <b-button class="w-100" :variant="pageVariant('/rushweeklies')" @click="$router.push('/rushweeklies')">
+            <b-button class="w-100 text-left" :variant="pageVariant('/rushweeklies')" @click="$router.push('/rushweeklies')">
+                <font-awesome-icon icon="calendar-alt"/>
                 Rush Weekly Achievements
             </b-button>
-            <b-button class="w-100" :variant="pageVariant('/accounttransfer')" @click="$router.push('/accounttransfer')">
+            <b-button class="w-100 text-left" :variant="pageVariant('/accounttransfer')" @click="$router.push('/accounttransfer')">
+                <font-awesome-icon icon="random"/>
                 Account Transfer
             </b-button>
-            <b-button class="w-100" :variant="pageVariant('/packopener')" @click="$router.push('/packopener')">
+            <b-button class="w-100 text-left" :variant="pageVariant('/packopener')" @click="$router.push('/packopener')">
+                <font-awesome-icon icon="box-open"/>
                 Pack Opener
             </b-button>
-            <b-button class="w-100" :variant="pageVariant('/physicaltracker')" @click="$router.push('/physicaltracker')">
+            <b-button class="w-100 text-left" :variant="pageVariant('/physicaltracker')" @click="$router.push('/physicaltracker')">
+                <font-awesome-icon icon="signature"/>
                 Physical Tracker
             </b-button>
         </b-row>
