@@ -188,8 +188,10 @@ export default {
             await storage.ref().child(`kato2020sigs/${playername}/${mint}/${filename}`).put(file);
 
             const username = this.$store.state.userdata.username;
+            const userId = this.$store.state.userdata.id;
             await db.collection("kato2020sigs_requests").doc(`${mint}_${playername}_${username}`).set({
-                owner: username,
+                owner_name: username,
+                owner: userId,
                 mint: mint,
                 player: playername,
                 img: `kato2020sigs/${playername}/${mint}/${filename}`
@@ -210,7 +212,7 @@ export default {
             this.$bvModal.show('requestImg')
         },
         async approveRequest() {
-            const userId = this.$store.state.userdata.id;
+            const userId = this.selectedRequest.owner;
             const userRef = db.collection('users').doc(userId.toString())
             const playername = this.selectedRequest.player
             const mint = this.selectedRequest.mint
@@ -229,7 +231,7 @@ export default {
         async removeRequest() {
             const req = this.selectedRequest
             await db.collection("kato2020sigs_requests")
-                .doc(`${req.mint}_${req.player}_${req.owner}`)
+                .doc(`${req.mint}_${req.player}_${req.owner_name}`)
                 .delete()
             this.requests.splice(this.requests.indexOf(req), 1)
         }
