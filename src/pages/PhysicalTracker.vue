@@ -22,7 +22,7 @@
                                     @click="selectRequest(req)"
                                     :active="selectedRequest === req"
                                 >
-                                    {{req.mint}} - {{req.player}}: {{req.owner}}
+                                    {{req.mint}} - {{req.player}}: {{req.owner_name}}
                                 </b-list-group-item>
                             </b-list-group>
                         </b-col>
