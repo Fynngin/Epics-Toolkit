@@ -116,8 +116,8 @@ export default {
     },
     methods: {
         removeListing(listing, idx) {
-            this.listings.splice(idx, 1);
             this.totalItemsToUpdate -= listing.items.length;
+            delete this.listings[idx]
         },
         reloadData() {
             this.listings = []
