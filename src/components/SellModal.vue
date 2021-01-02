@@ -53,7 +53,7 @@
             <b-list-group-item v-for="sticker in selected.stickers" :key="sticker.templateId">
                 <p class="font-weight-bold" style="display: inline;">{{sticker.name}}</p>
 <!--                <b-badge v-if="sticker.marketPrice" style="float: right;" variant="success">Price: {{sticker.marketPrice}}</b-badge>-->
-                <b-input-group prepend="Amount" :append="`max: ${sticker.max}`">
+                <b-input-group class="mb-2" prepend="Amount" :append="`max: ${sticker.max}`">
                     <b-form-input type="number" v-model="sticker.amount" :max="sticker.max" min="0"/>
                 </b-input-group>
                 <b-input-group prepend="Price">
@@ -86,7 +86,7 @@
             <b-list-group-item v-for="pack in selected.packs" :key="pack.id">
                 <p class="font-weight-bold" style="display: inline;">{{pack.name}}</p>
 <!--                <b-badge v-if="pack.marketPrice" style="float: right;" variant="success">Price: {{pack.marketPrice}}</b-badge>-->
-                <b-input-group prepend="Amount" :append="`max: ${pack.max}`">
+                <b-input-group class="mb-2" prepend="Amount" :append="`max: ${pack.max}`">
                     <b-form-input type="number" v-model="pack.amount" :max="pack.max" min="0"/>
                 </b-input-group>
                 <b-input-group prepend="Price">
