@@ -20,9 +20,12 @@
         <b-list-group v-if="!sellingDone" style="max-height: 300px; overflow: scroll;">
             <b-list-group-item v-for="card in selected.cards" :key="card.templateId">
                 <p class="font-weight-bold" style="display: inline;">{{card.name}}</p>
-                <b-badge v-if="card.marketPrice" style="float: right;" variant="success">Price: {{card.marketPrice}}</b-badge>
-                <b-input-group prepend="Amount" :append="`max: ${card.max}`">
+<!--                <b-badge v-if="card.marketPrice" style="float: right;" variant="success">Price: {{card.marketPrice}}</b-badge>-->
+                <b-input-group class="mb-2" prepend="Amount" :append="`max: ${card.max}`">
                     <b-form-input type="number" :max="card.max" min="0" v-model="card.amount"/>
+                </b-input-group>
+                <b-input-group prepend="Price">
+                    <b-form-input placeholder="Click 'show prices' or enter custom" type="number" min="1" v-model="card.marketPrice"/>
                 </b-input-group>
                 <b-progress
                     v-if="sellingInProgress && itemsSold.cards[card.templateId]"
@@ -49,9 +52,12 @@
             </b-list-group-item>
             <b-list-group-item v-for="sticker in selected.stickers" :key="sticker.templateId">
                 <p class="font-weight-bold" style="display: inline;">{{sticker.name}}</p>
-                <b-badge v-if="sticker.marketPrice" style="float: right;" variant="success">Price: {{sticker.marketPrice}}</b-badge>
+<!--                <b-badge v-if="sticker.marketPrice" style="float: right;" variant="success">Price: {{sticker.marketPrice}}</b-badge>-->
                 <b-input-group prepend="Amount" :append="`max: ${sticker.max}`">
                     <b-form-input type="number" v-model="sticker.amount" :max="sticker.max" min="0"/>
+                </b-input-group>
+                <b-input-group prepend="Price">
+                    <b-form-input placeholder="Click 'show prices' or enter custom" type="number" min="1" v-model="sticker.marketPrice"/>
                 </b-input-group>
                 <b-progress
                     v-if="sellingInProgress && itemsSold.stickers[sticker.templateId]"
@@ -79,9 +85,12 @@
 
             <b-list-group-item v-for="pack in selected.packs" :key="pack.id">
                 <p class="font-weight-bold" style="display: inline;">{{pack.name}}</p>
-                <b-badge v-if="pack.marketPrice" style="float: right;" variant="success">Price: {{pack.marketPrice}}</b-badge>
+<!--                <b-badge v-if="pack.marketPrice" style="float: right;" variant="success">Price: {{pack.marketPrice}}</b-badge>-->
                 <b-input-group prepend="Amount" :append="`max: ${pack.max}`">
                     <b-form-input type="number" v-model="pack.amount" :max="pack.max" min="0"/>
+                </b-input-group>
+                <b-input-group prepend="Price">
+                    <b-form-input placeholder="Click 'show prices' or enter custom" type="number" min="1" v-model="pack.marketPrice"/>
                 </b-input-group>
                 <b-progress
                     v-if="sellingInProgress && itemsSold.packs[pack.templateId]"
