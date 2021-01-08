@@ -7,10 +7,16 @@
                     @click="changeCategory(1)"
             >CS:GO</b-button>
             <b-button
-                    class="categoryButton"
+                    class="mr-2 categoryButton"
                     :variant="categoryVariant(2)"
                     @click="changeCategory(2)"
             >Streamers</b-button>
+<!--            <b-button-->
+<!--                    class="categoryButton"-->
+<!--                    style="height: 4rem"-->
+<!--                    :variant="categoryVariant(3)"-->
+<!--                    @click="changeCategory(3)"-->
+<!--            >PUBG Mobile</b-button>-->
         </div>
         <b-row class="mt-2 pr-2 pl-2">
             <b-button class="w-100" :variant="pageVariant('/')" @click="$router.push('/')">

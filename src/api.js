@@ -17,6 +17,19 @@ export function login(auth) {
     })
 }
 
+export function getUserInfo(jwt, category) {
+    return http("https://api.epics.gg/api/v1/user/info", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
+
 export function getCollections(jwt, category, season, userId) {
     return http(`https://api.epics.gg/api/v1/collections/users/${userId}/user-summary`, {
         method: 'GET',

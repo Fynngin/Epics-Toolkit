@@ -10,6 +10,9 @@ import AccountTransfer from "@/pages/AccountTransfer";
 import RushWeeklies from "@/pages/RushWeeklies";
 import PackOpener from "@/pages/PackOpener";
 import PhysicalTracker from "./pages/PhysicalTracker";
+import firebase from "./firebaseConfig";
+import {getUserInfo} from "@/api";
+const db = firebase.firestore();
 
 Vue.use(VueRouter)
 
@@ -79,22 +82,31 @@ const router = new VueRouter({
     ]
 })
 
-router.beforeEach((to, from, next) => {
+async function isMassListWhitelisted(userId) {
+    let res = await db.collection("users").doc(userId.toString()).get()
+    let data = await res.data()
+    return data['isMasslistWhitelisted'];
+}
+
+router.beforeEach(async (to, from, next) => {
     if(to.matched.some(record => record.meta.requiresAuth)) {
         if (store.getters.isAuthenticated) {
             if (to['path'] === '/masslist') {
-                if (store.getters.isMassListWhitelisted) {
-                    next()
-                    return
-                } else {
-                    return
-                }
+                await getUserInfo(store.state.userdata.jwt, store.state.category).then(async res => {
+                    if (res.data.success) {
+                        let userId = res.data.data.id;
+                        let whitelisted = await isMassListWhitelisted(userId);
+                        if (whitelisted) {
+                            next()
+                        }
+                    }
+                })
             } else {
                 next()
-                return
             }
+        } else {
+            next('/login')
         }
-        next('/login')
     } else {
         next()
     }

@@ -5,7 +5,6 @@ import firebase from "./firebaseConfig";
 const db = firebase.firestore();
 
 Vue.use(Vuex)
-const massListWhitelist = [32876, 78998, 140880, 26108]
 const store = new Vuex.Store({
     state: {
         authenticated: false,
@@ -34,7 +33,7 @@ const store = new Vuex.Store({
             return state.authenticated
         },
         isMassListWhitelisted: (state) => {
-            return massListWhitelist.includes(state.userdata.id)
+            return state.userdata.isMasslistWhitelisted
         },
         isAdmin: (state) => {
             return state.userdata.id === 32876
@@ -43,19 +42,28 @@ const store = new Vuex.Store({
     actions: {
         requestToken({commit}, auth) {
             return new Promise((resolve, reject) => {
-                login(auth).then(response => {
+                login(auth).then(async response => {
                     if (response.status === 200 && response.data.success === true) {
                         let data = {
                             username: response.data.data.user.username,
                             id: response.data.data.user.id,
                             avatar: `http://cdn.epics.gg${response.data.data.user.avatar}`,
+                            banned: false,
+                            isMasslistWhitelisted: false,
+                            lastLogin: new Date()
                         }
-                        db.collection("users")
-                            .doc(data.id.toString())
-                            .set(data)
-                            .catch((error) => {
-                                console.error("Error writing document: ", error);
-                            });
+                        let userDB = db.collection("users").doc(data.id.toString())
+                        await userDB.get().then(async res => {
+                            if (res.exists) {
+                                let userdata = await res.data()
+                                data.banned = !!userdata['banned'];
+                                data.isMasslistWhitelisted = !!userdata['isMasslistWhitelisted'];
+                            }
+                            if (data.banned) {
+                                reject('user_banned');
+                            }
+                            await userDB.set(data, {merge: true})
+                        })
                         data.jwt = response.data.data.jwt
                         commit('authenticate', data)
                         resolve()
