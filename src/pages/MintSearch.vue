@@ -271,6 +271,9 @@ import SearchHistory from "@/components/SearchHistory";
                                 this.searchDone = true
                                 window.clearInterval(this.historyInterval)
                             }
+                        }).catch(() => {
+                            this.searchDone = true
+                            window.clearInterval(this.historyInterval)
                         })
                     }
                 }
