@@ -22,14 +22,8 @@
                         display: true,
                         text: this.rating
                     }
-                }
-            }
-        },
-        extends: Doughnut,
-        mounted() {
-            this.data.datasets[0].data = [this.rating, 100 - this.rating]
-            this.addPlugin({
-                beforeDraw: function (chart) {
+                },
+                plugin: function (chart) {
                     let width = chart.chart.width,
                         height = chart.chart.height,
                         ctx = chart.chart.ctx;
@@ -46,12 +40,21 @@
                     ctx.fillText(text, textX, textY);
                     ctx.save();
                 }
+            }
+        },
+        extends: Doughnut,
+        mounted() {
+            this.data.datasets[0].data = [this.rating, 100 - this.rating]
+            this.options.centerText.text = this.rating
+            this.addPlugin({
+                beforeDraw: this.plugin
             })
             this.renderChart(this.data, this.options)
         },
         watch: {
             rating() {
-                this.datasets[0].data = [this.rating]
+                this.data.datasets[0].data = [this.rating, 100 - this.rating]
+                this.options.centerText.text = this.rating
                 this.renderChart(this.data, this.options)
             }
         }

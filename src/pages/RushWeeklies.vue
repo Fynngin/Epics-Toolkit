@@ -4,7 +4,7 @@
         <b-button v-b-toggle.sidebar style="float: left" class="ml-2 bg-transparent border-transparent">
             <font-awesome-icon icon="align-justify" style="color: black"></font-awesome-icon>
         </b-button>
-        <h1>Welcome {{this.$store.state.userdata.username}}!</h1>
+<!--        <h1>Welcome {{this.$store.state.userdata.username}}!</h1>-->
 
         <b-row>
             <b-col>
@@ -13,24 +13,103 @@
                         <b-col cols="3">
                             <h3>Map Bans:</h3>
                         </b-col>
-                        <b-col cols="9">
-                            <b-form inline>
-                                <b-form-checkbox
-                                    v-for="map in maps"
-                                    :key="map.id"
-                                    class="mr-2"
-                                    @input="selectMap(map)"
-                                >
-                                    {{map.name}}
-                                </b-form-checkbox>
-                            </b-form>
+                        <b-col cols="9" style="overflow-x: auto; white-space: nowrap; display: block;">
+                            <b-container v-for="map in maps"
+                                         :key="map.id"
+                                         style="display: inline; position: relative;"
+                                         class="p-0 m-0"
+                            >
+                                <font-awesome-icon
+                                    v-if="bannedMaps.includes(map.id)"
+                                    class="mapBanIcon"
+                                    icon="times-circle"
+                                    size="2x"/>
+                                <b-img
+                                    :src="`${$store.state.cdnUrl}${map.images[0].url}`"
+                                    class="mapImg"
+                                    :class="bannedMaps.includes(map.id) ? 'selectedMap' : ''"
+                                    @click="selectMap(map)"
+                                />
+                            </b-container>
                         </b-col>
                     </b-row>
                 </b-card>
             </b-col>
         </b-row>
+
         <b-row>
-            <b-col v-if="teamsReady" cols="7">
+            <b-col v-if="teamsReady">
+                <b-card border-variant="dark" class="mb-2 ml-2">
+                    <b-row style="text-align: left">
+                        <b-col>
+                            <h3>Your team:</h3>
+                        </b-col>
+                    </b-row>
+                    <b-row style="text-align: left;">
+                        <b-col cols="1" v-if="selectedUserRoster">
+                            <RushRating
+                                :rating="activeUserRoster['rating']"
+                                :styles="{height: '80px', width: '80px', position: 'relative'}"
+                            />
+                        </b-col>
+                        <b-col v-if="selectedUserRoster">
+                            <b-img
+                                class="team_card"
+                                v-for="card in activeUserRoster.cards"
+                                :key="card['card'].id"
+                                :src="card['card'].images['size402']"
+                            />
+                        </b-col>
+                        <b-col v-if="selectedUserRoster" style="overflow-x: auto; white-space: nowrap; display: block;">
+                            <b-container v-for="map in maps" :key="map.id" class="mb-1" style="display: inline; position: relative;">
+                                <b-img class="mapImg" :src="`${$store.state.cdnUrl}${map.images[0].url}`"/>
+                                <b-badge pill
+                                         style="position: absolute; left: 10%"
+                                         :variant="activeUserRoster.stats.maps.find(m => {return m['mapId'] === map.id}).weight >= 0 ? 'success' : 'danger'">
+                                    {{ round((activeUserRoster.stats.maps.find(m => {return m['mapId'] === map.id}).weight) * 100, 3)}} %
+                                </b-badge>
+                            </b-container>
+                        </b-col>
+                        <b-col v-else>
+                            <h4>Please select a roster.</h4>
+                        </b-col>
+                        <b-col>
+                            <b-form-select v-model="selectedUserRoster" :options="userRosters" text-field="name" value-field="id">
+                                <template #first>
+                                    <b-form-select-option :value="null" disabled>-- Please select a roster --</b-form-select-option>
+                                </template>
+                            </b-form-select>
+                        </b-col>
+                    </b-row>
+                </b-card>
+<!--                <b-list-group>-->
+<!--                    <b-list-group-item-->
+<!--                        href="#"-->
+<!--                        @click="selectedUserRoster = roster.id"-->
+<!--                        :active="selectedUserRoster === roster.id"-->
+<!--                        v-for="(roster, idx) in userRosters"-->
+<!--                        :key="idx">-->
+<!--                        <b-row align-v="center">-->
+<!--                            <b-col cols="3">-->
+<!--                                <h3>{{roster.name}}</h3>-->
+<!--                                <RushRating :rating="roster.rating"/>-->
+<!--                            </b-col>-->
+<!--                            <b-col>-->
+<!--                                <b-img-->
+<!--                                    class="team_card"-->
+<!--                                    v-for="card in roster.cards"-->
+<!--                                    :key="card['card'].id"-->
+<!--                                    :src="card['card'].images['size402']"-->
+<!--                                />-->
+<!--                            </b-col>-->
+<!--                        </b-row>-->
+<!--                    </b-list-group-item>-->
+<!--                </b-list-group>-->
+            </b-col>
+        </b-row>
+
+        <b-row>
+            <b-col v-if="teamsReady">
                 <b-card class="mb-2 ml-2" border-variant="dark" v-for="achievement in filteredAchievements" :key="achievement.id">
                     <b-row class="mb-2">
                         <b-col>
@@ -88,32 +167,6 @@
                         </b-col>
                     </b-row>
                 </b-card>
-            </b-col>
-
-            <b-col v-if="teamsReady">
-                <b-list-group>
-                    <b-list-group-item
-                        href="#"
-                        @click="selectedUserRoster = roster.id"
-                        :active="selectedUserRoster === roster.id"
-                        v-for="(roster, idx) in userRosters"
-                        :key="idx">
-                        <b-row align-v="center">
-                            <b-col cols="3">
-                                <h3>{{roster.name}}</h3>
-                                <RushRating :rating="roster.rating"/>
-                            </b-col>
-                            <b-col>
-                                <b-img
-                                    class="team_card"
-                                    v-for="card in roster.cards"
-                                    :key="card['card'].id"
-                                    :src="card['card'].images['size402']"
-                                />
-                            </b-col>
-                        </b-row>
-                    </b-list-group-item>
-                </b-list-group>
             </b-col>
         </b-row>
 
@@ -180,7 +233,15 @@ export default {
                 this.userRosters = res.data.data['rosters']
         })
     },
+    computed: {
+        activeUserRoster() {
+            return this.userRosters.find(el => el.id === this.selectedUserRoster)
+        }
+    },
     methods: {
+        round(value, decimals) {
+            return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+        },
         async filterTeamAchievements() {
             this.filteredAchievements = this.weeklyAchievements.filter(ach => {
                 return ach.description.match("against")
@@ -268,6 +329,28 @@ export default {
     }
 
     .team_card {
-        height: 150px;
+        height: 80px;
+        margin-right: 10px;
+    }
+
+    .mapImg {
+        height: 70px;
+        margin-right: 10px;
+        border-radius: 25px;
+        border: solid #0baaaa;
+    }
+
+    .selectedMap {
+        border: solid #7a083c;
+    }
+
+    .mapBanIcon {
+        pointer-events: none;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        left: 50%;
+        margin-right: -50%;
+        color: #7a083c;
     }
 </style>
