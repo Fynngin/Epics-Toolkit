@@ -4,7 +4,6 @@
         <b-button v-b-toggle.sidebar style="float: left" class="ml-2 bg-transparent border-transparent">
             <font-awesome-icon icon="align-justify" style="color: black"></font-awesome-icon>
         </b-button>
-<!--        <h1>Welcome {{this.$store.state.userdata.username}}!</h1>-->
 
         <b-row>
             <b-col>
@@ -52,7 +51,7 @@
                                 :styles="{height: '80px', width: '80px', position: 'relative'}"
                             />
                         </b-col>
-                        <b-col v-if="selectedUserRoster">
+                        <b-col v-if="selectedUserRoster" style="overflow-x: auto; white-space: nowrap; display: block;">
                             <b-img
                                 class="team_card"
                                 v-for="card in activeUserRoster.cards"
@@ -82,35 +81,39 @@
                         </b-col>
                     </b-row>
                 </b-card>
-<!--                <b-list-group>-->
-<!--                    <b-list-group-item-->
-<!--                        href="#"-->
-<!--                        @click="selectedUserRoster = roster.id"-->
-<!--                        :active="selectedUserRoster === roster.id"-->
-<!--                        v-for="(roster, idx) in userRosters"-->
-<!--                        :key="idx">-->
-<!--                        <b-row align-v="center">-->
-<!--                            <b-col cols="3">-->
-<!--                                <h3>{{roster.name}}</h3>-->
-<!--                                <RushRating :rating="roster.rating"/>-->
-<!--                            </b-col>-->
-<!--                            <b-col>-->
-<!--                                <b-img-->
-<!--                                    class="team_card"-->
-<!--                                    v-for="card in roster.cards"-->
-<!--                                    :key="card['card'].id"-->
-<!--                                    :src="card['card'].images['size402']"-->
-<!--                                />-->
-<!--                            </b-col>-->
-<!--                        </b-row>-->
-<!--                    </b-list-group-item>-->
-<!--                </b-list-group>-->
+            </b-col>
+        </b-row>
+
+        <b-row>
+            <b-col>
+                <b-card border-variant="dark" class="ml-2 mb-2">
+                    <b-row v-for="achievement in filteredAchievements.filter(el => !el.roster)"
+                           :key="achievement.id">
+                        <b-col cols="4">
+                            <b-badge variant="success">
+                                {{achievement.type}}
+                            </b-badge>
+                            {{achievement.description}}:
+                        </b-col>
+                        <b-col>
+                            <b-progress
+                                class="mb-2"
+                                :max="achievement.progress.max"
+                                :variant="achievement.progress.min < achievement.progress.max ? 'primary' : 'success'"
+                            >
+                                <b-progress-bar :value="achievement.progress.min">
+                                    {{achievement.progress.min}} / {{achievement.progress.max}}
+                                </b-progress-bar>
+                            </b-progress>
+                        </b-col>
+                    </b-row>
+                </b-card>
             </b-col>
         </b-row>
 
         <b-row>
             <b-col v-if="teamsReady">
-                <b-card class="mb-2 ml-2" border-variant="dark" v-for="achievement in filteredAchievements" :key="achievement.id">
+                <b-card class="mb-2 ml-2" border-variant="dark" v-for="achievement in filteredAchievements.filter(el => el.roster)" :key="achievement.id">
                     <b-row class="mb-2">
                         <b-col>
                             <b-progress :max="achievement.progress.max" :variant="achievement.progress.min < achievement.progress.max ? 'primary' : 'success'">
@@ -200,6 +203,7 @@ export default {
             userRosters: [],
             selectedUserRoster: null,
             bannedMaps: [],
+            dailyAchievements: [],
             weeklyAchievements: [],
             filteredAchievements: [],
             toastTitle: "",
@@ -225,6 +229,7 @@ export default {
         getRushAchievements(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.userdata.id).then(res => {
             if (res.data.success) {
                 this.weeklyAchievements = res.data.data['weekly']
+                this.dailyAchievements = res.data.data['daily']
                 this.filterTeamAchievements()
             }
         })
@@ -273,6 +278,27 @@ export default {
                             ach.roster = res.data.data['rosters'].find(r => new Date(r.start) < Date.now())
                     })
                 }
+            }
+
+            let weeklyWin = this.weeklyAchievements.find(el => el.description.match("Win [0-9]+ Rush Matches"))
+            if (weeklyWin) {
+                weeklyWin.type = 'weekly'
+                this.filteredAchievements.push(weeklyWin)
+            }
+            let weeklyPlay = this.weeklyAchievements.find(el => el.description.match("Play [0-9]+ Rush Matches"))
+            if (weeklyPlay) {
+                weeklyPlay.type = 'weekly'
+                this.filteredAchievements.push(weeklyPlay)
+            }
+            let dailyWin = this.dailyAchievements.find(el => el.description.match("Win [0-9]+ Rush Matches"))
+            if (dailyWin) {
+                dailyWin.type = 'daily'
+                this.filteredAchievements.push(dailyWin)
+            }
+            let dailyPlay = this.dailyAchievements.find(el => el.description.match("Play [0-9]+ Rush Matches"))
+            if (dailyPlay) {
+                dailyPlay.type = 'daily'
+                this.filteredAchievements.push(dailyPlay)
             }
             this.teamsReady = true
         },
