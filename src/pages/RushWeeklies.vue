@@ -44,7 +44,7 @@
                             <h3>Your team:</h3>
                         </b-col>
                     </b-row>
-                    <b-row style="text-align: left;">
+                    <b-row style="text-align: left;" align-v="center">
                         <b-col cols="1" v-if="selectedUserRoster">
                             <RushRating
                                 :rating="activeUserRoster['rating']"
@@ -113,25 +113,30 @@
 
         <b-row>
             <b-col v-if="teamsReady">
-                <b-card class="mb-2 ml-2" border-variant="dark" v-for="achievement in filteredAchievements.filter(el => el.roster)" :key="achievement.id">
-                    <b-row class="mb-2">
-                        <b-col>
-                            <b-progress :max="achievement.progress.max" :variant="achievement.progress.min < achievement.progress.max ? 'primary' : 'success'">
-                                <b-progress-bar :value="achievement.progress.min">
-                                    {{achievement.progress.min}} / {{achievement.progress.max}}
-                                </b-progress-bar>
-                            </b-progress>
-                        </b-col>
-                    </b-row>
-                    <b-row align-v="center">
-                        <b-col cols="1">
+                <b-card no-body class="mb-2 ml-2" border-variant="dark" v-for="achievement in filteredAchievements.filter(el => el.roster)" :key="achievement.id">
+                    <template v-slot:header>
+                        <b-row>
+                            <b-col>
+                                {{achievement.description}}
+                            </b-col>
+                            <b-col>
+                                <b-progress :max="achievement.progress.max" :variant="achievement.progress.min < achievement.progress.max ? 'primary' : 'success'">
+                                    <b-progress-bar :value="achievement.progress.min">
+                                        {{achievement.progress.min}} / {{achievement.progress.max}}
+                                    </b-progress-bar>
+                                </b-progress>
+                            </b-col>
+                        </b-row>
+                    </template>
+                    <b-row align-v="center" style="margin: initial">
+                        <div style="height: 200px; width: 115px; position: relative; overflow: hidden;">
                             <b-img
                                 class="team_logo"
                                 v-if="achievement.roster && achievement.roster.logoUrl"
                                 :src="`${$store.state.cdnUrl}${achievement.roster.logoUrl}`"
                             />
-                        </b-col>
-                        <b-col cols="7">
+                        </div>
+                        <b-col style="overflow-x: auto; white-space: nowrap; display: block;">
                             <b-img
                                 class="team_card"
                                 v-for="card in achievement.roster.cards"
@@ -139,25 +144,25 @@
                                 :src="card['card'].images['size402']"
                             />
                         </b-col>
-                        <b-col cols="2">
-                            <b-list-group>
-                                <b-list-group-item>
-                                    <b-row align-v="center">
-                                        <h5><strong>Team: &#160; </strong></h5>
-                                        {{achievement.roster.name}}
-                                    </b-row>
-                                </b-list-group-item>
-                                <b-list-group-item>
-                                    <b-row align-v="center">
-                                        <h5 style="float: left;"><strong>Stage:</strong></h5>
-                                        <b-img v-if="achievement.stageBadge" style="height: 60px; float: right" :src="achievement.stageBadge"/>
-                                        <span v-else>TOTW</span>
-                                    </b-row>
-
-                                </b-list-group-item>
-                            </b-list-group>
+                        <b-col class="d-md-none d-lg-block" cols="2">
+                            <RushRating
+                                :rating="achievement.roster.rating"
+                                :styles="{height: '150px', width: '150px', position: 'relative'}"
+                            />
                         </b-col>
-                        <b-col>
+
+                        <b-col style="overflow-x: auto; white-space: nowrap; display: block;" v-if="maps.length === 7">
+                            <b-container v-for="map in achievement.roster.stats.maps" :key="map['map_id']" class="mb-1" style="display: inline; position: relative;">
+                                <b-img class="mapImg" :src="`${$store.state.cdnUrl}${maps[map['map_id'] - 1].images[0].url}`"/>
+                                <b-badge pill
+                                         style="position: absolute; left: 10%"
+                                         :variant="map.weight >= 0 ? 'success' : 'danger'">
+                                    {{ round((map.weight) * 100, 3)}} %
+                                </b-badge>
+                            </b-container>
+                        </b-col>
+
+                        <b-col cols="1">
                             <b-button
                                 size="lg"
                                 :disabled="!selectedUserRoster || gameDelay"
@@ -165,9 +170,17 @@
                                 @click="playMatch(achievement)"
                             >
                                 <b-spinner v-if="gameDelay"/>
-                                <span v-else>Play</span>
+                                <font-awesome-icon icon="play" v-else/>
                             </b-button>
                         </b-col>
+                        <div
+                            style="right: 0; height: 200px; width: 115px; position: relative; overflow: hidden;"
+                        >
+                            <b-img
+                                class="stageBadge"
+                                :src="achievement.stageBadge"
+                            />
+                        </div>
                     </b-row>
                 </b-card>
             </b-col>
@@ -283,21 +296,25 @@ export default {
             let weeklyWin = this.weeklyAchievements.find(el => el.description.match("Win [0-9]+ Rush Matches"))
             if (weeklyWin) {
                 weeklyWin.type = 'weekly'
+                weeklyWin.condition = 'win'
                 this.filteredAchievements.push(weeklyWin)
             }
             let weeklyPlay = this.weeklyAchievements.find(el => el.description.match("Play [0-9]+ Rush Matches"))
             if (weeklyPlay) {
                 weeklyPlay.type = 'weekly'
+                weeklyPlay.condition = 'play'
                 this.filteredAchievements.push(weeklyPlay)
             }
             let dailyWin = this.dailyAchievements.find(el => el.description.match("Win [0-9]+ Rush Matches"))
             if (dailyWin) {
                 dailyWin.type = 'daily'
+                dailyWin.condition = 'win'
                 this.filteredAchievements.push(dailyWin)
             }
             let dailyPlay = this.dailyAchievements.find(el => el.description.match("Play [0-9]+ Rush Matches"))
             if (dailyPlay) {
                 dailyPlay.type = 'daily'
+                dailyPlay.condition = 'play'
                 this.filteredAchievements.push(dailyPlay)
             }
             this.teamsReady = true
@@ -314,6 +331,14 @@ export default {
                 if (res.data.success) {
                     if (res.data.data['game']['user1']['winner'] && achievement.progress.min < achievement.progress.max)
                         achievement.progress.min++
+                    this.filteredAchievements.forEach(ach => {
+                        if (ach.type === 'weekly' || ach.type === 'daily') {
+                            if (ach.condition === 'play')
+                                ach.progress.min++;
+                            else if (ach.condition === 'win' && res.data.data['game']['user1']['winner'])
+                                ach.progress.min++;
+                        }
+                    })
                     this.gameDelay = true
                     window.setTimeout(() => this.gameDelay = false, 2000)
                 }
@@ -341,21 +366,31 @@ export default {
 
 <style scoped>
     .team_logo {
-        height: 100px;
-        width: 100px;
+        height: 100%;
+        position: absolute;
+        left: -85px;
+        top: 0;
         -webkit-filter: drop-shadow(1px 1px 0 black)
                         drop-shadow(-1px 1px 0 black)
                         drop-shadow(1px -1px 0 black)
                         drop-shadow(-1px -1px 0 black);
-
         filter: drop-shadow(1px 1px 0 black)
                 drop-shadow(-1px 1px 0 black)
                 drop-shadow(1px -1px 0 black)
                 drop-shadow(-1px -1px 0 black);
+        mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0));
+    }
+
+    .stageBadge {
+        height: 100%;
+        position: absolute;
+        right: -85px;
+        top: 0;
+        mask-image: linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0));
     }
 
     .team_card {
-        height: 80px;
+        height: 150px;
         margin-right: 10px;
     }
 
