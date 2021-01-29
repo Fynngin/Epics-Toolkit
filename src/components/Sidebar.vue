@@ -54,6 +54,9 @@
                 <font-awesome-icon icon="signature"/>
                 Physical Tracker
             </b-button>
+            <b-button class="w-100 text-left" :variant="pageVariant(`/showcase/${$store.state.userdata.id}`)" @click="$router.push(`/showcase/${$store.state.userdata.id}`)">
+                Showcase creator
+            </b-button>
         </b-row>
     </b-sidebar>
 </template>

@@ -12,6 +12,7 @@ import PackOpener from "@/pages/PackOpener";
 import PhysicalTracker from "./pages/PhysicalTracker";
 import firebase from "./firebaseConfig";
 import {getUserInfo} from "@/api";
+import Showcase from "./pages/Showcase";
 const db = firebase.firestore();
 
 Vue.use(VueRouter)
@@ -77,6 +78,13 @@ const router = new VueRouter({
             component: PhysicalTracker,
             meta: {
                 requiresAuth: true
+            }
+        },
+        {
+            path: '/showcase/:id',
+            component: Showcase,
+            meta: {
+                requiresAuth: false
             }
         }
     ]
