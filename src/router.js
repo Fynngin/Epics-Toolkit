@@ -12,6 +12,7 @@ import PackOpener from "@/pages/PackOpener";
 import PhysicalTracker from "./pages/PhysicalTracker";
 import firebase from "./firebaseConfig";
 import {getUserInfo} from "@/api";
+import Betting from "@/pages/Betting";
 const db = firebase.firestore();
 
 Vue.use(VueRouter)
@@ -75,6 +76,13 @@ const router = new VueRouter({
         {
             path: '/physicaltracker',
             component: PhysicalTracker,
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/betting',
+            component: Betting,
             meta: {
                 requiresAuth: true
             }

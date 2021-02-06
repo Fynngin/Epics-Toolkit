@@ -54,6 +54,10 @@
                 <font-awesome-icon icon="signature"/>
                 Physical Tracker
             </b-button>
+            <b-button class="w-100 text-left" :variant="pageVariant('/betting')" @click="$router.push('/betting')">
+                <font-awesome-icon icon="coins"/>
+                Betting
+            </b-button>
         </b-row>
     </b-sidebar>
 </template>
