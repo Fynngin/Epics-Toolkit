@@ -1,9 +1,9 @@
 <template>
     <div style="border-color: #22283d; outline-style: solid;" class="match_container">
-        <b-row class="w-100 m-0" align-h="start">
-            <b-col style="margin-top: 5px">
+        <b-row class="w-100 m-0 h-100">
+            <b-col style="margin-top: 5px" align-self="center" class="d-sm-none d-md-none d-lg-block">
                 <b-img
-                    class="event_icon d-md-none d-lg-block"
+                    class="event_icon"
                     v-if="match['league']['image_url']"
                     :src="match['league']['image_url']"
                     v-b-tooltip:hover
@@ -31,14 +31,14 @@
                 <b-img class="team_icon" v-else src="icons/10.png"/>
                 <p class="team_name">{{match['opponents'][1]['opponent'].name}}</p>
             </b-col>
-<!--            <div-->
-<!--                @click="openAnalyticsPage(match.link)"-->
-<!--                class="analytics_button"-->
-<!--                v-b-tooltip:hover-->
-<!--                title="HLTV analytics"-->
-<!--            >-->
-<!--                <font-awesome-icon icon="chart-bar" color="white"/>-->
-<!--            </div>-->
+            <div
+                class="new_bet_btn"
+                v-b-tooltip:hover
+                title="Create bet"
+                @click="$emit('selectMatch')"
+            >
+                <font-awesome-icon icon="coins" color="white" style="margin-top: 10px"/>
+            </div>
         </b-row>
     </div>
 </template>
@@ -50,30 +50,28 @@ export default {
     methods: {
         parseDate(date) {
             const parsed = new Date(date);
-            // const day = ('0' + parsed.getDate()).slice(-2);
-            // const month = ('0' + parsed.getMonth()).slice(-2);
             const hour = ('0' + parsed.getHours()).slice(-2);
             const minute = ('0' + parsed.getMinutes()).slice(-2);
             return `${hour}:${minute}`
         }
-        // openAnalyticsPage(matchLink) {
-        //     const hltvPrefix = 'https://hltv.org';
-        //     const newLink = hltvPrefix + matchLink.replace("/matches", "/betting/analytics");
-        //     window.open(newLink, '_blank');
-        // }
     }
 }
 </script>
 
 <style scoped>
     .team_icon {
-        height: 70px;
+        max-height: 70px;
         max-width: 100px;
     }
 
     .team_name {
         white-space: nowrap;
         text-overflow: ellipsis;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        padding-right: 25px;
+        margin: 0;
     }
 
     .event_icon {
@@ -93,7 +91,7 @@ export default {
         height: 100px;
     }
 
-    .analytics_button {
+    .new_bet_btn {
         cursor: pointer;
         pointer-events: auto;
         top: 0;

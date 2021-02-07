@@ -23,9 +23,17 @@
                             v-for="match in matches"
                             :key="match.id"
                             :match="match"
+                            @selectMatch="selectedMatch = match"
                         />
                     </b-collapse>
                 </div>
+            </b-col>
+
+            <b-col cols="6" v-if="selectedMatch">
+                <SelectedMatchOverview
+                    :selected-match="selectedMatch"
+                    @teamSelect="team => selectedTeam = team"
+                />
             </b-col>
         </b-row>
     </div>
@@ -37,15 +45,19 @@ import _ from 'lodash';
 import Sidebar from "@/components/Sidebar";
 import {getMatchesByStartDate} from "@/csgoApi";
 import * as dayjs from "dayjs";
+import SelectedMatchOverview from "../components/betting/SelectedMatchOverview";
+import CollectionSelect from "../components/CollectionSelect";
 
 export default {
     name: "Betting",
-    components: {Sidebar, HLTVMatch},
+    components: {CollectionSelect, SelectedMatchOverview, Sidebar, HLTVMatch},
     data() {
         return {
             matches: [],
             matchesByDate: {},
-            collapsedDates: {}
+            collapsedDates: {},
+            selectedMatch: null,
+            selectedTeam: null
         }
     },
     created() {
@@ -53,16 +65,6 @@ export default {
     },
     methods: {
         init() {
-            // HLTV.getMatches().then(async matches => {
-            //     this.matches = matches.filter(match => {
-            //         return match.teams[0].name !== "" && match.teams[1].name !== "";
-            //     })
-            //     this.matches.forEach(match => {
-            //         const dateTimeSplit = match.time.split('T');
-            //         match.date = dateTimeSplit[0];
-            //     })
-            //     await this.groupMatchesByDate();
-            // });
             const today = dayjs().toISOString();
             const tomorrow = dayjs().add(7, 'day').toISOString();
             getMatchesByStartDate(today, tomorrow).then(res => {
@@ -77,7 +79,15 @@ export default {
             })
         },
         groupMatchesByDate() {
-            this.matchesByDate = _.groupBy(this.matches, 'date');
+            const matches = _.groupBy(this.matches, 'date');
+
+            // weird sorting needed to change iteration order for Object.keys()
+            const keys = Object.keys(matches)
+            keys.sort()
+            keys.forEach(key => {
+                this.matchesByDate[key] = matches[key]
+            })
+            this.$forceUpdate();
         },
         collapseDate(date) {
             if (this.collapsedDates[date] === undefined) {
@@ -85,6 +95,12 @@ export default {
             } else {
                 this.collapsedDates[date] = !this.collapsedDates[date];
             }
+        },
+        parseDate(date) {
+            const parsed = new Date(date);
+            const hour = ('0' + parsed.getHours()).slice(-2);
+            const minute = ('0' + parsed.getMinutes()).slice(-2);
+            return `${hour}:${minute}`
         }
     }
 }
