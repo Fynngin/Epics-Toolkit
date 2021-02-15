@@ -34,6 +34,10 @@
                     :selected-match="selectedMatch"
                     @teamSelect="team => selectedTeam = team"
                 />
+                <CollectionSelect
+                    :use-dropdown="true"
+                    @collectionChange="coll => selectedCollection = coll"
+                />
             </b-col>
         </b-row>
     </div>
@@ -57,7 +61,8 @@ export default {
             matchesByDate: {},
             collapsedDates: {},
             selectedMatch: null,
-            selectedTeam: null
+            selectedTeam: null,
+            selectedCollection: null
         }
     },
     created() {

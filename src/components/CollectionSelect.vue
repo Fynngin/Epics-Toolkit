@@ -9,7 +9,7 @@
                 <b-form-select-option :value="null" disabled>-- Season --</b-form-select-option>
             </template>
         </b-form-select>
-        <b-list-group v-if="season">
+        <b-list-group v-if="season && !useDropdown">
             <b-list-group-item v-for="(colls, name, index) in collectionOptions" :key="index"
                                action variant="secondary">
                 <a v-b-toggle="`collapse-${index}`">
@@ -19,7 +19,7 @@
                 <b-collapse :id="`collapse-${index}`">
                     <b-list-group v-if="name !== 'Event'">
                         <b-list-group-item v-for="(collection, index) in colls" :key="index" button
-                                           @click="selectCollection(collection, null)">
+                                           @click="selectCollection(collection.collection, null)">
                             {{collection.collection.name}}
                         </b-list-group-item>
                     </b-list-group>
@@ -33,7 +33,7 @@
                             <b-collapse :id="`event-${index}`">
                                 <b-list-group>
                                     <b-list-group-item v-for="(collection, index) in collections" :key="index" button
-                                                       @click="selectCollection(collection, event)">
+                                                       @click="selectCollection(collection.collection, event)">
                                         {{collection.collection.name}}
                                     </b-list-group-item>
                                 </b-list-group>
@@ -42,8 +42,55 @@
                     </b-list-group>
                 </b-collapse>
             </b-list-group-item>
-
         </b-list-group>
+
+        <div v-if="useDropdown">
+            <b-form-select
+                v-if="season"
+                :options="Object.keys(collectionOptions)"
+                v-model="selectedTier"
+                @change="selectedEvent = null"
+                class="mb-2"
+            >
+                <template v-slot:first>
+                    <b-form-select-option :value="null" disabled>-- Tier --</b-form-select-option>
+                </template>
+            </b-form-select>
+            <b-form-select
+                v-if="selectedTier === 'Event'"
+                :options="Object.keys(collectionOptions[selectedTier])"
+                v-model="selectedEvent"
+                class="mb-2"
+            >
+                <template v-slot:first>
+                    <b-form-select-option :value="null" disabled>-- Event --</b-form-select-option>
+                </template>
+            </b-form-select>
+            <b-form-select
+                v-if="selectedTier !== null && selectedTier !== 'Event'"
+                :options="collectionOptions[selectedTier]"
+                text-field="collection.name"
+                value-field="collection"
+                v-model="collection"
+                @change="value => selectCollection(value, null)"
+            >
+                <template v-slot:first>
+                    <b-form-select-option :value="null" disabled>-- Collection --</b-form-select-option>
+                </template>
+            </b-form-select>
+            <b-form-select
+                v-if="selectedEvent"
+                :options="collectionOptions['Event'][selectedEvent]"
+                text-field="collection.name"
+                value-field="collection"
+                v-model="collection"
+                @change="value => selectCollection(value, selectedEvent)"
+            >
+                <template v-slot:first>
+                    <b-form-select-option :value="null" disabled>-- Collection --</b-form-select-option>
+                </template>
+            </b-form-select>
+        </div>
     </div>
 </template>
 
@@ -52,12 +99,15 @@ import {getAppInfo, getCollections} from "@/api";
 
 export default {
     name: "CollectionSelect",
+    props: ['useDropdown'],
     data() {
         return {
             season: null,
             collection: null,
             collectionOptions: {},
-            tiers: []
+            tiers: [],
+            selectedTier: null,
+            selectedEvent: null
         }
     },
     methods: {
@@ -93,10 +143,10 @@ export default {
         },
         selectCollection(collection, event) {
             let coll = {
-                id: collection.collection.id,
-                entities: collection.collection.properties['entity_types'],
-                name: collection.collection.name,
-                season: collection.collection.properties['seasons'][0]
+                id: collection.id,
+                entities: collection.properties['entity_types'],
+                name: collection.name,
+                season: collection.properties['seasons'][0]
             }
             if (event) {
                 coll.event = event
