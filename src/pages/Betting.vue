@@ -37,7 +37,9 @@
                 <CollectionSelect
                     :use-dropdown="true"
                     @collectionChange="coll => selectedCollection = coll"
+                    class="mb-2"
                 />
+                <CollectionOverview v-if="selectedCollection" :collection="selectedCollection"/>
             </b-col>
         </b-row>
     </div>
@@ -51,10 +53,11 @@ import {getMatchesByStartDate} from "@/csgoApi";
 import * as dayjs from "dayjs";
 import SelectedMatchOverview from "../components/betting/SelectedMatchOverview";
 import CollectionSelect from "../components/CollectionSelect";
+import CollectionOverview from "../components/betting/CollectionOverview";
 
 export default {
     name: "Betting",
-    components: {CollectionSelect, SelectedMatchOverview, Sidebar, HLTVMatch},
+    components: {CollectionOverview, CollectionSelect, SelectedMatchOverview, Sidebar, HLTVMatch},
     data() {
         return {
             matches: [],

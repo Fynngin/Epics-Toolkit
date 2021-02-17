@@ -75,7 +75,7 @@ export default {
     }
 
     .event_icon {
-        height: 70px;
+        width: 70px;
         -webkit-filter: drop-shadow(1px 1px 0 black)
                         drop-shadow(-1px 1px 0 black)
                         drop-shadow(1px -1px 0 black)
