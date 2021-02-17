@@ -1,8 +1,8 @@
 <template>
     <div>
         <b-row align-h="center">
-            <b-col  cols="4">
-                <b-card title="Login with your Epics Account">
+            <b-col cols="4">
+                <b-card title="Login with your Epics Account" class="mb-2">
                     <a href="#" v-b-toggle.disclaimer>Why is this needed?</a>
                     <b-collapse id="disclaimer">
                         <p>
@@ -24,6 +24,23 @@
                         </span>
                     </b-button>
                 </b-card>
+
+                <font-awesome-icon class="mr-2" icon="donate"/>
+                <span>
+                    <a href="#" v-b-toggle.donate>Donate</a>
+                </span>
+                <b-collapse id="donate">
+                    <p>
+                        By popular request, I am now accepting donations if you want to support my work.
+                        Keep in mind, that donations are never necessary. I will continue to provide free tools for the
+                        community as long as I can :)
+                    </p>
+                    <form action="https://www.paypal.com/donate" method="post" target="_top">
+                        <input type="hidden" name="hosted_button_id" value="77TK3ED9MC6UQ" />
+                        <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+                        <img alt="" border="0" src="https://www.paypal.com/en_DE/i/scr/pixel.gif" width="1" height="1" />
+                    </form>
+                </b-collapse>
             </b-col>
         </b-row>
 
