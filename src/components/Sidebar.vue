@@ -11,12 +11,11 @@
                     :variant="categoryVariant(2)"
                     @click="changeCategory(2)"
             >Streamers</b-button>
-<!--            <b-button-->
-<!--                    class="categoryButton"-->
-<!--                    style="height: 4rem"-->
-<!--                    :variant="categoryVariant(3)"-->
-<!--                    @click="changeCategory(3)"-->
-<!--            >PUBG Mobile</b-button>-->
+            <b-button
+                    class="categoryButton"
+                    :variant="categoryVariant(4)"
+                    @click="changeCategory(4)"
+            >PUBG Mobile</b-button>
         </div>
         <b-row class="mt-2 pr-2 pl-2">
             <b-button class="w-100" :variant="pageVariant('/')" @click="$router.push('/')">
@@ -34,11 +33,21 @@
                 <font-awesome-icon icon="search"/>
                 Mint-Search
             </b-button>
-            <b-button class="w-100 text-left" :variant="pageVariant('/teambuilder')" @click="$router.push('/teambuilder')">
+            <b-button
+                v-if="isCSGOCategory"
+                class="w-100 text-left"
+                :variant="pageVariant('/teambuilder')"
+                @click="$router.push('/teambuilder')"
+            >
                 <font-awesome-icon icon="users-cog"/>
                 Rush Team-Builder
             </b-button>
-            <b-button class="w-100 text-left" :variant="pageVariant('/rushweeklies')" @click="$router.push('/rushweeklies')">
+            <b-button
+                v-if="isCSGOCategory"
+                class="w-100 text-left"
+                :variant="pageVariant('/rushweeklies')"
+                @click="$router.push('/rushweeklies')"
+            >
                 <font-awesome-icon icon="calendar-alt"/>
                 Rush Weekly Achievements
             </b-button>
@@ -64,7 +73,14 @@
     export default {
         name: "Sidebar",
         computed: {
-
+            isCSGOCategory() {
+                return this.$store.state.category === 1
+            }
+        },
+        watch: {
+            isCSGOCategory() {
+                this.$forceUpdate();
+            }
         },
         methods: {
             ...mapActions(['changeCategory']),
@@ -80,6 +96,7 @@
 
 <style scoped>
     .categoryButton {
-        width: 100px
+        height: 60px;
+        width: 100px;
     }
 </style>

@@ -19,7 +19,7 @@ const store = new Vuex.Store({
         whaleId: 93233,
         category: 1,
         currentSeasons: {
-            1: '2020',
+            1: '2021',
             2: 'First Edition'
         },
         rushSeason: '2020',
