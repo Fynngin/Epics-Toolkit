@@ -16,11 +16,13 @@
                         </b-button>
                     </template>
                     <b-spinner v-if="spinner.spinnerOdds"/>
+                    <p v-if="error.spinnerOdds">Spinner unavailable.</p>
                     <SpinnerOddsChart
                         :key="keys.spinnerodds"
-                        :hidden="spinner.spinnerOdds"
+                        :hidden="spinner.spinnerOdds || error.spinnerOdds"
                         :category="$store.state.category"
                         @loading="value => {value ? this.spinner.spinnerOdds = true : this.spinner.spinnerOdds = false}"
+                        @error="value => {this.error.spinnerOdds = value}"
                     ></SpinnerOddsChart>
                 </b-card>
             </b-col>
@@ -33,11 +35,13 @@
                         </b-button>
                     </template>
                     <b-spinner v-if="spinner.packStock"/>
+                    <p v-if="error.packStock">No packs available.</p>
                     <PackStock
                         :key="keys.packstock"
-                        :hidden="spinner.packStock"
+                        :hidden="spinner.packStock || error.packStock"
                         :category="$store.state.category"
                         @loading="value => {value ? this.spinner.packStock = true : this.spinner.packStock = false}"
+                        @error="value => {this.error.packStock = value}"
                     ></PackStock>
                 </b-card>
             </b-col>
@@ -59,6 +63,10 @@
                 spinner: {
                     spinnerOdds: true,
                     packStock: true
+                },
+                error: {
+                    spinnerOdds: false,
+                    packStock: false
                 },
                 keys: {
                     packstock: 0,

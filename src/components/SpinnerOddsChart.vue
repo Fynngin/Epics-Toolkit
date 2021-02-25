@@ -48,8 +48,12 @@
                     }
                 }).then(response => {
                     if (response.data.success) {
+                        this.$emit('error', false);
                         this.parseData(response.data.data.items)
                     }
+                }).catch(() => {
+                    this.$emit('loading', false);
+                    this.$emit('error', true);
                 })
             },
             parseData(data) {

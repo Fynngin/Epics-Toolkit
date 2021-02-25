@@ -55,6 +55,9 @@
                             this.parseData();
                         }
                     }
+                }).catch(() => {
+                    this.$emit('loading', false);
+                    this.$emit('error', true);
                 })
             },
             parseData() {
@@ -98,6 +101,12 @@
                         data: [item.data]
                     })
                 })
+
+                if (sorted.length === 0) {
+                    this.$emit('error', true);
+                } else {
+                    this.$emit('error', false);
+                }
 
                 this.$emit('loading', false);
                 this.renderChart(this.data, this.options)
