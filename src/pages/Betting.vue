@@ -34,12 +34,22 @@
                     :selected-match="selectedMatch"
                     @teamSelect="team => selectedTeam = team"
                 />
+                <StakeOverview
+                    v-if="!stakeEmpty"
+                    :stake="stake"
+                    @removeItem="value => updateStake({templateId: value, items: []})"
+                />
                 <CollectionSelect
                     :use-dropdown="true"
                     @collectionChange="coll => selectedCollection = coll"
                     class="mb-2"
                 />
-                <CollectionOverview v-if="selectedCollection" :collection="selectedCollection"/>
+                <CollectionOverview
+                    v-if="selectedCollection"
+                    :collection="selectedCollection"
+                    :stake="stake"
+                    @stakeUpdate="value => updateStake(value)"
+                />
             </b-col>
         </b-row>
     </div>
@@ -54,10 +64,11 @@ import * as dayjs from "dayjs";
 import SelectedMatchOverview from "../components/betting/SelectedMatchOverview";
 import CollectionSelect from "../components/CollectionSelect";
 import CollectionOverview from "../components/betting/CollectionOverview";
+import StakeOverview from "../components/betting/StakeOverview";
 
 export default {
     name: "Betting",
-    components: {CollectionOverview, CollectionSelect, SelectedMatchOverview, Sidebar, HLTVMatch},
+    components: {StakeOverview, CollectionOverview, CollectionSelect, SelectedMatchOverview, Sidebar, HLTVMatch},
     data() {
         return {
             matches: [],
@@ -65,11 +76,17 @@ export default {
             collapsedDates: {},
             selectedMatch: null,
             selectedTeam: null,
-            selectedCollection: null
+            selectedCollection: null,
+            stake: {}
         }
     },
     created() {
         this.init();
+    },
+    computed: {
+        stakeEmpty() {
+            return Object.values(this.stake).length === 0
+        }
     },
     methods: {
         init() {
@@ -109,6 +126,14 @@ export default {
             const hour = ('0' + parsed.getHours()).slice(-2);
             const minute = ('0' + parsed.getMinutes()).slice(-2);
             return `${hour}:${minute}`
+        },
+        updateStake(newItems) {
+            if (newItems.items.length === 0) {
+                delete this.stake[newItems.templateId];
+                this.stake = Object.assign({}, this.stake, this.stake);
+            } else {
+                this.$set(this.stake, newItems.templateId, newItems.items);
+            }
         }
     }
 }

@@ -38,9 +38,9 @@
                 <b-col cols="8">
                     <h5>Select mints to add to stake:</h5>
                     <b-form-checkbox
-                        v-for="item in selectedTemplate.items" :key="item.id"
-                        :checked="item.checked"
-                        @change="addCardToStake(item)"
+                        v-for="(item, idx) in selectedTemplate.items" :key="item.id"
+                        :checked="selectedItemIdx.includes(idx)"
+                        @change="selectMint(idx)"
                     >
                         {{item.mintBatch}}{{item.mintNumber}}
                     </b-form-checkbox>
@@ -59,7 +59,12 @@
                 </b-col>
             </b-row>
             <template v-slot:modal-footer>
-                <b-button variant="outline-success">Add to stake</b-button>
+                <b-button
+                    variant="outline-success"
+                    @click="addSelectionToStake"
+                >
+                    Update stake
+                </b-button>
             </template>
         </b-modal>
     </div>
@@ -71,13 +76,14 @@ import _ from 'lodash';
 
 export default {
     name: "CollectionOverview",
-    props: ['collection'],
+    props: ['collection', 'stake'],
     data() {
         return {
             dupesOnly: false,
             templates: [],
             templatesDupesOnly: [],
             selectedTemplate: null,
+            selectedItemIdx: [],
             searchInput: ""
         }
     },
@@ -127,22 +133,37 @@ export default {
             })
         },
         selectTemplate(items) {
+            this.selectedItemIdx = [];
             if (items[0].type === 'card') {
                 this.selectedTemplate = items[0]['cardTemplate'];
             } else {
                 this.selectedTemplate = items[0]['stickerTemplate'];
             }
             this.selectedTemplate.items = items;
+            for (const [idx, item] of this.selectedTemplate.items.entries()) {
+                if (this.stake[this.selectedTemplate.id] && this.stake[this.selectedTemplate.id].find(el => el.id === item.id)) {
+                    this.selectedItemIdx.push(idx)
+                }
+            }
             this.$bvModal.show('mintModal');
         },
-        addCardToStake(item) {
-            if (item.checked) {
-                item.checked = false;
-                this.$emit('removeCard', item);
+        selectMint(idx) {
+            // item.checked = !item.checked;
+            if (this.selectedItemIdx.includes(idx)) {
+                this.selectedItemIdx.splice(this.selectedItemIdx.indexOf(idx), 1);
             } else {
-                item.checked = true;
-                this.$emit('addCard', item);
+                this.selectedItemIdx.push(idx);
             }
+        },
+        addSelectionToStake() {
+            const items = this.selectedTemplate.items.filter((it, idx) => {
+                return this.selectedItemIdx.includes(idx);
+            })
+            this.$emit('stakeUpdate', {
+                templateId: this.selectedTemplate.id,
+                items: items
+            })
+            this.$bvModal.hide('mintModal')
         }
     }
 }

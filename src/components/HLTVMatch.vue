@@ -1,6 +1,6 @@
 <template>
     <div style="border-color: #22283d; outline-style: solid;" class="match_container">
-        <b-row class="w-100 m-0 h-100">
+        <b-row class="w-100 m-0 h-100" style="position: relative">
             <b-col style="margin-top: 5px" align-self="center" class="d-sm-none d-md-none d-lg-block">
                 <b-img
                     class="event_icon"
@@ -26,7 +26,7 @@
                 <h4>{{parseDate(match['begin_at'])}}</h4>
                 <b-badge variant="dark">BO{{match['number_of_games']}}</b-badge><br>
             </b-col>
-            <b-col style="margin-top: 5px">
+            <b-col style="margin-top: 5px; margin-right: 100px">
                 <b-img class="team_icon" v-if="match['opponents'][1]['opponent']['image_url']" :src="match['opponents'][1]['opponent']['image_url']"/>
                 <b-img class="team_icon" v-else src="icons/10.png"/>
                 <p class="team_name">{{match['opponents'][1]['opponent'].name}}</p>
@@ -76,14 +76,14 @@ export default {
 
     .event_icon {
         width: 70px;
-        -webkit-filter: drop-shadow(1px 1px 0 black)
-                        drop-shadow(-1px 1px 0 black)
-                        drop-shadow(1px -1px 0 black)
-                        drop-shadow(-1px -1px 0 black);
-        filter: drop-shadow(1px 1px 0 black)
-                drop-shadow(-1px 1px 0 black)
-                drop-shadow(1px -1px 0 black)
-                drop-shadow(-1px -1px 0 black);
+        /*-webkit-filter: drop-shadow(1px 1px 0 black)*/
+        /*                drop-shadow(-1px 1px 0 black)*/
+        /*                drop-shadow(1px -1px 0 black)*/
+        /*                drop-shadow(-1px -1px 0 black);*/
+        /*filter: drop-shadow(1px 1px 0 black)*/
+        /*        drop-shadow(-1px 1px 0 black)*/
+        /*        drop-shadow(1px -1px 0 black)*/
+        /*        drop-shadow(-1px -1px 0 black);*/
     }
 
     .match_container {
@@ -94,6 +94,7 @@ export default {
     .new_bet_btn {
         cursor: pointer;
         pointer-events: auto;
+        position: absolute;
         top: 0;
         bottom: 0;
         right: 0;
