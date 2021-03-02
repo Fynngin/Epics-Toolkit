@@ -1,6 +1,9 @@
 <template>
     <div>
         <h1>Selected match:</h1>
+        <b-row v-if="!selectedTeam" align-h="center">
+            <p>(select a team)</p>
+        </b-row>
         <b-row align-h="center" align-v="center" cols="3">
             <b-col>
                 <div
@@ -54,6 +57,9 @@ export default {
         }
     },
     watch: {
+        selectedMatch() {
+            this.selectedTeam = null;
+        },
         selectedTeam() {
             this.$emit('teamSelect', this.selectedTeam);
         }

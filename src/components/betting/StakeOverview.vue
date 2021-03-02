@@ -1,7 +1,15 @@
 <template>
     <div>
-        <b-row align-h="center">
-            <u><h3>Stake</h3></u>
+        <b-row class="w-100 mb-2" align-h="between">
+            <b-col cols="3">
+                <u><h3>Stake</h3></u>
+            </b-col>
+            <b-col cols="3">
+                <b-button variant="outline-success" @click="$emit('createBet')">
+                    Create bet
+                </b-button>
+            </b-col>
+
         </b-row>
         <b-row>
             <b-col style="overflow-x: auto; white-space: nowrap; display: block;">

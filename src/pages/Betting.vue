@@ -38,6 +38,7 @@
                     v-if="!stakeEmpty"
                     :stake="stake"
                     @removeItem="value => updateStake({templateId: value, items: []})"
+                    @createBet="createBet"
                 />
                 <CollectionSelect
                     :use-dropdown="true"
@@ -52,6 +53,13 @@
                 />
             </b-col>
         </b-row>
+
+        <FeedbackToast
+            id="feedback-toast"
+            :title="feedbackHeader"
+            :type="feedbackType"
+            :description="errMsg"
+        />
     </div>
 </template>
 
@@ -65,10 +73,15 @@ import SelectedMatchOverview from "../components/betting/SelectedMatchOverview";
 import CollectionSelect from "../components/CollectionSelect";
 import CollectionOverview from "../components/betting/CollectionOverview";
 import StakeOverview from "../components/betting/StakeOverview";
+import FeedbackToast from "../components/FeedbackToast";
+import firebase from "../firebaseConfig";
+const db = firebase.firestore();
 
 export default {
     name: "Betting",
-    components: {StakeOverview, CollectionOverview, CollectionSelect, SelectedMatchOverview, Sidebar, HLTVMatch},
+    components: {
+        FeedbackToast,
+        StakeOverview, CollectionOverview, CollectionSelect, SelectedMatchOverview, Sidebar, HLTVMatch},
     data() {
         return {
             matches: [],
@@ -77,7 +90,10 @@ export default {
             selectedMatch: null,
             selectedTeam: null,
             selectedCollection: null,
-            stake: {}
+            stake: {},
+            errMsg: "",
+            feedbackType: "",
+            feedbackHeader: ""
         }
     },
     created() {
@@ -134,6 +150,76 @@ export default {
             } else {
                 this.$set(this.stake, newItems.templateId, newItems.items);
             }
+        },
+        createBet() {
+            if (!this.selectedTeam) {
+                this.errMsg = "You need to pick a team to win!";
+                this.feedbackHeader = "Error!";
+                this.feedbackType = "error";
+                this.$bvToast.show('feedback-toast');
+                return;
+            }
+
+            if (Object.keys(this.stake).length === 0) {
+                this.errMsg = "You need to add some items to your bet!";
+                this.feedbackHeader = "Error!";
+                this.feedbackType = "error";
+                this.$bvToast.show('feedback-toast');
+                return;
+            }
+
+            let stake = {};
+            for (const templateId of Object.keys(this.stake)) {
+                const items = this.stake[templateId];
+                stake[templateId] = items.map(it => {
+                    if (it.type === "card") {
+                        const el = it.cardTemplate;
+                        return {
+                            cardTemplate: {
+                                id: el.id,
+                                images: el.images,
+                                title: el.title,
+                                cardType: el.cardType
+                            },
+                            mintBatch: it.mintBatch,
+                            mintNumber: it.mintNumber,
+                            id: it.id,
+                            level: it.level,
+                            type: it.type
+                        }
+                    } else {
+                        const el = it.stickerTemplate;
+                        return {
+                            stickerTemplate: {
+                                id: el.id,
+                                images: el.images,
+                                title: el.title
+                            },
+                            mintBatch: it.mintBatch,
+                            mintNumber: it.mintNumber,
+                            id: it.id,
+                            level: it.level,
+                            type: it.type
+                        }
+                    }
+                })
+            }
+            let bet = {
+                matchId: this.selectedMatch.id,
+                selectedTeamId: this.selectedTeam,
+                stake: stake,
+                userId: this.$store.state.userdata.id
+            }
+            this.uploadBet(bet);
+        },
+        uploadBet(bet) {
+            let openBetDB = db.collection("open_bets").doc(`${bet.matchId}_${this.$store.state.userdata.id}`)
+            openBetDB.set(bet).then(() => {
+                this.errMsg = "Successfully created bet!";
+                this.feedbackHeader = "Success!";
+                this.feedbackType = "success";
+                this.$bvToast.show('feedback-toast');
+            })
         }
     }
 }
