@@ -1,5 +1,8 @@
 <template>
     <div style="border-color: #22283d; outline-style: solid;" class="match_container">
+        <b-badge v-if="match['bets'].length > 0" style="position: absolute; left: 0; font-size: 20px" variant="info">
+            {{match['bets'].length}} open {{`${match['bets'].length === 1 ? 'bet' : 'bets'}`}}
+        </b-badge>
         <b-row class="w-100 m-0 h-100" style="position: relative">
             <b-col style="margin-top: 5px" align-self="center" class="d-sm-none d-md-none d-lg-block">
                 <b-img
@@ -87,6 +90,7 @@ export default {
     }
 
     .match_container {
+        position: relative;
         padding: 0 0 5px 5px;
         height: 100px;
     }

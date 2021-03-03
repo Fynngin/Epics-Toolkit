@@ -7,6 +7,21 @@
             </b-button>
         </b-row>
 
+        <b-row v-if="userBets.length > 0" class="mb-2">
+            <b-col style="display: block; white-space: nowrap; overflow-x: auto;">
+                <div style="height: 160px;">
+                    <h2>Your bets:</h2>
+                    <UserBet
+                        class="mr-3"
+                        style="display: inline-block; white-space: nowrap;"
+                        v-for="bet in userBets" :key="bet.id"
+                        :bet="bet"
+                        @removeBet="removeUserBet(bet.id)"
+                    />
+                </div>
+            </b-col>
+        </b-row>
+
         <b-row class="ml-2">
             <b-col cols="6">
                 <div v-for="(matches, date) in matchesByDate" :key="date">
@@ -17,7 +32,7 @@
                         </b-button>
                         <h2 class="m-0">{{date}}</h2>
                     </b-row>
-                    <b-collapse visible :id="`collapse-${date}`">
+                    <b-collapse visible :id="`collapse-${date}`" v-if="!matchesLoading">
                         <h-l-t-v-match
                             class="ml-5 mb-2"
                             v-for="match in matches"
@@ -75,11 +90,13 @@ import CollectionOverview from "../components/betting/CollectionOverview";
 import StakeOverview from "../components/betting/StakeOverview";
 import FeedbackToast from "../components/FeedbackToast";
 import firebase from "../firebaseConfig";
+import UserBet from "../components/betting/UserBet";
 const db = firebase.firestore();
 
 export default {
     name: "Betting",
     components: {
+        UserBet,
         FeedbackToast,
         StakeOverview, CollectionOverview, CollectionSelect, SelectedMatchOverview, Sidebar, HLTVMatch},
     data() {
@@ -93,7 +110,9 @@ export default {
             stake: {},
             errMsg: "",
             feedbackType: "",
-            feedbackHeader: ""
+            feedbackHeader: "",
+            matchesLoading: true,
+            userBets: []
         }
     },
     created() {
@@ -106,6 +125,7 @@ export default {
     },
     methods: {
         init() {
+            this.matchesLoading = true;
             const today = dayjs().toISOString();
             const tomorrow = dayjs().add(7, 'day').toISOString();
             getMatchesByStartDate(today, tomorrow).then(res => {
@@ -115,8 +135,10 @@ export default {
                 this.matches.forEach(match => {
                     const dateTimeSplit = match['begin_at'].split('T');
                     match.date = dateTimeSplit[0];
+                    match.bets = [];
                 })
                 this.groupMatchesByDate();
+                this.getOpenBets();
             })
         },
         groupMatchesByDate() {
@@ -129,6 +151,50 @@ export default {
                 this.matchesByDate[key] = matches[key]
             })
             this.$forceUpdate();
+        },
+        async getOpenBets() {
+            let openBetDB = db.collection("open_bets")
+            await openBetDB.get().then(snap => {
+                snap.forEach(doc => {
+                    let data = doc.data();
+                    data.id = doc.id;
+                    let assignedMatch = this.matchesByDate[data.matchDate].findIndex(el => el.id === data.matchId)
+
+                    if (doc.id.split('_')[1] === this.$store.state.userdata.id.toString()) {
+                        if (assignedMatch !== undefined) {
+                            data.match = this.matchesByDate[data.matchDate][assignedMatch];
+                        } else {
+                            // cleanup bets that are no longer valid
+                            this.deleteBet(doc.id)
+                        }
+                        this.userBets.push(data);
+                    } else {
+                        if (assignedMatch !== undefined) {
+                            const newLength = this.matchesByDate[data.matchDate][assignedMatch].bets.length + 1;
+                            this.matchesByDate[data.matchDate][assignedMatch].bets.splice(newLength);
+                            this.$set(this.matchesByDate[data.matchDate][assignedMatch].bets, this.matchesByDate[data.matchDate][assignedMatch].bets.length, data);
+                        } else {
+                            // cleanup bets that are no longer valid
+                            this.deleteBet(doc.id)
+                        }
+                    }
+                })
+            })
+            this.matchesLoading = false;
+        },
+        removeUserBet(id) {
+            const betIdx = this.userBets.findIndex(bet => bet.id === id)
+            this.userBets.splice(betIdx, 1);
+            this.deleteBet(id);
+        },
+        async deleteBet(doc) {
+            let openBetDB = db.collection("open_bets").doc(doc)
+            openBetDB.delete().then(() => {
+                this.errMsg = "Successfully removed bet!";
+                this.feedbackHeader = "Success!";
+                this.feedbackType = "success";
+                this.$bvToast.show('feedback-toast');
+            })
         },
         collapseDate(date) {
             if (this.collapsedDates[date] === undefined) {
@@ -185,7 +251,8 @@ export default {
                             mintNumber: it.mintNumber,
                             id: it.id,
                             level: it.level,
-                            type: it.type
+                            type: it.type,
+                            images: it.images
                         }
                     } else {
                         const el = it.stickerTemplate;
@@ -206,6 +273,7 @@ export default {
             }
             let bet = {
                 matchId: this.selectedMatch.id,
+                matchDate: this.selectedMatch['begin_at'].split('T')[0],
                 selectedTeamId: this.selectedTeam,
                 stake: stake,
                 userId: this.$store.state.userdata.id
@@ -213,7 +281,8 @@ export default {
             this.uploadBet(bet);
         },
         uploadBet(bet) {
-            let openBetDB = db.collection("open_bets").doc(`${bet.matchId}_${this.$store.state.userdata.id}`)
+            const randomToken = Math.random().toString(16).substr(2, 8);
+            let openBetDB = db.collection("open_bets").doc(`${bet.matchId}_${this.$store.state.userdata.id}_${randomToken}`)
             openBetDB.set(bet).then(() => {
                 this.errMsg = "Successfully created bet!";
                 this.feedbackHeader = "Success!";
