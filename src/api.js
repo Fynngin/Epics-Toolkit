@@ -249,16 +249,17 @@ export function getMarketListings(jwt, category, templateId, type, page) {
 }
 
 export function getUserMarketListings(jwt, category, userId, type, page) {
-    return http(`https://api.epics.gg/api/v1/market/listed/users/${userId}?sort=-price`, {
+    return http(`https://api.epics.gg/api/v1/market/listed/users/${userId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             'x-user-jwt': jwt
         },
         params: {
+            'sort': '-price',
             'categoryId': category,
-            'type': type,
-            'page': page
+            'page': page,
+            'type': type
         }
     })
 }
@@ -277,6 +278,16 @@ export function updateMarketListing(jwt, category, marketId, minOffer, price) {
             'minOffer': minOffer,
             'price': price
         })
+    })
+}
+
+export function removeMarketListing(jwt, marketId) {
+    return http(`https://api.epics.gg/api/v1/market/listed/${marketId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
     })
 }
 

@@ -14,8 +14,18 @@
                         </p>
                     </b-collapse>
                     <b-form-group class="mt-2">
-                        <b-form-input v-model="email" placeholder="Email"/>
-                        <b-form-input v-model="password" placeholder="Password" type="password" class="mt-2"/>
+                        <b-form-input
+                            v-model="email"
+                            placeholder="Email"
+                            @keyup.enter="login"
+                        />
+                        <b-form-input
+                            v-model="password"
+                            placeholder="Password"
+                            type="password"
+                            class="mt-2"
+                            @keyup.enter="login"
+                        />
                     </b-form-group>
                     <b-button style="float: left" variant="primary" @click="login">
                         <b-spinner v-if="spinner"/>

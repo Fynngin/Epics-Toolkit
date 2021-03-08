@@ -13,7 +13,8 @@
                         <b-button variant="outline-dark" class="mr-2" @click="selectAll">Select all</b-button>
                         <b-button variant="outline-dark" class="mr-2" @click="deselectAll">Deselect all</b-button>
                         <b-button v-b-modal.sellModal variant="outline-success" class="mr-2">Sell</b-button>
-                        <b-button v-b-modal.updateModal variant="outline-success">Update Listings</b-button>
+                        <b-button v-b-modal.updateModal variant="outline-success" class="mr-2">Update Listings</b-button>
+                        <b-button v-b-modal.removeModal variant="outline-danger">Remove all Listings</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -81,6 +82,9 @@
         <UpdateModal
             id="updateModal"
         />
+        <RemoveModal
+            id="removeModal"
+        />
     </div>
 </template>
 
@@ -97,10 +101,11 @@
     } from "@/api";
     import SellModal from "@/components/SellModal";
     import UpdateModal from "@/components/UpdateModal";
+    import RemoveModal from "@/components/MassList/RemoveModal";
 
     export default {
         name: "MassList",
-        components: {UpdateModal, SellModal, CollectionSelect, Sidebar, Checkmark},
+        components: {RemoveModal, UpdateModal, SellModal, CollectionSelect, Sidebar, Checkmark},
         data() {
             return {
                 season: null,
