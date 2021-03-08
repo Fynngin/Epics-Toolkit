@@ -1,7 +1,7 @@
 <template>
     <div>
         <b-row align-h="center">
-            <b-col cols="4">
+            <b-col xl="3" lg="5" md="6" sm="10">
                 <b-card title="Login with your Epics Account" class="mb-2">
                     <a href="#" v-b-toggle.disclaimer>Why is this needed?</a>
                     <b-collapse id="disclaimer">
