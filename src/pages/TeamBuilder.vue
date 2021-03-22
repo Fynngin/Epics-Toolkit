@@ -359,7 +359,7 @@ export default {
     computed: {
         playersToShow() {
             return this.filteredPlayers.filter(player => {
-                return player.handle.toLowerCase().includes(this.search.toLowerCase())
+                return player.handle.toLowerCase().includes(this.search.toLowerCase()) && player.images.length > 0
             })
         }
     },
@@ -587,26 +587,13 @@ export default {
             if (!this.cards[player.id]) {
                 this.spinner.cards = true;
                 this.cards[player.id] = []
-                let page = 1
-                let neededRequests = 0
-                await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, player.id, this.$store.state.rushSeason, page).then(res => {
-                    if (res.data.success) {
-                        let cards = res.data.data.cards
-                        neededRequests = Math.ceil(res.data.data.total / cards.length) - 1
-                        cards.forEach(card => {
-                            if (!this.cards[player.id].find(elem => {
-                                return elem.id === card['cardTemplate'].id
-                            })) {
-                                this.cards[player.id].push(card['cardTemplate'])
-                            }
-                        })
-                        page++
-                    }
-                })
-                while (neededRequests > 0) {
-                    await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, player.id, this.$store.state.rushSeason, page).then(res => {
+                for (const season of ['2020', '2021']) {
+                    let page = 1
+                    let neededRequests = 0
+                    await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, player.id, season, page).then(res => {
                         if (res.data.success) {
                             let cards = res.data.data.cards
+                            neededRequests = Math.ceil(res.data.data.total / cards.length) - 1
                             cards.forEach(card => {
                                 if (!this.cards[player.id].find(elem => {
                                     return elem.id === card['cardTemplate'].id
@@ -615,10 +602,26 @@ export default {
                                 }
                             })
                             page++
-                            neededRequests--
                         }
                     })
+                    while (neededRequests > 0) {
+                        await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, player.id, season, page).then(res => {
+                            if (res.data.success) {
+                                let cards = res.data.data.cards
+                                cards.forEach(card => {
+                                    if (!this.cards[player.id].find(elem => {
+                                        return elem.id === card['cardTemplate'].id
+                                    })) {
+                                        this.cards[player.id].push(card['cardTemplate'])
+                                    }
+                                })
+                                page++
+                                neededRequests--
+                            }
+                        })
+                    }
                 }
+
                 this.cards[player.id].sort((a,b) => {
                     return a.properties['player_rating'] - b.properties['player_rating']
                 })
