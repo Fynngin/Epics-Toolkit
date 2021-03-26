@@ -55,13 +55,13 @@
                         <b-col lg="2" md="4" sm="6" v-for="card in cards" :key="card.id" class="mb-3">
                             <b-card @click="selectCard(card)" no-body>
                                 <Checkmark v-if="card.selected" style="position: absolute;"/>
-                                <b-card-img :src="card.images['size402']"/>
+                                <b-card-img :src="card.images['size402']" class="cardImg"/>
                             </b-card>
                         </b-col>
                         <b-col lg="2" md="4" sm="6" v-for="sticker in stickers" :key="sticker.id" class="mb-3">
                             <b-card @click="selectSticker(sticker)" no-body>
                                 <Checkmark v-if="sticker.selected" style="position: absolute;"/>
-                                <b-card-img :src="`${$store.state.cdnUrl}${sticker.images[1].url}`"/>
+                                <b-card-img :src="`${$store.state.cdnUrl}${sticker.images[1].url}`" class="cardImg"/>
                             </b-card>
                         </b-col>
                     </b-row>
@@ -412,5 +412,12 @@ import SearchHistory from "@/components/SearchHistory";
 </script>
 
 <style scoped>
+    .cardImg {
+        cursor: pointer;
+        transition: .2s;
+    }
 
+    .cardImg:hover {
+        border: #0baaaa solid;
+    }
 </style>

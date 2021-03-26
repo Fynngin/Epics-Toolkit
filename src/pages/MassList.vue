@@ -45,7 +45,7 @@
                             <b-card @click="selectItem(pack, 'pack')" no-body>
                                 <Checkmark v-if="pack.selected" style="position: absolute;"/>
                                 <b-badge variant="info">x{{pack.max}}</b-badge>
-                                <b-card-img :src="pack.templateImage"/>
+                                <b-card-img :src="pack.templateImage" class="cardImg"/>
                             </b-card>
                         </b-col>
                     </b-row>
@@ -58,14 +58,14 @@
                                 <b-card @click="selectItem(card, 'card')" no-body>
                                     <Checkmark v-if="card.selected" style="position: absolute;"/>
                                     <b-badge variant="info">{{card.max}}x</b-badge>
-                                    <b-card-img :src="card.images['size402']"/>
+                                    <b-card-img :src="card.images['size402']" class="cardImg"/>
                                 </b-card>
                             </b-col>
                             <b-col lg="2" md="4" sm="6" v-for="sticker in stickers" :key="sticker.templateId" class="mb-3">
                                 <b-card @click="selectItem(sticker, 'sticker')" no-body>
                                     <Checkmark v-if="sticker.selected" style="position: absolute;"/>
                                     <b-badge variant="info">{{sticker.max}}x</b-badge>
-                                    <b-card-img :src="`${$store.state.cdnUrl}${sticker.images[1].url}`"/>
+                                    <b-card-img :src="`${$store.state.cdnUrl}${sticker.images[1].url}`" class="cardImg"/>
                                 </b-card>
                             </b-col>
                         </b-row>
@@ -348,5 +348,12 @@
 </script>
 
 <style scoped>
+    .cardImg {
+        cursor: pointer;
+        transition: .2s;
+    }
 
+    .cardImg:hover {
+        border: #0baaaa solid;
+    }
 </style>

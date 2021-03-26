@@ -395,10 +395,16 @@ export default {
     }
 
     .mapImg {
+        cursor: pointer;
         height: 70px;
         margin-right: 10px;
         border-radius: 25px;
         border: solid #0baaaa;
+        transition: .2s;
+    }
+
+    .mapImg:hover {
+        border: solid #7a083c;
     }
 
     .selectedMap {

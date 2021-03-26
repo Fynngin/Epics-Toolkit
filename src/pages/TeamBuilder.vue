@@ -200,7 +200,7 @@
                         <b-col cols="8" v-else-if="selectedPlayer.id === 0">
                             <b-row>
                                 <b-col class="mb-3" xl="3" lg="4" md="6" sm="12" v-for="(player, index) in playersToShow" :key="index">
-                                    <b-card no-body @click="loadPlayerCards(player)" class="h-100">
+                                    <b-card no-body @click="loadPlayerCards(player)" class="h-100 playerCard">
                                         <template v-slot:header>
                                             <h3 style="float: left">{{player.handle}}</h3>
                                             <b-badge variant="light" style="top: 0; left: 0; position: absolute;" v-if="player['minSalary'] !== player['maxSalary']">
@@ -242,7 +242,7 @@
                                     <b-row>
                                         <b-col class="mb-3" md="2" sm="4" v-for="(card, index) in cards[selectedPlayer.id]" :key="index">
                                             <b-overlay :show="overlay === card.id" style="pointer-events: none">
-                                                <b-card style="pointer-events: all" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0" @click="addCardToHighlight(card)">
+                                                <b-card style="pointer-events: all; cursor: pointer;" no-body @mouseover="overlay = card.id" @mouseleave="overlay = 0" @click="addCardToHighlight(card)">
                                                     <b-card-img :src="`${card.images['size402']}`"/>
                                                 </b-card>
                                                 <template v-slot:overlay>
@@ -654,6 +654,7 @@ export default {
 
     .roleCard {
         height: 200px;
+        cursor: pointer;
     }
 
     .playerFrame {
@@ -682,5 +683,14 @@ export default {
 
     .map_img {
         filter: drop-shadow(4px 4px 5px rgba(0,0,0,0.9));
+    }
+
+    .playerCard {
+        cursor: pointer;
+        transition: .1s;
+    }
+
+    .playerCard:hover {
+        border: #0baaaa solid;
     }
 </style>
