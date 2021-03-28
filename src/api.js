@@ -44,6 +44,19 @@ export function getCollections(jwt, category, season, userId) {
     })
 }
 
+export function getAllCollections(jwt, category) {
+    return http(`https://api.epics.gg/api/v1/collections`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
+
 export function getCardTemplates(jwt, category, collectionId) {
     return http(`https://api.epics.gg/api/v1/collections/${collectionId}/card-templates`, {
         method: 'GET',

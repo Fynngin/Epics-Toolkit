@@ -13,6 +13,7 @@ import PhysicalTracker from "./pages/PhysicalTracker";
 import firebase from "./firebaseConfig";
 import {getUserInfo} from "@/api";
 import DonationSuccess from "@/pages/DonationSuccess";
+import Admin from "@/pages/Admin";
 const db = firebase.firestore();
 
 Vue.use(VueRouter)
@@ -86,6 +87,13 @@ const router = new VueRouter({
             meta: {
                 requiresAuth: false
             }
+        },
+        {
+            path: '/admin',
+            component: Admin,
+            meta: {
+                requiresAuth: true
+            }
         }
     ]
 })
@@ -94,6 +102,11 @@ async function isMassListWhitelisted(userId) {
     let res = await db.collection("users").doc(userId.toString()).get()
     let data = await res.data()
     return data['isMasslistWhitelisted'];
+}
+async function isAdmin(userId) {
+    let res = await db.collection("users").doc(userId.toString()).get()
+    let data = await res.data()
+    return data['isAdmin'];
 }
 
 router.beforeEach(async (to, from, next) => {
@@ -104,6 +117,16 @@ router.beforeEach(async (to, from, next) => {
                     if (res.data.success) {
                         let userId = res.data.data.id;
                         let whitelisted = await isMassListWhitelisted(userId);
+                        if (whitelisted) {
+                            next()
+                        }
+                    }
+                })
+            } else if (to['path'] === '/admin') {
+                await getUserInfo(store.state.userdata.jwt, store.state.category).then(async res => {
+                    if (res.data.success) {
+                        let userId = res.data.data.id;
+                        let whitelisted = await isAdmin(userId);
                         if (whitelisted) {
                             next()
                         }

@@ -35,8 +35,11 @@ const store = new Vuex.Store({
         isMassListWhitelisted: (state) => {
             return state.userdata.isMasslistWhitelisted
         },
-        isAdmin: (state) => {
-            return state.userdata.id === 32876
+        isAdmin: async (state) => {
+            const userId = state.userdata.id;
+            let res = await db.collection("users").doc(userId.toString()).get()
+            let data = await res.data()
+            return data['isAdmin'];
         }
     },
     actions: {
@@ -50,6 +53,7 @@ const store = new Vuex.Store({
                             avatar: `http://cdn.epics.gg${response.data.data.user.avatar}`,
                             banned: false,
                             isMasslistWhitelisted: false,
+                            isAdmin: false,
                             lastLogin: new Date()
                         }
                         let userDB = db.collection("users").doc(data.id.toString())
@@ -58,6 +62,7 @@ const store = new Vuex.Store({
                                 let userdata = await res.data()
                                 data.banned = !!userdata['banned'];
                                 data.isMasslistWhitelisted = !!userdata['isMasslistWhitelisted'];
+                                data.isAdmin = !!userdata['isAdmin'];
                             }
                             if (data.banned) {
                                 reject('user_banned');
