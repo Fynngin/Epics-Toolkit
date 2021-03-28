@@ -292,8 +292,10 @@
 </template>
 
 <script>
+import firebase from "../firebaseConfig";
+const db = firebase.firestore();
 import Sidebar from "../components/Sidebar";
-import {getPlayerMaps, getPlayers, getRoles, getMaps, getCardsByPlayer, getMarketListings} from "@/api";
+import {getPlayerMaps, getPlayers, getRoles, getMaps, getMarketListings} from "@/api";
 import CountrySearch from "@/components/CountrySearch";
 import TeamSearch from "@/components/TeamSearch";
 import Epicoin from "@/components/Epicoin";
@@ -587,40 +589,17 @@ export default {
             if (!this.cards[player.id]) {
                 this.spinner.cards = true;
                 this.cards[player.id] = []
-                for (const season of ['2020', '2021']) {
-                    let page = 1
-                    let neededRequests = 0
-                    await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, player.id, season, page).then(res => {
-                        if (res.data.success) {
-                            let cards = res.data.data.cards
-                            neededRequests = Math.ceil(res.data.data.total / cards.length) - 1
-                            cards.forEach(card => {
-                                if (!this.cards[player.id].find(elem => {
-                                    return elem.id === card['cardTemplate'].id
-                                })) {
-                                    this.cards[player.id].push(card['cardTemplate'])
-                                }
-                            })
-                            page++
-                        }
+
+                await db.collection("cardTemplates").where("player.id", "==", player.id)
+                    .get()
+                    .then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            this.cards[player.id].push(doc.data())
+                        });
                     })
-                    while (neededRequests > 0) {
-                        await getCardsByPlayer(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.whaleId, player.id, season, page).then(res => {
-                            if (res.data.success) {
-                                let cards = res.data.data.cards
-                                cards.forEach(card => {
-                                    if (!this.cards[player.id].find(elem => {
-                                        return elem.id === card['cardTemplate'].id
-                                    })) {
-                                        this.cards[player.id].push(card['cardTemplate'])
-                                    }
-                                })
-                                page++
-                                neededRequests--
-                            }
-                        })
-                    }
-                }
+                    .catch((error) => {
+                        console.log("Error getting documents: ", error);
+                    });
 
                 this.cards[player.id].sort((a,b) => {
                     return a.properties['player_rating'] - b.properties['player_rating']
