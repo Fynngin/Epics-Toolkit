@@ -34,7 +34,7 @@
                                     <template v-slot:overlay>
                                         <div>
                                             <h2 style="white-space: nowrap">{{roster[role.id].properties['salary']}} $</h2>
-                                            <h3 style="white-space: nowrap">{{roster[role.id].properties['player_rating']}} OVR</h3>
+                                            <h3 style="white-space: nowrap">{{roster[role.id]['playerStatsV2']['rating']['score']}} OVR</h3>
                                             <strong v-if="roster[role.id].price">{{roster[role.id].price}} <Epicoin/></strong>
                                             <strong v-else style="color: red">No market price</strong><br>
                                             <b-button variant="outline-danger" @click="removeCardFromRoster(role.id)">
@@ -72,7 +72,7 @@
                                     <template v-slot:overlay>
                                         <div>
                                             <h2 style="white-space: nowrap">{{roster['flex'].properties['salary']}} $</h2>
-                                            <h3>{{roster['flex'].properties['player_rating']}} OVR</h3>
+                                            <h3>{{roster['flex']['playerStatsV2']['rating']['score']}} OVR</h3>
                                             <strong v-if="roster['flex'].price">{{roster['flex'].price}} <Epicoin/></strong>
                                             <strong v-else style="color: red">No market price</strong><br>
                                             <b-button variant="outline-danger" @click="removeCardFromRoster('flex')">
@@ -248,7 +248,7 @@
                                                 <template v-slot:overlay>
                                                     <div>
                                                         <h2>{{card.properties['salary']}} $</h2>
-                                                        <h3>{{card.properties['player_rating']}} OVR</h3>
+                                                        <h3>{{card['playerStatsV2']['rating']['score']}} OVR</h3>
                                                     </div>
                                                 </template>
                                             </b-overlay>
@@ -602,7 +602,7 @@ export default {
                     });
 
                 this.cards[player.id].sort((a,b) => {
-                    return a.properties['player_rating'] - b.properties['player_rating']
+                    return a['playerStatsV2']['rating']['score'] - b['playerStatsV2']['rating']['score']
                 })
                 this.spinner.cards = false;
                 this.$forceUpdate();
