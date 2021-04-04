@@ -21,9 +21,9 @@
             <b-button class="w-100" :variant="pageVariant('/')" @click="$router.push('/')">
                 Dashboard
             </b-button>
-            <b-button v-if="$store.getters.isAdmin" class="w-100" :variant="pageVariant('/admin')" @click="$router.push('/admin')">
-                Admin
-            </b-button>
+<!--            <b-button v-if="$store.getters.isAdmin" class="w-100" :variant="pageVariant('/admin')" @click="$router.push('/admin')">-->
+<!--                Admin-->
+<!--            </b-button>-->
             <b-button class="w-100 text-left" :variant="pageVariant('/masslist')" @click="$router.push('/masslist')">
                 <font-awesome-icon icon="dollar-sign"/>
                 Mass-List
