@@ -91,6 +91,10 @@ export default {
         }
     },
     created() {
+        if (!this.$store.getters.isAdmin) {
+            this.$router.push('/');
+            return;
+        }
         getAllCollections(this.$store.state.userdata.jwt, this.$store.state.category).then(res => {
             if (res.data.success) {
                 let temp = {}

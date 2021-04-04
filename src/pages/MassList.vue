@@ -134,6 +134,11 @@
                 itemsSold: 0
             }
         },
+        created() {
+            if (!this.$store.getters.isMassListWhitelisted) {
+                this.$router.push('/');
+            }
+        },
         methods: {
             reloadItems() {
                 this.$bvModal.hide('sellModal')
