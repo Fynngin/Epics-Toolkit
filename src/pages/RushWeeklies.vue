@@ -13,23 +13,12 @@
                             <h3>Map Bans:</h3>
                         </b-col>
                         <b-col cols="9" style="overflow-x: auto; white-space: nowrap; display: block;">
-                            <b-container v-for="map in maps"
-                                         :key="map.id"
-                                         style="display: inline; position: relative;"
-                                         class="p-0 m-0"
-                            >
-                                <font-awesome-icon
-                                    v-if="bannedMaps.includes(map.id)"
-                                    class="mapBanIcon"
-                                    icon="times-circle"
-                                    size="2x"/>
-                                <b-img
-                                    :src="`${$store.state.cdnUrl}${map.images[0].url}`"
-                                    class="mapImg"
-                                    :class="bannedMaps.includes(map.id) ? 'selectedMap' : ''"
-                                    @click="selectMap(map)"
-                                />
-                            </b-container>
+                            <MapImg
+                                v-for="map in maps" :key="map.id"
+                                :img="map.images[0].url"
+                                :selected="bannedMaps.includes(map.id)"
+                                @selectMap="selectMap(map)"
+                            />
                         </b-col>
                     </b-row>
                 </b-card>
@@ -60,14 +49,12 @@
                             />
                         </b-col>
                         <b-col v-if="selectedUserRoster" style="overflow-x: auto; white-space: nowrap; display: block;">
-                            <b-container v-for="map in maps" :key="map.id" class="mb-1" style="display: inline; position: relative;">
-                                <b-img class="mapImg" :src="`${$store.state.cdnUrl}${map.images[0].url}`"/>
-                                <b-badge pill
-                                         style="position: absolute; left: 10%"
-                                         :variant="activeUserRoster.stats.maps.find(m => {return m['mapId'] === map.id}).weight >= 0 ? 'success' : 'danger'">
-                                    {{ round((activeUserRoster.stats.maps.find(m => {return m['mapId'] === map.id}).weight) * 100, 3)}} %
-                                </b-badge>
-                            </b-container>
+                            <MapImg
+                                v-for="map in maps" :key="map.id"
+                                class="mb-1" style="display: inline; position: relative;"
+                                :img="map.images[0].url"
+                                :map-bonus="activeUserRoster.stats.maps.find(m => {return m['mapId'] === map.id}).weight"
+                            />
                         </b-col>
                         <b-col v-else>
                             <h4>Please select a roster.</h4>
@@ -152,14 +139,12 @@
                         </b-col>
 
                         <b-col style="overflow-x: auto; white-space: nowrap; display: block;" v-if="maps.length === 7">
-                            <b-container v-for="map in achievement.roster.stats.maps" :key="map['map_id']" class="mb-1" style="display: inline; position: relative;">
-                                <b-img class="mapImg" :src="`${$store.state.cdnUrl}${maps[map['map_id'] - 1].images[0].url}`"/>
-                                <b-badge pill
-                                         style="position: absolute; left: 10%"
-                                         :variant="map.weight >= 0 ? 'success' : 'danger'">
-                                    {{ round((map.weight) * 100, 3)}} %
-                                </b-badge>
-                            </b-container>
+                            <MapImg
+                                v-for="map in achievement.roster.stats.maps" :key="map['map_id']"
+                                class="mb-1" style="display: inline; position: relative;"
+                                :img="maps[map['map_id'] - 1].images[0].url"
+                                :map-bonus="map.weight"
+                            />
                         </b-col>
 
                         <b-col cols="1">
@@ -204,9 +189,10 @@ import {
 } from "@/api";
 import FeedbackToast from "@/components/FeedbackToast";
 import RushRating from "@/components/RushRating";
+import MapImg from "@/components/Rush/MapImg";
 export default {
     name: "RushWeeklies",
-    components: {RushRating, FeedbackToast, Sidebar},
+    components: {MapImg, RushRating, FeedbackToast, Sidebar},
     data() {
         return {
             teamsReady: false,
@@ -257,9 +243,6 @@ export default {
         }
     },
     methods: {
-        round(value, decimals) {
-            return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
-        },
         async filterTeamAchievements() {
             this.filteredAchievements = this.weeklyAchievements.filter(ach => {
                 return ach.description.match("against")
@@ -392,32 +375,5 @@ export default {
     .team_card {
         height: 150px;
         margin-right: 10px;
-    }
-
-    .mapImg {
-        cursor: pointer;
-        height: 70px;
-        margin-right: 10px;
-        border-radius: 25px;
-        border: solid #0baaaa;
-        transition: .2s;
-    }
-
-    .mapImg:hover {
-        border: solid #7a083c;
-    }
-
-    .selectedMap {
-        border: solid #7a083c;
-    }
-
-    .mapBanIcon {
-        pointer-events: none;
-        position: absolute;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        left: 50%;
-        margin-right: -50%;
-        color: #7a083c;
     }
 </style>
