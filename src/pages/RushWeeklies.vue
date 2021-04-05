@@ -63,7 +63,7 @@
         </b-row>
 
         <b-row>
-            <b-col v-if="teamsReady">
+            <b-col v-if="teamsReady" cols="6">
                 <RushAchievement
                     v-for="achievement in filteredAchievements.filter(el => el.roster)" :key="achievement.id"
                     :play-button-disabled="!selectedUserRoster || gameDelay"
@@ -71,6 +71,12 @@
                     :spinner="gameDelay"
                     :maps="maps"
                     @playMatch="playMatch(achievement)"
+                />
+            </b-col>
+            <b-col cols="6">
+                <RushCircuit
+                    v-for="circuit in circuits" :key="circuit.id"
+                    :circuit="circuit"
                 />
             </b-col>
         </b-row>
@@ -95,9 +101,10 @@ import FeedbackToast from "@/components/FeedbackToast";
 import MapImg from "@/components/Rush/MapImg";
 import UserRoster from "@/components/Rush/UserRoster";
 import RushAchievement from "@/components/Rush/RushAchievement";
+import RushCircuit from "@/components/Rush/RushCircuit";
 export default {
     name: "RushWeeklies",
-    components: {RushAchievement, UserRoster, MapImg, FeedbackToast, Sidebar},
+    components: {RushCircuit, RushAchievement, UserRoster, MapImg, FeedbackToast, Sidebar},
     data() {
         return {
             teamsReady: false,
@@ -113,14 +120,18 @@ export default {
             toastTitle: "",
             toastType: "",
             toastDescription: "",
-            gameDelay: false
+            gameDelay: false,
+            circuits: []
         }
     },
     async created() {
         this.teamsReady = false
+        this.circuits = [];
         await getCircuit(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.coreCircuitId).then(res => {
-            if (res.data.success)
-                this.stages = res.data.data['circuit']['stages']
+            if (res.data.success) {
+                this.stages = res.data.data['circuit']['stages'];
+                this.circuits.push(res.data.data['circuit']);
+            }
         })
         await getTeams(this.$store.state.userdata.jwt).then(res => {
             if (res.data.success)
