@@ -445,6 +445,19 @@ export function getCircuit(jwt, category, circuitId) {
     })
 }
 
+export function getActiveCircuits(jwt, category) {
+    return http(`https://api.epics.gg/api/v1/ultimate-team/circuits`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-user-jwt': jwt
+        },
+        params: {
+            'categoryId': category
+        }
+    })
+}
+
 export function getRushAchievements(jwt, category, userId) {
     return http(`https://api.epics.gg/api/v1/achievements/${userId}/user`, {
         method: 'GET',

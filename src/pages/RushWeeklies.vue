@@ -75,8 +75,12 @@
             </b-col>
             <b-col cols="6">
                 <RushCircuit
+                    class="mb-2"
                     v-for="circuit in circuits" :key="circuit.id"
                     :circuit="circuit"
+                    :can-play-match="canPlayMatch"
+                    :user-roster="selectedUserRoster"
+                    :banned-maps="bannedMaps"
                 />
             </b-col>
         </b-row>
@@ -89,6 +93,7 @@
 import Sidebar from "@/components/Sidebar";
 import {
     getCircuit,
+    getActiveCircuits,
     getMaps,
     getRostersById,
     getRushAchievements,
@@ -127,10 +132,17 @@ export default {
     async created() {
         this.teamsReady = false
         this.circuits = [];
-        await getCircuit(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.coreCircuitId).then(res => {
+        await getActiveCircuits(this.$store.state.userdata.jwt, this.$store.state.category).then(async res => {
             if (res.data.success) {
-                this.stages = res.data.data['circuit']['stages'];
-                this.circuits.push(res.data.data['circuit']);
+                console.log(res.data)
+                for (const circuit of res.data.data.circuits) {
+                    await getCircuit(this.$store.state.userdata.jwt, this.$store.state.category, circuit.id).then(res => {
+                        if (res.data.success) {
+                            this.stages.push(res.data.data['circuit']['stages'])
+                            this.circuits.push(res.data.data['circuit']);
+                        }
+                    }).catch(() => {})
+                }
             }
         })
         await getTeams(this.$store.state.userdata.jwt).then(res => {
@@ -156,6 +168,9 @@ export default {
     computed: {
         activeUserRoster() {
             return this.userRosters.find(el => el.id === this.selectedUserRoster)
+        },
+        canPlayMatch() {
+            return this.selectedUserRoster && this.bannedMaps.length === 2
         }
     },
     methods: {

@@ -19,7 +19,16 @@
 
                 <b-collapse :id="`collapse-${idx}`">
                     <b-list-group>
-                        <b-list-group-item v-for="team in stageRosters[idx]" :key="team.id">
+                        <b-list-group-item v-for="(team, teamIdx) in stageRosters[idx]" :key="team.id" style="position: relative">
+                            <div
+                                :id="`progressDiv_stage${idx}_team${teamIdx}`"
+                                class="progressDiv"
+                                :style="{width: circuit['stages'][idx]['rosterProgress'][teamIdx]['progress'] + '%'}"
+                            >
+                                {{circuit['stages'][idx]['rosterProgress'][teamIdx]['wins'] > circuit['stages'][idx]['winsNeeded']
+                                    ? '100'
+                                    : circuit['stages'][idx]['rosterProgress'][teamIdx]['wins'] / circuit['stages'][idx]['winsNeeded'] * 100}}%
+                            </div>
                             <b-row>
                                 <b-col cols="2">
                                     <b-img
@@ -27,8 +36,18 @@
                                         :src="`${$store.state.cdnUrl}${team.images.find(el => el.name === 'team_logo').url}`"
                                     />
                                 </b-col>
-                                <b-col cols="4">
-                                    <h4 style="text-align: left">{{team.name}}</h4>
+                                <b-col cols="8">
+                                    <h4 style="text-align: left; white-space: nowrap">{{team.name}}</h4>
+                                </b-col>
+                                <b-col cols="1">
+                                    <b-button
+                                        :disabled="!canPlayMatch || gameDelay"
+                                        :variant="canPlayMatch && !gameDelay ? 'success' : 'dark'"
+                                        @click="playMatch(team, circuit['stages'][idx]['rosterProgress'][teamIdx], circuit['stages'][idx])"
+                                    >
+                                        <b-spinner v-if="gameDelay" small/>
+                                        <font-awesome-icon v-else icon="play"/>
+                                    </b-button>
                                 </b-col>
                             </b-row>
                         </b-list-group-item>
@@ -41,14 +60,16 @@
 
 <script>
 import {getRostersById, getTeams} from "@/api";
+import {playRushPve} from "../../api";
 
 export default {
     name: "RushCircuit",
-    props: ['circuit'],
+    props: ['circuit', 'canPlayMatch', 'userRoster', 'bannedMaps'],
     data() {
         return {
             teams: [],
-            stageRosters: {}
+            stageRosters: {},
+            gameDelay: false
         }
     },
     created() {
@@ -61,6 +82,19 @@ export default {
     methods: {
         async toggleStage(stage, idx) {
             if (!this.stageRosters[idx]) {
+
+                const firstMatch = stage['objective'].match("[0-9]+ times")[0];
+                stage['winsNeeded'] = parseInt(firstMatch.match("[0-9]+")[0]);
+
+                for (let roster of stage['rosterProgress']) {
+                    const wins = roster['wins'];
+                    if (wins > stage['winsNeeded']) {
+                        roster['progress'] = 100;
+                    } else {
+                        roster['progress'] = wins / stage['winsNeeded'] * 100;
+                    }
+                }
+
                 let stageRosterIds = [];
                 for (let roster of stage['rosters']) {
                     stageRosterIds.push(roster['ut_pve_roster_id']);
@@ -78,6 +112,31 @@ export default {
 
             this.$forceUpdate();
             this.$root.$emit('bv::toggle::collapse', `collapse-${idx}`);
+        },
+        playMatch(team, progressObj, stage) {
+            playRushPve(
+                this.$store.state.userdata.jwt,
+                this.$store.state.category,
+                this.circuit.id,
+                stage.id,
+                this.bannedMaps,
+                this.userRoster,
+                team.id,
+                false
+            ).then(res => {
+                if (res.data.success) {
+                    const isWinner = res.data.data['game']['user1']['winner'];
+                    if (isWinner) {
+                        if (progressObj.progress < 100) {
+                            progressObj['wins']++;
+                            progressObj.progress = progressObj['wins'] / stage['winsNeeded'] * 100;
+                        }
+                        this.$forceUpdate();
+                    }
+                    this.gameDelay = true;
+                    window.setTimeout(() => this.gameDelay = false, 2000);
+                }
+            })
         }
     }
 }
@@ -102,5 +161,19 @@ export default {
                 drop-shadow(-1px 1px 0 black)
                 drop-shadow(1px -1px 0 black)
                 drop-shadow(-1px -1px 0 black);
+    }
+
+    .progressDiv {
+        position: absolute;
+        background: #28a745;
+        filter: opacity(.5);
+        top: 0;
+        left: 0;
+        line-height: 60px;
+        color: white;
+        height: 60px;
+        font-size: 85px;
+        text-align: end;
+        font-family: "Proxima Nova Rg",monospace;
     }
 </style>
