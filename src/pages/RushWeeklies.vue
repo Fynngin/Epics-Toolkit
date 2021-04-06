@@ -63,17 +63,7 @@
         </b-row>
 
         <b-row>
-            <b-col v-if="teamsReady" cols="6">
-                <RushAchievement
-                    v-for="achievement in filteredAchievements.filter(el => el.roster)" :key="achievement.id"
-                    :play-button-disabled="!selectedUserRoster || gameDelay"
-                    :achievement="achievement"
-                    :spinner="gameDelay"
-                    :maps="maps"
-                    @playMatch="playMatch(achievement)"
-                />
-            </b-col>
-            <b-col cols="6">
+            <b-col lg="12" xl="6">
                 <RushCircuit
                     class="mb-2"
                     v-for="circuit in circuits" :key="circuit.id"
@@ -81,6 +71,16 @@
                     :can-play-match="canPlayMatch"
                     :user-roster="selectedUserRoster"
                     :banned-maps="bannedMaps"
+                />
+            </b-col>
+            <b-col v-if="teamsReady" lg="12" xl="6">
+                <RushAchievement
+                    v-for="achievement in filteredAchievements.filter(el => el.roster)" :key="achievement.id"
+                    :play-button-disabled="!selectedUserRoster || gameDelay"
+                    :achievement="achievement"
+                    :spinner="gameDelay"
+                    :maps="maps"
+                    @playMatch="playMatch(achievement)"
                 />
             </b-col>
         </b-row>
@@ -138,7 +138,10 @@ export default {
                 for (const circuit of res.data.data.circuits) {
                     await getCircuit(this.$store.state.userdata.jwt, this.$store.state.category, circuit.id).then(res => {
                         if (res.data.success) {
-                            this.stages.push(res.data.data['circuit']['stages'])
+                            for (let stage of res.data.data['circuit']['stages']) {
+                                stage.circuitId = circuit.id;
+                                this.stages.push(stage);
+                            }
                             this.circuits.push(res.data.data['circuit']);
                         }
                     }).catch(() => {})
@@ -185,6 +188,7 @@ export default {
                     ach.stageName = temp[0].match("[a-zA-Z ]+")[0]
                     let stage = this.stages.find(stage => stage.name === ach.stageName)
                     ach.stageId = stage.id
+                    ach.circuitId = stage.circuitId
                     ach.stageBadge = `${this.$store.state.cdnUrl}${stage.images[0].url}`
                     ach.stageRosters = stage['rosters']
                     let rosterIds = ach.stageRosters.map(el => el['ut_pve_roster_id'])
@@ -245,7 +249,7 @@ export default {
         },
         playMatch(achievement) {
             let isTotw = achievement.stageName === "TOTW"
-            playRushPve(this.$store.state.userdata.jwt, this.$store.state.category, this.$store.state.coreCircuitId, achievement.stageId, this.bannedMaps, this.selectedUserRoster, achievement.roster.id, isTotw).then(res => {
+            playRushPve(this.$store.state.userdata.jwt, this.$store.state.category, achievement.circuitId, achievement.stageId, this.bannedMaps, this.selectedUserRoster, achievement.roster.id, isTotw).then(res => {
                 if (res.data.success) {
                     if (res.data.data['game']['user1']['winner'] && achievement.progress.min < achievement.progress.max)
                         achievement.progress.min++
