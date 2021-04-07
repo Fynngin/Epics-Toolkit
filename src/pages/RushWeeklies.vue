@@ -63,7 +63,7 @@
         </b-row>
 
         <b-row>
-            <b-col lg="12" xl="6" class="ml-2">
+            <b-col lg="12" :xl="achievementsWithRoster.length > 0 ? '6' : '12'" class="ml-2 mr-2">
                 <RushCircuit
                     class="mb-2"
                     v-for="circuit in circuits" :key="circuit.id"
@@ -74,9 +74,9 @@
                     @feedback="info => showFeedbackToast(info.type, info.title, info.description)"
                 />
             </b-col>
-            <b-col v-if="teamsReady" lg="12" xl="6">
+            <b-col v-if="teamsReady && achievementsWithRoster.length > 0" lg="12" xl="6">
                 <RushAchievement
-                    v-for="achievement in filteredAchievements.filter(el => el.roster)" :key="achievement.id"
+                    v-for="achievement in achievementsWithRoster" :key="achievement.id"
                     :play-button-disabled="!selectedUserRoster || gameDelay"
                     :achievement="achievement"
                     :spinner="gameDelay"
@@ -174,21 +174,23 @@ export default {
         },
         canPlayMatch() {
             return this.selectedUserRoster && this.bannedMaps.length === 2
+        },
+        achievementsWithRoster() {
+            return this.filteredAchievements.filter(el => el.roster)
         }
     },
     methods: {
         async filterTeamAchievements() {
-            this.filteredAchievements = this.weeklyAchievements.filter(ach => {
+            let tempFilter = this.weeklyAchievements.filter(ach => {
                 return ach.description.match("against")
             })
 
-            for (const ach of this.filteredAchievements) {
+            for (const ach of tempFilter) {
                 let temp = ach.description.match("[(][a-zA-Z ]+[)]")
                 if (temp) {
                     ach.stageName = temp[0].match("[a-zA-Z ]+")[0]
                     let stage = this.stages.find(stage => stage.name === ach.stageName)
                     if (!stage) {
-                        this.filteredAchievements.splice(this.filteredAchievements.indexOf(ach), 1);
                         continue;
                     }
                     ach.stageId = stage.id
@@ -213,6 +215,7 @@ export default {
                             ach.roster = res.data.data['rosters'].find(r => new Date(r.start) < Date.now())
                     })
                 }
+                this.filteredAchievements.push(ach);
             }
 
             let weeklyWin = this.weeklyAchievements.find(el => el.description.match("Win [0-9]+ Rush Matches"))
