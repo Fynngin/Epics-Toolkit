@@ -135,7 +135,6 @@ export default {
         this.circuits = [];
         await getActiveCircuits(this.$store.state.userdata.jwt, this.$store.state.category).then(async res => {
             if (res.data.success) {
-                console.log(res.data)
                 for (const circuit of res.data.data.circuits) {
                     await getCircuit(this.$store.state.userdata.jwt, this.$store.state.category, circuit.id).then(res => {
                         if (res.data.success) {

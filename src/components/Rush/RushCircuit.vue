@@ -23,11 +23,11 @@
                             <div
                                 :id="`progressDiv_stage${idx}_team${teamIdx}`"
                                 class="progressDiv"
-                                :style="{width: circuit['stages'][idx]['rosterProgress'][teamIdx]['progress'] + '%'}"
+                                :style="{width: circuit['stages'][idx]['rosters'][teamIdx]['progress'] + '%'}"
                             >
-                                {{circuit['stages'][idx]['rosterProgress'][teamIdx]['wins'] > circuit['stages'][idx]['winsNeeded']
+                                {{circuit['stages'][idx]['rosters'][teamIdx]['userWins'] > circuit['stages'][idx]['winsNeeded']
                                     ? '100'
-                                    : circuit['stages'][idx]['rosterProgress'][teamIdx]['wins'] / circuit['stages'][idx]['winsNeeded'] * 100}}%
+                                    : circuit['stages'][idx]['rosters'][teamIdx]['userWins'] / circuit['stages'][idx]['winsNeeded'] * 100}}%
                             </div>
                             <b-row>
                                 <b-col cols="2">
@@ -43,7 +43,7 @@
                                     <b-button
                                         :disabled="!canPlayMatch || gameDelay"
                                         :variant="canPlayMatch && !gameDelay ? 'success' : 'dark'"
-                                        @click="playMatch(team, circuit['stages'][idx]['rosterProgress'][teamIdx], circuit['stages'][idx])"
+                                        @click="playMatch(team, circuit['stages'][idx]['rosters'][teamIdx], circuit['stages'][idx])"
                                     >
                                         <b-spinner v-if="gameDelay" small/>
                                         <font-awesome-icon v-else icon="play"/>
@@ -91,9 +91,13 @@ export default {
                 const firstMatch = stage['objective'].match("[0-9]+ times")[0];
                 stage['winsNeeded'] = parseInt(firstMatch.match("[0-9]+")[0]);
 
-                for (let roster of stage['rosterProgress']) {
-                    const wins = roster['wins'];
-                    if (wins > stage['winsNeeded']) {
+                for (let roster of stage['rosters']) {
+                    const rosterId = roster['ut_pve_roster_id'];
+                    let progressObj = stage['rosterProgress'].find(el => el['ut_pve_roster_id'] === rosterId);
+
+                    const wins = progressObj ? progressObj['wins'] : 0;
+                    roster['userWins'] = wins;
+                    if (wins >= stage['winsNeeded']) {
                         roster['progress'] = 100;
                     } else {
                         roster['progress'] = wins / stage['winsNeeded'] * 100;
@@ -139,8 +143,8 @@ export default {
                         }
                         this.$emit("feedback", info);
                         if (progressObj.progress < 100) {
-                            progressObj['wins']++;
-                            progressObj.progress = progressObj['wins'] / stage['winsNeeded'] * 100;
+                            progressObj['userWins']++;
+                            progressObj.progress = progressObj['userWins'] / stage['winsNeeded'] * 100;
                         }
                         this.$forceUpdate();
                     } else {
@@ -212,5 +216,6 @@ export default {
         font-size: 85px;
         text-align: end;
         font-family: "Proxima Nova Rg",monospace;
+        transition: .4s ease-in-out;
     }
 </style>

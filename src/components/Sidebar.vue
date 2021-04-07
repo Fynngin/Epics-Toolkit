@@ -52,7 +52,7 @@
                 @click="$router.push('/rushweeklies')"
             >
                 <font-awesome-icon icon="calendar-alt"/>
-                Rush Weekly Achievements
+                Rush Games
             </b-button>
             <b-button class="w-100 text-left" :variant="pageVariant('/accounttransfer')" @click="$router.push('/accounttransfer')">
                 <font-awesome-icon icon="random"/>
