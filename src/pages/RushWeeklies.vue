@@ -63,7 +63,7 @@
         </b-row>
 
         <b-row>
-            <b-col lg="12" xl="6">
+            <b-col lg="12" xl="6" class="ml-2">
                 <RushCircuit
                     class="mb-2"
                     v-for="circuit in circuits" :key="circuit.id"
@@ -71,6 +71,7 @@
                     :can-play-match="canPlayMatch"
                     :user-roster="selectedUserRoster"
                     :banned-maps="bannedMaps"
+                    @feedback="info => showFeedbackToast(info.type, info.title, info.description)"
                 />
             </b-col>
             <b-col v-if="teamsReady" lg="12" xl="6">
@@ -187,6 +188,10 @@ export default {
                 if (temp) {
                     ach.stageName = temp[0].match("[a-zA-Z ]+")[0]
                     let stage = this.stages.find(stage => stage.name === ach.stageName)
+                    if (!stage) {
+                        this.filteredAchievements.splice(this.filteredAchievements.indexOf(ach), 1);
+                        continue;
+                    }
                     ach.stageId = stage.id
                     ach.circuitId = stage.circuitId
                     ach.stageBadge = `${this.$store.state.cdnUrl}${stage.images[0].url}`
@@ -265,22 +270,23 @@ export default {
                     window.setTimeout(() => this.gameDelay = false, 2000)
                 }
             }).catch(err => {
-                this.toastType = "error"
+                const type = "error";
                 if (err.response.data['errorCode'] === "invalid_number_of_ut_map_bans") {
-                    this.toastTitle = "Invalid Map Bans"
-                    this.toastDescription = err.response.data.error
+                    this.showFeedbackToast(type, "Invalid Map Bans", err.response.data.error)
                 } else if (err.response.data['errorCode'] === "ut_game_in_progress") {
-                    this.toastTitle = "You are clicking too fast."
-                    this.toastDescription = err.response.data.error
+                    this.showFeedbackToast(type, "You are clicking too fast.", err.response.data.error)
                 } else if (!this.selectedUserRoster) {
-                    this.toastTitle = "Invalid Roster Selection"
-                    this.toastDescription = "You have to select one of your rosters."
+                    this.showFeedbackToast(type, "Invalid Roster Selection", "You have to select one of your rosters.")
                 } else {
-                    this.toastTitle = "Error 404"
-                    this.toastDescription = "Ooops..."
+                    this.showFeedbackToast(type, "Error 404", "Ooops...")
                 }
-                this.$bvToast.show("feedback-toast")
             })
+        },
+        showFeedbackToast(type, title, description) {
+            this.toastType = type;
+            this.toastTitle = title;
+            this.toastDescription = description;
+            this.$bvToast.show("feedback-toast");
         }
     }
 }

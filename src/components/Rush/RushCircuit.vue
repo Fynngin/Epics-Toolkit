@@ -55,12 +55,14 @@
                 </b-collapse>
             </b-list-group-item>
         </b-list-group>
+
+<!--        <FeedbackToast id="feedback-toast" :title="toastTitle" :type="toastType" :description="toastDescription"/>-->
     </b-card>
 </template>
 
 <script>
 import {getRostersById, getTeams} from "@/api";
-import {playRushPve} from "../../api";
+import {playRushPve} from "@/api";
 
 export default {
     name: "RushCircuit",
@@ -69,7 +71,10 @@ export default {
         return {
             teams: [],
             stageRosters: {},
-            gameDelay: false
+            gameDelay: false,
+            toastTitle: "",
+            toastType: "",
+            toastDescription: ""
         }
     },
     created() {
@@ -127,15 +132,47 @@ export default {
                 if (res.data.success) {
                     const isWinner = res.data.data['game']['user1']['winner'];
                     if (isWinner) {
+                        const info = {
+                            type: 'success',
+                            title: 'Match won!',
+                            description: `You won the match with a ${res.data.data['game']['user1']['winChance']}% chance!`
+                        }
+                        this.$emit("feedback", info);
                         if (progressObj.progress < 100) {
                             progressObj['wins']++;
                             progressObj.progress = progressObj['wins'] / stage['winsNeeded'] * 100;
                         }
                         this.$forceUpdate();
+                    } else {
+                        const info = {
+                            type: 'error',
+                            title: 'Match lost!',
+                            description: `You lost the match with a ${res.data.data['game']['user1']['winChance']}% win-chance!`
+                        }
+                        this.$emit("feedback", info);
                     }
                     this.gameDelay = true;
                     window.setTimeout(() => this.gameDelay = false, 2000);
                 }
+            }).catch(err => {
+                let info = {
+                    type: "error"
+                }
+
+                if (err.response.data['errorCode'] === "invalid_number_of_ut_map_bans") {
+                    info.title = "Invalid Map Bans"
+                    info.description = err.response.data.error
+                } else if (err.response.data['errorCode'] === "ut_game_in_progress") {
+                    info.title = "You are clicking too fast."
+                    info.description = err.response.data.error
+                } else if (!this.selectedUserRoster) {
+                    info.title = "Invalid Roster Selection"
+                    info.description = "You have to select one of your rosters."
+                } else {
+                    info.title = "Error 404"
+                    info.description = "Ooops..."
+                }
+                this.$emit('feedback', info)
             })
         }
     }
