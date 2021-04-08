@@ -10,7 +10,7 @@
                         />
                     </b-col>
                     <b-col>
-                        <a href="#" @click="toggleStage(stage, idx)" style="text-align: left;">
+                        <a  href="javascript:void(0)" @click="toggleStage(stage, idx)" style="text-align: left;">
                             <font-awesome-icon icon="caret-down" style="float: right"/>
                             <h6>{{stage.name}}</h6>
                         </a>
