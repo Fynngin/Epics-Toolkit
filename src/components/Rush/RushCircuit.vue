@@ -17,7 +17,7 @@
                     </b-col>
                 </b-row>
 
-                <b-collapse :id="`collapse-${idx}`">
+                <b-collapse :id="`collapse-${circuit.id}-${idx}`">
                     <b-list-group>
                         <b-list-group-item v-for="(team, teamIdx) in stageRosters[idx]" :key="team.id" style="position: relative">
                             <div
@@ -120,7 +120,7 @@ export default {
             }
 
             this.$forceUpdate();
-            this.$root.$emit('bv::toggle::collapse', `collapse-${idx}`);
+            this.$root.$emit('bv::toggle::collapse', `collapse-${this.circuit.id}-${idx}`);
         },
         playMatch(team, progressObj, stage) {
             playRushPve(
