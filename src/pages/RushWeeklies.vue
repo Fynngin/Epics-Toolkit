@@ -269,7 +269,7 @@ export default {
                         }
                     })
                     this.gameDelay = true
-                    window.setTimeout(() => this.gameDelay = false, 2000)
+                    window.setTimeout(() => this.gameDelay = false, 5000)
                 }
             }).catch(err => {
                 const type = "error";
