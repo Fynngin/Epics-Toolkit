@@ -217,7 +217,7 @@ export default {
                     this.progress.getMarketPrice++
                 }))
             }
-            Promise.all(promises).then(() => this.spinner.getMarketPrice = false)
+            Promise.allSettled(promises).then(() => this.spinner.getMarketPrice = false)
         },
         async updateListings() {
             this.progress.updateListings = 0;
@@ -227,11 +227,19 @@ export default {
                 let price = template.newPrice;
                 let promises = [];
                 for (const item of template.items) {
-                    promises.push(updateMarketListing(this.$store.state.userdata.jwt, this.$store.state.category, item.marketId, item.minOffer, price))
+                    promises.push(
+                        updateMarketListing(
+                            this.$store.state.userdata.jwt,
+                            this.$store.state.category,
+                            item.marketId,
+                            item.minOffer,
+                            price
+                        ).catch(() => {})
+                    )
                 }
                 this.progress.updateListings++
                 this.$forceUpdate();
-                await Promise.all(promises)
+                await Promise.allSettled(promises)
             }
         }
     }
