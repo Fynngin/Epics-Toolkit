@@ -1,5 +1,5 @@
 <template>
-    <b-card border-variant="dark" class="mb-2 ml-2">
+    <b-card border-variant="dark" class="mb-2">
         <b-row style="text-align: left">
             <b-col>
                 <h3>Your team:</h3>
@@ -7,6 +7,7 @@
         </b-row>
         <b-row style="text-align: left;" align-v="center">
             <b-col cols="1" v-if="selectedRosterId">
+                <b>Level {{activeUserRoster['level']}}</b>
                 <RushRating
                     :rating="activeUserRoster['rating']"
                     :styles="{height: '80px', width: '80px', position: 'relative'}"

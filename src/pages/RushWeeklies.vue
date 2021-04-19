@@ -5,9 +5,9 @@
             <font-awesome-icon icon="align-justify" style="color: black"></font-awesome-icon>
         </b-button>
 
-        <b-row>
+        <b-row class="ml-2">
             <b-col>
-                <b-card class="mb-2 ml-2" border-variant="dark">
+                <b-card class="mb-2" border-variant="dark">
                     <b-row align-v="center">
                         <b-col cols="3">
                             <h3>Map Bans:</h3>
@@ -25,7 +25,7 @@
             </b-col>
         </b-row>
 
-        <b-row>
+        <b-row class="ml-2">
             <b-col v-if="teamsReady">
                 <UserRoster
                     :maps="maps"
@@ -35,9 +35,9 @@
             </b-col>
         </b-row>
 
-        <b-row>
+        <b-row class="ml-2">
             <b-col>
-                <b-card border-variant="dark" class="ml-2 mb-2">
+                <b-card border-variant="dark" class="mb-2">
                     <b-row v-for="achievement in filteredAchievements.filter(el => !el.roster)"
                            :key="achievement.id">
                         <b-col cols="4">
@@ -62,8 +62,8 @@
             </b-col>
         </b-row>
 
-        <b-row>
-            <b-col lg="12" :xl="achievementsWithRoster.length > 0 ? '6' : '12'" class="ml-2 mr-2">
+        <b-row class="ml-2">
+            <b-col lg="12" :xl="achievementsWithRoster.length > 0 ? '6' : '12'">
                 <RushCircuit
                     class="mb-2"
                     v-for="circuit in circuits" :key="circuit.id"
@@ -186,28 +186,34 @@ export default {
             })
 
             for (const ach of tempFilter) {
-                let temp = ach.description.match("[(][a-zA-Z ]+[)]")
+                let temp = ach.description.match("[(][a-zA-Z0-9 ]+[)]")
                 if (temp) {
-                    ach.stageName = temp[0].match("[a-zA-Z ]+")[0]
-                    let stage = this.stages.find(stage => stage.name === ach.stageName)
-                    if (!stage) {
+                    ach.stageName = temp[0].match("[a-zA-Z0-9 ]+")[0]
+                    let filteredStages = this.stages.filter(stage => stage.name === ach.stageName)
+                    if (filteredStages.length === 0) {
                         continue;
                     }
-                    ach.stageId = stage.id
-                    ach.circuitId = stage.circuitId
-                    ach.stageBadge = `${this.$store.state.cdnUrl}${stage.images[0].url}`
-                    ach.stageRosters = stage['rosters']
-                    let rosterIds = ach.stageRosters.map(el => el['ut_pve_roster_id'])
-                    await getRostersById(this.$store.state.userdata.jwt, this.$store.state.category, JSON.stringify(rosterIds).replace(/(\[|\])/g, "")).then(res => {
-                        if (res.data.success) {
-                            let rosters = res.data.data['rosters']
-                            ach.roster = rosters.find(roster => {
-                                return ach.description.toUpperCase().match(roster.name.toUpperCase())
-                            })
-                            ach.roster.logoUrl = this.teams.find(team => team.id === ach.roster.teamId).images
-                                .find(im => im.name === "team_logo").url
-                        }
-                    })
+                    for (const stage of filteredStages) {
+                        ach.stageId = stage.id
+                        ach.circuitId = stage.circuitId
+                        ach.stageBadge = `${this.$store.state.cdnUrl}${stage.images[0].url}`
+                        ach.stageRosters = stage['rosters']
+                        let rosterIds = ach.stageRosters.map(el => el['ut_pve_roster_id'])
+                        await getRostersById(this.$store.state.userdata.jwt, this.$store.state.category, JSON.stringify(rosterIds).replace(/(\[|\])/g, "")).then(res => {
+                            if (res.data.success) {
+                                let rosters = res.data.data['rosters']
+                                ach.roster = rosters.find(roster => {
+                                    return ach.description.toUpperCase().match(roster.name.toUpperCase())
+                                })
+                                if (!ach.roster) {
+                                    return;
+                                }
+                                ach.roster.logoUrl = this.teams.find(team => team.id === ach.roster.teamId).images
+                                    .find(im => im.name === "team_logo").url
+                            }
+                        })
+                    }
+
                 } else {
                     ach.stageName = "TOTW"
                     await getTotw(this.$store.state.userdata.jwt, this.$store.state.category).then(res => {

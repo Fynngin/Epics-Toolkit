@@ -1,5 +1,5 @@
 <template>
-    <b-card no-body class="mb-2 ml-2" border-variant="dark">
+    <b-card no-body class="mb-2" border-variant="dark">
         <template v-slot:header>
             <b-row>
                 <b-col>

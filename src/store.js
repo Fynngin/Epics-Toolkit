@@ -8,7 +8,7 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
     state: {
         authenticated: false,
-        cdnUrl: 'http://cdn.epics.gg',
+        cdnUrl: 'https://cdn.epics.gg',
         repoUrl: 'https://github.com/Fynngin/Epics-Toolkit',
         userdata: {
             jwt: null,

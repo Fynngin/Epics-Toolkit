@@ -55,8 +55,6 @@
                 </b-collapse>
             </b-list-group-item>
         </b-list-group>
-
-<!--        <FeedbackToast id="feedback-toast" :title="toastTitle" :type="toastType" :description="toastDescription"/>-->
     </b-card>
 </template>
 
