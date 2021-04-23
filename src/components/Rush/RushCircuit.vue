@@ -10,14 +10,14 @@
                         />
                     </b-col>
                     <b-col>
-                        <a href="#" @click="toggleStage(stage, idx)" style="text-align: left;">
+                        <a  href="javascript:void(0)" @click="toggleStage(stage, idx)" style="text-align: left;">
                             <font-awesome-icon icon="caret-down" style="float: right"/>
                             <h6>{{stage.name}}</h6>
                         </a>
                     </b-col>
                 </b-row>
 
-                <b-collapse :id="`collapse-${idx}`">
+                <b-collapse :id="`collapse-${circuit.id}-${idx}`">
                     <b-list-group>
                         <b-list-group-item v-for="(team, teamIdx) in stageRosters[idx]" :key="team.id" style="position: relative">
                             <div
@@ -55,8 +55,6 @@
                 </b-collapse>
             </b-list-group-item>
         </b-list-group>
-
-<!--        <FeedbackToast id="feedback-toast" :title="toastTitle" :type="toastType" :description="toastDescription"/>-->
     </b-card>
 </template>
 
@@ -120,7 +118,7 @@ export default {
             }
 
             this.$forceUpdate();
-            this.$root.$emit('bv::toggle::collapse', `collapse-${idx}`);
+            this.$root.$emit('bv::toggle::collapse', `collapse-${this.circuit.id}-${idx}`);
         },
         playMatch(team, progressObj, stage) {
             playRushPve(
@@ -156,7 +154,7 @@ export default {
                         this.$emit("feedback", info);
                     }
                     this.gameDelay = true;
-                    window.setTimeout(() => this.gameDelay = false, 2000);
+                    window.setTimeout(() => this.gameDelay = false, 5000);
                 }
             }).catch(err => {
                 let info = {
