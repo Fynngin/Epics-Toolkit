@@ -54,10 +54,10 @@
                 <font-awesome-icon icon="calendar-alt"/>
                 Rush Games
             </b-button>
-            <b-button class="w-100 text-left" :variant="pageVariant('/accounttransfer')" @click="$router.push('/accounttransfer')">
-                <font-awesome-icon icon="random"/>
-                Account Transfer
-            </b-button>
+<!--            <b-button class="w-100 text-left" :variant="pageVariant('/accounttransfer')" @click="$router.push('/accounttransfer')">-->
+<!--                <font-awesome-icon icon="random"/>-->
+<!--                Account Transfer-->
+<!--            </b-button>-->
             <b-button class="w-100 text-left" :variant="pageVariant('/packopener')" @click="$router.push('/packopener')">
                 <font-awesome-icon icon="box-open"/>
                 Pack Opener

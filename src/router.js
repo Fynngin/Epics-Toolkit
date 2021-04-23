@@ -6,7 +6,7 @@ import store from "./store";
 import MassList from "./pages/MassList";
 import MintSearch from "./pages/MintSearch";
 import TeamBuilder from "@/pages/TeamBuilder";
-import AccountTransfer from "@/pages/AccountTransfer";
+// import AccountTransfer from "@/pages/AccountTransfer";
 import RushWeeklies from "@/pages/RushWeeklies";
 import PackOpener from "@/pages/PackOpener";
 import PhysicalTracker from "./pages/PhysicalTracker";
@@ -60,13 +60,13 @@ const router = new VueRouter({
                 requiresAuth: true
             }
         },
-        {
-            path: '/accounttransfer',
-            component: AccountTransfer,
-            meta: {
-                requiresAuth: true
-            }
-        },
+        // {
+        //     path: '/accounttransfer',
+        //     component: AccountTransfer,
+        //     meta: {
+        //         requiresAuth: true
+        //     }
+        // },
         {
             path: '/packopener',
             component: PackOpener,
