@@ -25,22 +25,55 @@
 
         <div v-if="step === 1">
             <h2>Do you want to send or accept trades?</h2>
-            <h5>Sending will send the items from a given account to your account.</h5>
-            <h5>Accepting will accept all incoming trades from a given account</h5>
+            <h5>Sending will send the items from your account to someone else.</h5>
+            <h5>Accepting will accept all incoming trades from a given account.</h5>
             <b-button
                 @click="action = 'send'"
                 :variant="action === 'send' ? 'success' : 'outline-success'"
-                class="button"
-            >Send</b-button>
+            >
+                <b-row>
+                    <b-col>
+                        Send
+                    </b-col>
+                </b-row>
+                <b-row align-v="center">
+                    <b-col>
+                        <b-avatar :src="$store.state.userdata.avatar"/>
+                    </b-col>
+                    <b-col>
+                        <font-awesome-icon icon="arrow-right" size="2x" color="gray"/>
+                    </b-col>
+                    <b-col>
+                        <font-awesome-icon icon="question" size="2x" color="gray"/>
+                    </b-col>
+                </b-row>
+            </b-button>
             <b-button
+                class="ml-2"
                 @click="action = 'accept'"
                 :variant="action === 'accept' ? 'success' : 'outline-success'"
-                class="ml-2 button"
-            >Accept</b-button>
+            >
+                <b-row>
+                    <b-col>
+                        Accept
+                    </b-col>
+                </b-row>
+                <b-row align-v="center">
+                    <b-col>
+                        <font-awesome-icon icon="question" size="2x" color="gray"/>
+                    </b-col>
+                    <b-col>
+                        <font-awesome-icon icon="arrow-right" size="2x" color="gray"/>
+                    </b-col>
+                    <b-col>
+                        <b-avatar :src="$store.state.userdata.avatar"/>
+                    </b-col>
+                </b-row>
+            </b-button>
         </div>
 
         <div v-if="step === 2">
-            <h2 v-if="action === 'send'">What account do you want to transfer the items from?</h2>
+            <h2 v-if="action === 'send'">What account do you want to transfer the items to?</h2>
             <h2 v-else>What account do you want to accept the trades from?</h2>
 
             <p v-if="selectedUser">Selected user: <strong>{{this.selectedUser.username}}</strong></p>
@@ -75,7 +108,7 @@
             </div>
 
             <div v-else>
-                <p>Click "Start" to begin the process. The program will start sorting {{selectedUser.username}}'s cards.</p>
+                <p>Click "Start" to begin the process. The program will start sorting your cards.</p>
                 <p>After that, you have to confirm the process one more time.</p>
                 <b-button v-if="!progress.seasons" @click="createTradeList" variant="outline-success">Prepare trades</b-button>
                 <p v-if="progress.seasons && progress.seasons < $store.state.seasons.length">
@@ -132,7 +165,13 @@
                     :animated="progress.sending < idList.length"
                     :variant="progress.sending < idList.length ? 'primary' : 'success'"
                 />
-                <b-button v-if="progress.grouping.progress === progress.grouping.max && !progress.sending" @click="sendTrades" variant="outline-success">Send trades</b-button>
+                <b-button
+                    v-if="progress.grouping.progress === progress.grouping.max && !progress.sending"
+                    @click="sendTrades"
+                    variant="outline-success"
+                >
+                    Send trades
+                </b-button>
             </div>
         </template>
     </div>
@@ -246,7 +285,7 @@ export default {
             let stickerids = []
 
             for (const season of this.$store.state.seasons) {
-                await getCollections(this.$store.state.userdata.jwt, this.$store.state.category, season, this.selectedUser.id).then(res => {
+                await getCollections(this.$store.state.userdata.jwt, this.$store.state.category, season, this.$store.state.userdata.id).then(res => {
                     if (res.data.success) {
                         collections = collections.concat(res.data.data.filter(coll => {
                             return coll.count > 0
@@ -261,7 +300,7 @@ export default {
             this.progress.collections.max = collections.length
             for (const coll of collections) {
                 if (coll.collection.properties['entity_types'].includes('card')) {
-                    await getCardIds(this.$store.state.userdata.jwt, this.$store.state.category, coll.collection.id, this.selectedUser.id).then(res => {
+                    await getCardIds(this.$store.state.userdata.jwt, this.$store.state.category, coll.collection.id, this.$store.state.userdata.id).then(res => {
                         if (res.data.success) {
                             res.data.data.forEach(template => {
                                 cardids = cardids.concat(template['cardIds'])
@@ -270,7 +309,7 @@ export default {
                     })
                 }
                 if (coll.collection.properties['entity_types'].includes('sticker')) {
-                    await getStickerIds(this.$store.state.userdata.jwt, this.$store.state.category, coll.collection.id, this.selectedUser.id).then(res => {
+                    await getStickerIds(this.$store.state.userdata.jwt, this.$store.state.category, coll.collection.id, this.$store.state.userdata.id).then(res => {
                         if (res.data.success) {
                             res.data.data.forEach(template => {
                                 stickerids = stickerids.concat(template['stickerIds'])
