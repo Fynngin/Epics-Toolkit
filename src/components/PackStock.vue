@@ -24,6 +24,9 @@
                         colorschemes: {
                             scheme: 'brewer.SetThree12'
                         }
+                    },
+                    legend: {
+                        display: false
                     }
                 },
                 packs: []
@@ -109,7 +112,8 @@
                 }
 
                 this.$emit('loading', false);
-                this.renderChart(this.data, this.options)
+                this.renderChart(this.data, this.options);
+                this.$emit('packData', this.data.datasets);
             }
         }
     }

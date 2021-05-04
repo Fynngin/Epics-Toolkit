@@ -19,6 +19,9 @@
                         colorschemes: {
                             scheme: 'brewer.SetThree12'
                         }
+                    },
+                    legend: {
+                        display: false
                     }
                 },
             }
@@ -74,7 +77,8 @@
                 })
 
                 this.$emit('loading', false);
-                this.renderChart(this.data, this.options)
+                this.renderChart(this.data, this.options);
+                this.$emit('spinnerData', this.data.datasets);
             }
         }
     }
