@@ -28,7 +28,7 @@
                                 @error="value => {this.error.spinnerOdds = value}"
                                 @spinnerData="value => showSpinnerOddsTable(value)"
                             ></SpinnerOddsChart>
-                            <b-table :items="spinnerOdds" v-if="!spinner.packStock && !error.packStock" small>
+                            <b-table :items="spinnerOdds" v-if="!spinner.spinnerOdds && !error.spinnerOdds" small>
                                 <template #cell(color)="data">
                                     <span v-html="data.value"></span>
                                 </template>
